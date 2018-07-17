@@ -210,7 +210,7 @@ class MyClass(GeneratedClass):
                             <bitmap>media/images/box/box-python-script.png</bitmap>
                             <script language="4">
                                 <content>
-                                    <![CDATA[# NAO CADET 1.0-beta.27
+                                    <![CDATA[# NAO CADET 1.0
 
 import sqlite3
 import json
@@ -482,7 +482,7 @@ class MyClass(GeneratedClass):
             time.sleep(1.0)
             self.proxy["posture"].goToPosture("Stand", 3.0)
 
-            self.websocketServer.run_forever()
+            self.websocketServer.run_forever(ping_interval=30, ping_timeout=10)
 
     def onInput_onStop(self):
         self.cadet_quit(None)
