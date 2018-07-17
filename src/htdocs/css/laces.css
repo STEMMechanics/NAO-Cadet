@@ -1,0 +1,154 @@
+html {height:100%;margin:0}
+body {min-height:100%;width:100%}
+
+.ring-container .alert {display:none; position:absolute; top:10px; left:50px; font-size:0.9em; background-color:#FFFDE1; border-color:#999; overflow:hidden; box-shadow:3px 3px 10px #999}
+.ring-container .alert p {
+    width: 250px;
+    margin-bottom: 40px;
+}
+
+.ring-container .alert p strong {
+    display: block;
+}
+
+.ring-container .alert p img {display:block; margin-left:auto; margin-right:auto; margin-top:1rem; margin-bottom:1rem}
+
+.ring-container .alert.right {
+    left: auto;
+    right: 0px;
+}
+
+.ring-container .alert .close {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+}
+
+.ring-container .alert .btn {
+    font-size: 0.9em; 
+    min-width: 90px;
+}
+
+.ring-container .alert .btn-primary {
+    position: absolute;
+    background-color: #FEF778;
+    border-color: #666;
+/*     left: 190px; */
+	right: 10px;
+    bottom: 10px;
+    color: #666;
+}
+.ring-container .alert .btn-primary:active {
+    background-color: #666;
+    border-color:#666;
+    color: #fff;
+}
+
+.ring-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 100%;
+    z-index: 200;
+}
+
+.circle {
+    width: 15px;
+    height: 15px;
+    background-color: #FFFDE1;
+    border-radius: 50%;
+    border:1px solid #ccc;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+.ringring {
+    box-shadow: 0px 0px 10px #E7C5EC;
+	border: 3px solid #AF65B9;
+    -webkit-border-radius: 30px;
+    height: 25px;
+    width: 25px;
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    -webkit-animation: pulsate 1s ease-out;
+    -webkit-animation-iteration-count: infinite; 
+    opacity: 0.0
+}
+@-webkit-keyframes pulsate {
+    0% {-webkit-transform: scale(0.1, 0.1); opacity: 0.0;}
+    50% {opacity: 1.0;}
+    100% {-webkit-transform: scale(1.6, 1.6); opacity: 0.0;}
+}
+
+/* Bootstrap */
+.jumbotron {position:fixed; top:3rem; left:0; right:0; margin-left:auto; margin-right:auto; width:60rem; border:1px solid #aaa; box-shadow:3px 3px 10px #333; padding-bottom:2rem}
+.jumbotron .btn {margin-top:0.7rem; min-width:8rem}
+.jumbotron a.btn {margin:0; min-width:auto}
+.modal-dialog {position:fixed; top:3rem; left:0; right:0; margin-left:auto; margin-right:auto; width:50rem; max-width:none; box-shadow:3px 3px 10px #333}
+.modal-header {padding:0.5rem 1rem}
+.modal-title {margin-top:0.2rem}
+.modal-title .form-control[type=text] {display:inline-block; width:20rem; margin-left:2rem}
+.modal-body h5 {border-top:1px solid #eee; padding-top:20px; margin-top:20px; margin-bottom:20px}
+/* .modal-body {padding:0} */
+/* .modal-body. p, .modal-body .form-group {padding:1rem 1rem 0 1rem} */
+/* .modal-body .alert {margin:1rem} */
+.modal-body.no-padding {padding:0}
+.modal-footer .btn:not(.btn-link) {float:right; min-width:8rem; margin-left:0.8rem}
+.modal-footer .btn.laces-modal-btn-left:not(.btn-link) {float:right; margin-left:0; margin-right:0.8rem}
+.modal-footer .btn.laces-modal-btn-icon:not(.btn-link) {min-width: 1rem}
+.modal-footer p {margin-bottom:0; margin-right:auto !important; font-style:italic; color:#999; font-size:0.9em}
+.ml-auto .dropdown-menu.show {left:auto; right:0}
+.is-invalid {background-color:#ffdfef}
+a.dropdown-item.disabled {pointer-events:none}
+/* .navbar-dark .navbar-nav .nav-link:focus, .navbar-dark .navbar-nav .nav-link:hover (color:inherit) */
+.navbar-brand {margin-right:2rem}
+.navbar-text {color: rgba(255, 255, 255, 0.7) !important}
+.table thead th {text-align:center}
+.table tbody td {text-align:center}
+.table tbody tr:not(.laces-listview-none) td:first-of-type {text-align:left}
+table.laces-table-sortable thead th {cursor:pointer}
+table.laces-table-sortable thead th span.laces-sort {margin-left:0.5rem}
+.progress-bar {transition:width 0.1s}
+.modal-body > .table thead th {border-top:0}
+.dropdown-menu {box-shadow:3px 3px 10px #999}
+.navbar-nav.disabled a {pointer-events:none; cursor:default}
+.navbar-nav.disabled .nav-link {color:rgba(255, 255, 255, .5) !important}
+i.fa-stop {color:#ff0000}
+.tab-pane {padding:1rem}
+
+/* Laces */
+.laces-status {position:fixed; top:0; left:0; width: 100%; height:100%; text-align:center;margin-top:10rem; font-size:1.4rem; color:#bbb}
+#laces-overlay {position:fixed; top:0; left:0; width:100%; height:100%; background-color:#000; opacity:0; z-index:900}
+.laces-alert {position:fixed; top:5rem; left:0; right:0; margin-left:auto; margin-right:auto; width:32rem; box-shadow:3px 3px 10px #333}
+.laces-alert .btn {float:right; min-width:8rem; margin-left:0.8rem; pointer-events:auto !important}
+.laces-alert samp {display:block; border:1px solid #ccc; background-color:#eee; margin:1rem 0rem; padding:0.6rem; font-size:0.8rem; color:#666}
+.btn-primary.laces-aria-loading {white-space:nowrap; overflow:hidden; text-indent:-9999px; background-image:url("/img/loading.svg") !important; background-repeat:no-repeat; background-position:center; background-size:20px}
+.laces-popup {opacity:0; z-index:901}
+.laces-popup:not(:last-of-type) * {pointer-events:none}
+.laces-popup-overlay {position:absolute; top:0; left:0; right:0; bottom: 0; background-color:#000; opacity:0.5; border-radius:5px; background-image:url("/img/loading.svg"); background-repeat:no-repeat; background-position:center; pointer-events:none; z-index:902}
+.laces-popup-overlay + * {pointer-events:none}
+.laces-progress-dialog {position:fixed; top:150px; left:0; right:0; margin-left:auto; margin-right:auto; width:20rem; box-shadow: 3px 3px 10px #333; background-color:#fff; padding:1rem; border-radius:5px}
+.laces-progress-dialog .progress {height:2rem; margin-top:1rem}
+.laces-progress-dialog .progress-bar {height:2rem}
+.laces-progress-dialog button {margin-top:1rem; float:right}
+.laces-dropdown-checkgroup, .laces-dropdown-checkable {padding-left:3rem}
+.laces-dropdown-checkgroup i, .laces-dropdown-checkable i {width:1.5rem; margin-left:-1.5rem}
+.laces-hidden {display:none}
+.laces-checkbox {display:inline-block; width:2rem; height:2rem; font-size:1.2rem; line-height:1.8rem; text-align:center; border:1px solid #999; border-radius:0.3rem; margin-right:0.5rem}
+.laces-select {background-color:#fff}
+.laces-select .dropdown-toggle {text-align:left; color:#000}
+.laces-select .dropdown-toggle:after {float:right; margin-top:10px}
+.laces-select .dropdown-toggle .fa, .selectpicker .dropdown-item .fa {margin-right:1rem}
+.laces-colour-dot {width:2.5rem; height:2.5rem; display:inline-block; margin:0.6rem; border-radius:1.25rem; border:0.3rem solid #FFFFFF; cursor:pointer}
+.laces-icon-dot {width:2.5rem; height:2.5rem; display:inline-block; margin:0.6rem; border-radius:1.25rem; border:0.3rem solid #FFFFFF; cursor:pointer; font-size:1.7rem; color:#666; text-align:center}
+.laces-colour-dot.laces-colour-dot-selected, .laces-icon-dot.laces-icon-dot-selected {border-color: #0FB6FF}
+.laces-listview-none td {color:#bbb; text-align:center}
+#laces-uploader {display:none}
+.laces-modal-help {padding:0 0.5rem; color:#aaa; font-size:1.5rem}
+.laces-listview-search {}
+.laces-listview-search #laces-listview-search-field {width: 14rem; display:inline-block}
+.laces-listview-search #laces-listview-search-btn {padding-right:0}
+#laces-listview-search-clear {float:none; margin-left:0; margin-right:0.5rem; font-size:0.7rem; min-width:auto; padding:0.1rem 0.4rem}
+.laces-reload {margin-top:1rem; border-color:#999; color:#999}

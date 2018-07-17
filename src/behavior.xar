@@ -1,0 +1,2187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3">
+    <Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0">
+        <bitmap>media/images/box/root.png</bitmap>
+        <script language="4">
+            <content>
+                <![CDATA[]]>
+</content>
+        </script>
+        <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+        <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+        <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+        <Input name="TouchChanged" type="0" type_size="1" nature="4" stm_value_name="TouchChanged" inner="1" tooltip="TouchChanged desc" id="4" />
+        <Input name="BehaviorsRun" type="0" type_size="1" nature="4" stm_value_name="BehaviorsRun" inner="1" tooltip="BehaviorsRun desc" id="5" />
+        <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="6" />
+        <Timeline enable="0">
+            <BehaviorLayer name="behavior_layer1">
+                <BehaviorKeyframe name="keyframe1" index="1">
+                    <Diagram scale="35.3553">
+                        <Box name="BasicHTTPServer" id="2" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="352" y="33">
+                            <bitmap>media/images/box/box-python-script.png</bitmap>
+                            <script language="4">
+                                <content>
+                                    <![CDATA[import os
+import time
+import urllib
+import mimetypes
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        try:
+            domain = re.findall('Host: (.*?)\r\n',str(self.headers))[0]
+            domain = domain.split(":")[0]
+
+            filePath = self.htdocsPath + "/index.html"
+
+            path = urllib.unquote(urllib.unquote(self.path))
+            path = path.split("?")[0]
+
+            if path[0:6] == "/file/":
+                filePath = self.app["app_path"] + "/scriptdocs/" + path[6:]
+            elif path <> "/":
+                filePath = self.htdocsPath + path
+
+            self.log(path + ' = ' + filePath)
+
+            fileHndl = open(filePath, "rb")
+            mimeType = mimetypes.guess_type(filePath)[0]
+
+            if self.path[-8:] == "cadet.js" or self.path[-6:] == "nao.js":
+                data = fileHndl.read()
+                data = data.replace("%APP_VERSION%", self.app["app_version"])
+                data = data.replace("%NAO_NAME%", self.app["nao_name"])
+                data = data.replace("%NAO_IPADDR%", domain)
+
+                self.send_response(200)
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Content-type", mimeType)
+                self.send_header("Content-length", len(data))
+                self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Last-Modified", time.strftime("%a %d %b %Y %H:%M:%S GMT", time.localtime(os.path.getmtime(filePath))))
+                self.end_headers()
+
+                self.wfile.write(data)
+            else:
+                self.send_response(200)
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Content-type", mimeType)
+                self.send_header("Content-length", os.path.getsize(filePath))
+                self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Last-Modified", time.strftime("%a %d %b %Y %H:%M:%S GMT", time.localtime(os.path.getmtime(filePath))))
+                self.end_headers()
+                self.wfile.write(fileHndl.read())
+
+            fileHndl.close()
+
+        except IOError:
+            self.send_error(404, 'File Not Found: %s' % self.path)
+
+    def do_POST(self):
+        self.send_error(500, 'Internal Error')
+
+    def address_string(self):
+        host, port = self.client_address[:2]
+        return host
+
+
+class Server(HTTPServer):
+    def serve_forever(self, app, log, path):
+        self.RequestHandlerClass.app = app
+        self.RequestHandlerClass.htdocsPath = path
+        self.RequestHandlerClass.log = log
+        HTTPServer.serve_forever(self)
+
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        pass
+
+    def onUnload(self):
+        self.running = 0
+        try:
+            self.httpServer.shutdown()
+            self.httpServer.socket.close()
+        except:
+            pass
+
+    def onInput_onStart(self, p):
+        self.app = {}
+        for item in p:
+            self.app[item[0]] = item[1]
+
+        self.htdocsPath = self.app["app_path"] + "/htdocs"
+
+        self.httpServer = Server(('', self.app["http_port"]), Handler)
+        self.httpServer.allow_reuse_address = True
+        self.httpServer.serve_forever(self.app, self.log, self.htdocsPath)]]>
+</content>
+                            </script>
+                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                            <Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                            <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" />
+                        </Box>
+                        <Box name="App Details" id="3" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="229" y="8">
+                            <bitmap>media/images/box/box-python-script.png</bitmap>
+                            <script language="4">
+                                <content>
+                                    <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        pass
+
+    def onUnload(self):
+        pass
+
+    def onInput_onStart(self):
+        import socket
+        import fcntl
+        import struct
+
+        app = {}
+
+        #---- EDIT THESE IF NEEDED ----
+        app["app_version"] = "1.0"
+        app["http_port"] = 3000
+        app["websocket_port"] = 4000
+
+
+
+
+        #---- THATS IT, CODE BEGINS HERE ----
+
+        app["nao_virtual"] = True
+        app["nao_name"] = "NAO"
+        app["nao_eth_ip"] = ""
+        app["nao_wlan_ip"] = ""
+        try:
+            ALMemory.getData("DCM/Time")
+            if ALMemory.getData("DCM/Simulation") != 1:
+                app["nao_virtual"] = False
+        except:
+            pass
+
+        if app["nao_virtual"] == True:
+            app["nao_name"] = "virtual-nao"
+            app["nao_eth_ip"] = "127.0.0.1"
+            app["nao_wlan_ip"] = "127.0.0.1"
+        else:
+            app["nao_name"] = socket.gethostname()
+
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                strInterfaceName = "eth0"
+                strInterfaceName = strInterfaceName[:15]
+                packedInterfaceName = struct.pack('256s', strInterfaceName)
+                ret = fcntl.ioctl(sock.fileno(), 0x8915, packedInterfaceName)
+                ret = ret[20:24]
+                app["nao_eth_ip"] = socket.inet_ntoa(ret)
+            except:
+                app["nao_eth_ip"] = ""
+
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                strInterfaceName = "wlan0"
+                strInterfaceName = strInterfaceName[:15]
+                packedInterfaceName = struct.pack('256s', strInterfaceName)
+                ret = fcntl.ioctl(sock.fileno(), 0x8915, packedInterfaceName)
+                ret = ret[20:24]
+                app["nao_wlan_ip"] = socket.inet_ntoa(ret)
+            except:
+                app["nao_wlan_ip"] = ""
+
+        self.frameMgr = ALProxy("ALFrameManager")
+        app["app_path"] = self.frameMgr.getBehaviorPath(self.behaviorId)
+
+        self.onStopped(app)]]>
+</content>
+                            </script>
+                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                            <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                            <Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" />
+                        </Box>
+                        <Box name="WebSocket Server" id="4" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="371" y="272">
+                            <bitmap>media/images/box/box-python-script.png</bitmap>
+                            <script language="4">
+                                <content>
+                                    <![CDATA[# NAO CADET 1.0-beta.27
+
+import sqlite3
+import json
+import time
+import base64
+import sys
+import ast
+import re
+import tarfile
+import glob
+import shutil
+from random import randint
+from sqlite3 import Error
+from os import listdir
+from os.path import isfile, join
+
+# Error Codes
+ERR_UNKNOWN_CMD = 1
+ERR_SCRIPT_LOCKED = 2
+ERR_SCRIPT_MISSING = 3
+ERR_RUN_LOCKED = 4
+ERR_PARAMETER_MISSING = 5
+ERR_EXCEPTION_THROWN = 6
+ERR_FILE_MISSING = 7
+ERR_FILE_EXISTS = 8
+ERR_RES_IN_USE = 9
+ERR_COMMAND_MISSING = 10
+ERR_ALPROXY_MISSING = 11
+ERR_FUNCTION_MISSING = 12
+ERR_AUTHENTICATION_REQ = 13
+ERR_DOMAIN_NOT_SET = 14
+ERR_USER_PASSWORD_INCORRECT = 15
+ERR_USER_NOT_VALID = 16
+ERR_FILE_INVALID = 17
+
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        self.proxy = {}
+        self.cmds = {}
+        self.users = {}
+        self.posts = {}
+        self.lastTouch = 0
+        self.lastTasksCheck = 0
+        self.lastHardwareCheck = 0
+        self.ignoreTouch = False
+        self.touchState = {}
+        self.touchShutdownStart = 0
+        self.speaking = False
+        self.motionRunning = ""
+
+        self.runlocked = None
+
+    def onUnload(self):
+        try:
+            self.websocketServer.shutdown()
+            self.websocketServer.server_close()
+            self.websocketServer = None
+        except:
+            pass
+
+    def onInput_onTextToSpeechStarted(self):
+        self.speaking = True
+
+    def onInput_onTextToSpeechDone(self):
+        self.speaking = False
+
+    def onInput_onStart(self, p):
+        self.app = {}
+        for item in p:
+            self.app[item[0]] = item[1]
+
+        self.proxy["self"] = self
+        self.proxy["autonomousLife"] = self.getALProxy("ALAutonomousLife")
+        self.proxy["behavior"] = self.getALProxy("ALBehaviorManager")
+        self.proxy["system"] = self.getALProxy("ALSystem")
+        self.proxy["motion"] = self.getALProxy("ALMotion")
+        self.proxy["posture"] = self.getALProxy("ALRobotPosture")
+        self.proxy["animatedSpeech"] = self.getALProxy("ALAnimatedSpeech")
+        self.proxy["audioDevice"] = self.getALProxy("ALAudioDevice")
+        self.proxy["audioPlayer"] = self.getALProxy("ALAudioPlayer")
+        self.proxy["audioRecorder"] = self.getALProxy("ALAudioRecorder")
+        self.proxy["speechRecognition"] = self.getALProxy("ALSpeechRecognition")
+        self.proxy["textToSpeech"] = self.getALProxy("ALTextToSpeech")
+        self.proxy["photoCapture"] = self.getALProxy("ALPhotoCapture")
+        self.proxy["videoRecorder"] = self.getALProxy("ALVideoRecorder")
+        self.proxy["battery"] = self.getALProxy("ALBattery")
+        self.proxy["leds"] = self.getALProxy("ALLeds")
+        self.proxy["memory"] = self.getALProxy("ALMemory")
+        self.proxy["autonomousMoves"] = self.getALProxy("ALAutonomousMoves")
+        self.proxy["basicAwareness"] = self.getALProxy("ALBasicAwareness")
+
+        self.virtual = (self.proxy["system"] is None)
+
+        self.cmds["cadet_pong"] = {"proxy":"self", "function":"cadet_pong", "noauth":True, "runonly":False, "result":"pong", "parameters":[{"name":"client", "type":"client"}]}
+        self.cmds["cadet_setup"] = {"proxy":"self", "function":"cadet_setup", "noauth":True, "runonly":False, "result":"id", "parameters":[{"name":"domain", "type":"str"},{"name":"admin", "type":"str"},{"name":"root", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_restart"] = {"proxy":"self", "function":"cadet_restart", "noauth":True, "runonly":False, "parameters":[{"name":"client", "type":"client"}]}
+        self.cmds["cadet_quit"] = {"proxy":"self", "function":"cadet_quit", "noauth":True, "runonly":False, "parameters":[{"name":"client", "type":"client"}]}
+        self.cmds["cadet_cmdrunning"] = {"proxy":"self", "function":"cadet_cmdRunning", "result":"running", "runonly":False, "parameters":[{"name":"name", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_runlock"] = {"proxy":"self", "function":"cadet_runLock", "runonly":False, "parameters":[{"name":"lock", "type":"bool"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_touchState"] = {"proxy":"self", "function":"nao_touchState", "result":"state", "parameters":[{"name":"name", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_msec"] = {"proxy":"self", "function":"cadet_msec", "result":"msec", "parameters":[{"name":"client", "type":"client"}]}
+        self.cmds["cadet_naoreboot"] = {"proxy":"system", "function":"reboot", "runonly":False}
+        self.cmds["cadet_naoshutdown"] = {"proxy":"system", "function":"shutdown", "runonly":False}
+
+        self.cmds["cadet_settinglist"] = {"proxy":"self", "function":"cadet_settingList", "result":"settings", "runonly":False, "parameters":[{"name":"client", "type":"client"}]}
+        self.cmds["cadet_settingget"] = {"proxy":"self", "function":"cadet_settingGet", "noauth":True, "result":"value", "runonly":False, "parameters":[{"name":"setting", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_settingset"] = {"proxy":"self", "function":"cadet_settingSet", "noauth":True, "runonly":False, "parameters":[{"name":"setting", "type":"str"}, {"name":"value", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_settingdelete"] = {"proxy":"self", "function":"cadet_settingDelete", "runonly":False, "parameters":[{"name":"setting", "type":"str"}, {"name":"client", "type":"client"}]}
+
+        self.cmds["cadet_domainlist"] = {"proxy":"self", "function":"cadet_domainList", "result":"domains", "runonly":False, "parameters":[{"name":"client", "type":"client"}]}
+        self.cmds["cadet_domainget"] = {"proxy":"self", "function":"cadet_domainGet", "noauth":True, "result":"domain", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_domainset"] = {"proxy":"self", "function":"cadet_domainSet", "result":"id", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"name", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_domaindelete"] = {"proxy":"self", "function":"cadet_domainDelete", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_domainrestore"] = {"proxy":"self", "function":"cadet_domainRestore", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_domainunlink"] = {"proxy":"self", "function":"cadet_domainUnlink", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"client", "type":"client"}]}
+
+        self.cmds["cadet_userlist"] = {"proxy":"self", "function":"cadet_userList", "result":"users", "runonly":False, "noauth":True, "parameters":[{"name":"domain", "type":"int"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_userget"] = {"proxy":"self", "function":"cadet_userGet", "noauth":True, "result":"user", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_userset"] = {"proxy":"self", "function":"cadet_userSet", "result":"id", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"name", "type":"str", "default":""}, {"name":"domain", "type":"int", "default":0}, {"name":"options", "type":"str", "default":""}, {"name":"password", "type":"str", "default":""}, {"name":"currentPassword", "type":"str", "default":""}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_userlogin"] = {"proxy":"self", "function":"cadet_userLogin", "noauth":True, "result":"user", "runonly":False, "parameters":[{"name":"name", "type":"str"}, {"name":"password", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_userdelete"] = {"proxy":"self", "function":"cadet_userDelete", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_userrestore"] = {"proxy":"self", "function":"cadet_userRestore", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_userunlink"] = {"proxy":"self", "function":"cadet_userUnlink", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"client", "type":"client"}]}
+
+        self.cmds["cadet_scriptlist"] = {"proxy":"self", "function":"cadet_scriptList", "noauth":True, "result":"scripts", "runonly":False, "parameters":[{"name":"domain", "type":"int"}, {"name":"tutorial", "type":"bool", "default":False}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_scriptget"] = {"proxy":"self", "function":"cadet_scriptGet", "result":"script", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_scriptset"] = {"proxy":"self", "function":"cadet_scriptSet", "result":"id", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"name", "type":"str", "default":""}, {"name":"user", "type":"int", "default":0}, {"name":"options", "type":"str", "default":""}, {"name":"xml", "type":"str", "default":""}, {"name":"lock", "type":"int", "default":-1}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_scriptdelete"] = {"proxy":"self", "function":"cadet_scriptDelete", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_scriptrestore"] = {"proxy":"self", "function":"cadet_scriptRestore", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_scriptunlink"] = {"proxy":"self", "function":"cadet_scriptUnlink", "runonly":False, "parameters":[{"name":"id", "type":"int"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_scriptchangedir"] = {"proxy":"self", "function":"cadet_scriptChangeDir", "runonly":False, "parameters":[{"name":"olddir", "type":"str"}, {"name":"newdir", "type":"str"}, {"name":"domain", "type":"int"}, {"name":"client", "type":"client"}]}
+
+        self.cmds["cadet_filelist"] = {"proxy":"self", "function":"cadet_fileList", "result":"files", "runonly":False, "parameters":[{"name":"client", "type":"client"}]}
+        self.cmds["cadet_fileupload"] = {"proxy":"self", "function":"cadet_fileUpload", "runonly":False, "parameters":[{"name":"name", "type":"str"}, {"name":"offset", "type":"int"}, {"name":"data", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_filerename"] = {"proxy":"self", "function":"cadet_fileRename", "runonly":False, "parameters":[{"name":"name", "type":"str"}, {"name":"newname", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_filedelete"] = {"proxy":"self", "function":"cadet_fileDelete", "runonly":False, "parameters":[{"name":"name", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_filerestore"] = {"proxy":"self", "function":"cadet_fileRestore", "result":"name", "runonly":False, "parameters":[{"name":"name", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_fileunlink"] = {"proxy":"self", "function":"cadet_fileUnlink", "runonly":False, "parameters":[{"name":"name", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_fileexists"] = {"proxy":"self", "function":"cadet_fileExists", "result":"exists", "runonly":False, "parameters":[{"name":"name", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_filecleartmp"] = {"proxy":"self", "function":"cadet_fileClearTemp", "runonly":False}
+
+        self.cmds["cadet_motionlist"] = {"proxy":"self", "function":"cadet_motionList", "runonly":False, "result":"motions", "parameters":[{"name":"client", "type":"client"}]}
+        self.cmds["cadet_motionget"] = {"proxy":"self", "function":"cadet_motionGet", "runonly":False, "result":"motion", "parameters":[{"name":"name", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_motionexists"] = {"proxy":"self", "function":"cadet_motionExists", "runonly":False, "result":"exists", "parameters":[{"name":"name", "type":"str"}]}
+        self.cmds["cadet_motionset"] = {"proxy":"self", "function":"cadet_motionSet", "runonly":False, "parameters":[{"name":"name", "type":"str"}, {"name":"newname", "type":"str", "default":""}, {"name":"movements", "type":"array", "default":None}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_motiondelete"] = {"proxy":"self", "function":"cadet_motionDelete", "runonly":False, "parameters":[{"name":"name", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_motionrestore"] = {"proxy":"self", "function":"cadet_motionRestore", "runonly":False, "parameters":[{"name":"name", "type":"str"}, {"name":"newname", "type":"str", "default":""}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_motionunlink"] = {"proxy":"self", "function":"cadet_motionUnlink", "runonly":False, "parameters":[{"name":"name", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_motionrun"] = {"proxy":"self", "function":"cadet_motionRun", "runonly":False, "parameters":[{"name":"motion", "type":"str"}, {"name":"client", "type":"client"}]}
+        self.cmds["cadet_motionstop"] = {"proxy":"self", "function":"cadet_motionStop", "runonly":False, "parameters":[{"name":"client", "type":"client"}]}
+        self.cmds["cadet_motionrunning"] = {"proxy":"self", "function":"cadet_motionRunning", "runonly":False, "result":"motion", "parameters":[{"name":"client", "type":"client"}]}
+
+        self.cmds["cadet_backup"] = {"proxy":"self", "function":"cadet_backup", "runonly":False, "parameters":[{"name":"client", "type":"client"}]}
+        self.cmds["cadet_restore"] = {"proxy":"self", "function":"cadet_restore", "runonly":False, "parameters":[{"name":"name", "type":"str"}, {"name":"client", "type":"client"}]}
+
+        self.cmds["animatedspeech_say"] = {"proxy":"animatedSpeech", "function":"say", "parameters":[{"name":"string", "type":"str"}, {"name":"configuration", "type":"array", "default":"{\"bodyLanguageMode\":\"contextual\"}"}]}
+
+        self.cmds["audiodevice_getoutputvolume"] = {"proxy":"audioDevice", "function":"getOutputVolume", "result":"volume", "runonly":False}
+        self.cmds["audiodevice_setoutputvolume"] = {"proxy":"audioDevice", "function":"setOutputVolume", "runonly":False, "parameters":[{"name":"volume", "type":"int"}]}
+        self.cmds["audiodevice_startmicrophonesrecording"] = {"proxy":"self", "function":"audioDevice_startMicrophonesRecording", "runonly":False, "parameters":[{"name":"name", "type":"file"}, {"name":"client", "type":"client"}]}
+        self.cmds["audiodevice_stopmicrophonesrecording"] = {"proxy":"self", "function":"audioDevice_stopMicrophonesRecording", "runonly":False, "parameters":[{"name":"client", "type":"client"}]}
+        self.cmds["audiodevice_muteaudioout"] = {"proxy":"audioDevice", "function":"muteAudioOut", "parameters":[{"name":"mute", "type":"bool"}]}
+
+        self.cmds["audioplayer_playfile"] = {"proxy":"audioPlayer", "function":"playFile", "post":True, "allowidle":True, "parameters":[{"name":"name", "type":"file"}, {"name":"volume", "type":"float", "default":1}, {"name":"pan", "type":"float", "default":0}]}
+        self.cmds["audioplayer_playsine"] = {"proxy":"audioPlayer", "function":"playSine", "parameters":[{"name":"hertz", "type":"int"}, {"name":"gain", "type":"int"}, {"name":"pan", "type":"int"}, {"name":"duration", "type":"float"}]}
+
+        self.cmds["behavior_getinstalledbehaviors"] = {"proxy":"behavior", "function":"getInstalledBehaviors", "result":"behaviors", "runonly":False}
+        self.cmds["behavior_getrunningbehaviors"] = {"proxy":"behavior", "function":"getRunningBehaviors", "result":"behaviors", "runonly":False}
+        self.cmds["behavior_startbehavior"] = {"proxy":"behavior", "function":"startBehavior", "allowidle":True, "parameters":[{"name":"name", "type":"str"}]}
+        self.cmds["behavior_isbehaviorrunning"] = {"proxy":"behavior", "function":"isBehaviorRunning", "result":"running", "runonly":False, "parameters":[{"name":"name", "type":"str"}]}
+        self.cmds["behavior_stopbehavior"] = {"proxy":"behavior", "function":"stopBehavior", "result":"running", "runonly":False, "parameters":[{"name":"name", "type":"str"}]}
+
+        self.cmds["battery_getcharge"] = {"proxy":"battery", "function":"getBatteryCharge", "result":"percent", "runonly":False, "virtual":100}
+
+        self.cmds["leds_fade"] = {"proxy":"leds", "function":"fade", "parameters":[{"name":"name", "type":"str"}, {"name":"intensity", "type":"float"}, {"name":"duration", "type":"float"}]}
+        self.cmds["leds_fadergb"] = {"proxy":"leds", "function":"fadeRGB", "parameters":[{"name":"name", "type":"str"}, {"name":"rgb", "type":"int16"}, {"name":"duration", "type":"float"}]}
+        self.cmds["leds_off"] = {"proxy":"leds", "function":"off", "parameters":[{"name":"name", "type":"str"}]}
+        self.cmds["leds_on"] = {"proxy":"leds", "function":"on", "parameters":[{"name":"name", "type":"str"}]}
+        self.cmds["leds_randomeyes"] = {"proxy":"leds", "function":"randomEyes", "parameters":[{"name":"duration", "type":"float"}]}
+        self.cmds["leds_rasta"] = {"proxy":"leds", "function":"rasta", "parameters":[{"name":"duration", "type":"float"}]}
+        self.cmds["leds_reset"] = {"proxy":"leds", "function":"reset", "parameters":[{"name":"name", "type":"str"}]}
+        self.cmds["leds_rotateeyes"] = {"proxy":"leds", "function":"rotateEyes", "parameters":[{"name":"rgb", "type":"int"}, {"name":"speed", "type":"float"}, {"name":"duration", "type":"float"}]}
+        self.cmds["leds_setintensity"] = {"proxy":"leds", "function":"setIntensity", "parameters":[{"name":"name", "type":"str"}, {"name":"intensity", "type":"float"}]}
+
+        self.cmds["motion_getrobotconfig"] = {"proxy":"motion", "function":"getRobotConfig", "result":"config", "runonly":False}
+        self.cmds["motion_move"] = {"proxy":"motion", "function":"move", "parameters":[{"name":"x", "type":"float"}, {"name":"y", "type":"float"}, {"name":"theta", "type":"float"}]}
+        self.cmds["motion_stop"] = {"proxy":"motion", "function":"stopMove"}
+        self.cmds["motion_moveisactive"] = {"proxy":"motion", "function":"moveIsActive", "result":"active"}
+        self.cmds["motion_openhand"] = {"proxy":"motion", "function":"openHand", "parameters":[{"name":"name", "type":"str"}]}
+        self.cmds["motion_closehand"] = {"proxy":"motion", "function":"closeHand", "parameters":[{"name":"name", "type":"str"}]}
+        self.cmds["motion_getstiffnesses"] = {"proxy":"motion", "function":"getStiffnesses", "result":"stiffnesses", "parameters":[{"name":"name", "type":"str"}]}
+        self.cmds["motion_setstiffnesses"] = {"proxy":"motion", "function":"setStiffnesses", "allowidle":True, "parameters":[{"name":"name", "type":"array"}, {"name":"stiffness", "type":"float"}]}
+        self.cmds["motion_setangles"] = {"proxy":"motion", "function":"setAngles", "parameters":[{"name":"name", "type":"str"}, {"name":"radians", "type":"float"}, {"name":"speed", "type":"float"}]}
+        self.cmds["motion_angleinterpolation"] = {"proxy":"motion", "function":"angleInterpolation", "allowidle":True, "parameters":[{"name":"name", "type":"array"}, {"name":"radians", "type":"array"}, {"name":"speed", "type":"float"}, {"name":"absolute", "type":"bool"}]}
+        self.cmds["motion_setfootsteps"] = {"proxy":"self", "function":"setFootSteps", "parameters":[{"name":"legNames", "type":"array"}, {"name":"footSteps", "type":"array"}, {"name":"timeList", "type":"array"}, {"name":"clearExisting", "type":"bool"}]}
+        self.cmds["motion_wakeup"] = {"proxy":"motion", "function":"wakeUp"}
+        self.cmds["motion_rest"] = {"proxy":"motion", "function":"rest"}
+        self.cmds["motion_waituntilmoveisfinished"] = {"proxy":"motion", "function":"waitUntilMoveIsFinished", "runonly":False}
+
+        self.cmds["photocapture_takepicture"] = {"proxy":"self", "function":"photoCapture_takePicture", "parameters":[{"name":"name", "type":"str"}]}
+
+        self.cmds["posture_gotoposture"] = {"proxy":"posture", "function":"goToPosture", "allowidle":True, "parameters":[{"name":"name", "type":"str"}, {"name":"speed", "type":"float"}]}
+
+        self.cmds["system_robotname"] = {"proxy":"system", "function":"robotName", "result":"name", "runonly":False, "virtual":"virtual-nao"}
+        self.cmds["system_systemversion"] = {"proxy":"system", "function":"systemVersion", "result":"version", "runonly":False, "virtual":0}
+        self.cmds["system_timezone"] = {"proxy":"system", "function":"timezone", "result":"timezone", "runonly":False, "virtual":""}
+        self.cmds["system_freememory"] = {"proxy":"system", "function":"freeMemory", "result":"size", "runonly":False, "virtual":0}
+
+        self.cmds["texttospeech_say"] = {"proxy":"textToSpeech", "function":"say", "parameters":[{"name":"string", "type":"str"}]}
+        self.cmds["texttospeech_done"] = {"proxy":"self", "function":"textToSpeech_done", "result":"running", "runonly":False}
+
+        self.cmds["videorecorder_startrecording"] = {"proxy":"self", "function":"videoRecorder_startRecording", "parameters":[{"name":"client", "type":"client"}, {"name":"name", "type":"str"}]}
+        self.cmds["videorecorder_stoprecording"] = {"proxy":"self", "function":"videoRecorder_stopRecording", "parameters":[{"name":"client", "type":"client"}]}
+
+        self.scriptdocsPath = self.app["app_path"] + '/scriptdocs/'
+        if not os.path.exists(self.scriptdocsPath):
+            try:
+                os.makedirs(self.scriptdocsPath)
+            except OSError as exc:
+                if exc.errno != errno.EEXIST:
+                    raise
+
+        if self.app["app_path"] + "/lib" not in sys.path:
+            sys.path.append(self.app["app_path"] + "/lib")
+
+        self.dbQuery("UPDATE scripts SET locked=0 WHERE 1")
+
+        from websocket_server import WebsocketServer
+
+        self.websocketServer = WebsocketServer(self.app["websocket_port"], '')
+        self.websocketServer.set_fn_new_client(self.onNewClient)
+        self.websocketServer.set_fn_client_left(self.onClientLeft)
+        self.websocketServer.set_fn_message_received(self.onMessageRecv)
+
+        robotName = "virtual-robot"
+        if self.proxy["system"] is not None:
+            robotName = self.proxy["system"].robotName()
+
+        if self.virtual == False:
+            self.proxy["basicAwareness"].stopAwareness()
+            self.proxy["autonomousMoves"].setBackgroundStrategy("none")
+
+        configuration = {"bodyLanguageMode":"contextual"}
+        if self.app["nao_eth_ip"] == "" and self.app["nao_wlan_ip"] == "":
+            self.proxy["animatedSpeech"].say("I cannot play NAO Cadet because I am not connected to a network", configuration)
+            time.sleep(1.0)
+            self.proxy["posture"].goToPosture("Stand", 3.0)
+            time.sleep(3.0)
+            self.cadet_quit(None)
+        else:
+            s = "Hey, I'm " + robotName + ". and lets play NAO Cadet. Open the app on your tablet or ipad., Or connect your browser to "
+
+            if self.app["nao_eth_ip"] != "":
+                ipaddr = self.app["nao_eth_ip"].split(".")
+                s = s + ", if you are using ethernet, " + ipaddr[0] + ". " + ipaddr[1] + ". " + ipaddr[2] + ". " + ipaddr[3] + ". colon 3000"
+
+                if self.app["nao_wlan_ip"] != "":
+                    s = s + ", or "
+
+            if self.app["nao_wlan_ip"] != "":
+                ipaddr = self.app["nao_wlan_ip"].split(".")
+                s = s + ", if you are using wifi, " + ipaddr[0] + ". " + ipaddr[1] + ". " + ipaddr[2] + ". " + ipaddr[3] + ". colon 3000"
+
+            self.proxy["animatedSpeech"].say(s, configuration)
+            time.sleep(1.0)
+            self.proxy["posture"].goToPosture("Stand", 3.0)
+
+            self.websocketServer.run_forever()
+
+    def onInput_onStop(self):
+        self.cadet_quit(None)
+#        self.proxy["autonomousMoves"].setBackgroundStrategy("backToNeutral")
+#        self.proxy["basicAwareness"].startAwareness()
+
+    def getALProxy(self, name):
+        try:
+            return ALProxy(name)
+        except:
+            return None
+
+    def setFootSteps(self, legNames, footSteps, timeList, clear):
+        self.proxy["motion"].setFootSteps(legNames, footSteps, timeList, False)
+
+    def dbOpen(self):
+        db = sqlite3.connect(self.app["app_path"] + "/db.sqlite")
+        return db
+
+    def dbQuery(self, query, other=None):
+        db = self.dbOpen()
+        cur = db.cursor()
+
+        if other is None:
+            cur.execute(query)
+        else:
+            cur.execute(query, other)
+
+        rows = ""
+
+        r = 0
+        q = query.lower()
+        if q.startswith('select'):
+            r = cur.fetchall()
+        elif q.startswith('insert'):
+            r = cur.lastrowid
+
+        if q.startswith('insert') or q.startswith('update') or q.startswith('delete'):
+            db.commit()
+
+        db.close()
+        return r
+
+    def clean(self, s):
+        #s = ''.join([ch for ch in str(s) if ord(ch) > 31 and ord(ch) < 126 or ord(ch) == 9])
+        #return s.encode('utf-8')
+        return s.encode('ascii', 'ignore')
+
+    def sendMessage(self, client, message):
+        try:
+            self.websocketServer.send_message(client, json.dumps(message, ensure_ascii=False))
+        except:
+            pass
+
+    def sendMessageToAll(self, message):
+        try:
+            self.websocketServer.send_message_to_all(json.dumps(message, ensure_ascii=False))
+        except:
+            pass
+
+    def nao_checkShutdown(self):
+        if self.touchShutdownStart != 0:
+            if self.touchShutdownStart > 0:
+                if int(round(time.time() * 1000)) - self.touchShutdownStart >= 10000:
+                    self.touchShutdownStart = -1
+                    self.cadet_quit(None)
+
+                    return True
+
+
+        return False
+
+    def onInput_onTouched(self, p):
+        if self.nao_checkShutdown() == False:
+            if self.ignoreTouch == False:
+                msec = int(round(time.time() * 1000))
+
+                self.log("msec: " + str(msec))
+                self.log("last: " + str(self.lastTouch))
+                self.log("diff: " + str(msec - self.lastTouch))
+
+                if msec - self.lastTouch > 5000:
+                    touched = False
+
+                    for item in p:
+                        self.touchState[str(item[0])] = bool(item[1])
+
+                        self.log(str(item[0]) + "=" + str(bool(item[1])))
+
+                        if item[1] == True:
+                            touched = True
+
+                            m = {"event": "event_touch", "nao_part":str(item[0]), "is_touching":str(item[1])}
+
+                            if self.runlocked is not None:
+                                self.sendMessage(self.runlocked, m)
+                            else:
+                                self.sendMessageToAll(m)
+
+                    if touched == True:
+                        self.log("TOUCH RESET")
+                        self.lastTouch = msec
+
+                        if self.runlocked is None and str(item[0]).lower() == "head/touch/front":
+                            s = "Hey, try connecting your browser to "
+
+                            if self.app["nao_eth_ip"] != "":
+                                ipaddr = self.app["nao_eth_ip"].split(".")
+                                s = s + ipaddr[0] + ". " + ipaddr[1] + ". " + ipaddr[2] + ". " + ipaddr[3] + ". colon 3000"
+
+                                if self.app["nao_wlan_ip"] != "":
+                                    s = s + " on ethernet and "
+
+                            if self.app["nao_wlan_ip"] != "":
+                                ipaddr = self.app["nao_wlan_ip"].split(".")
+                                s = s + ipaddr[0] + ". " + ipaddr[1] + ". " + ipaddr[2] + ". " + ipaddr[3] + ". colon 3000"
+
+                                if self.app["nao_eth_ip"] != "":
+                                    s = s + " on wireless"
+
+                            s = "Hey, try connecting your browser to " + ipaddr[0] + ". " + ipaddr[1] + ". " + ipaddr[2] + ". " + ipaddr[3] + ". colon 3000"
+                            self.proxy["textToSpeech"].say(s)
+
+                        if self.runlocked is None and str(item[0]).lower() == "head/touch/back":
+                            self.proxy["posture"].goToPosture("Stand", 3.0)
+
+    def onInput_behaviorRunning(self, p):
+        m = {"event": "event_behavior_running", "behaviors": p}
+        self.sendMessageToAll(m)
+
+    def onInput_onWordRecognized(self, eventName, value, identifier):
+        pass
+
+    def onInput_onSonarLeftDetected(self, p):
+        if self.nao_checkShutdown() == False:
+            m = {"event": "event_sonar_left", "distance":p}
+
+            if self.runlocked is not None:
+                self.sendMessage(self.runlocked, m)
+            else:
+                self.sendMessageToAll(m)
+
+    def onInput_onSonarRightDetected(self, p):
+        if self.nao_checkShutdown() == False:
+            m = {"event": "event_sonar_right", "distance":p}
+
+            if self.runlocked is not None:
+                self.sendMessage(self.runlocked, m)
+            else:
+                self.sendMessageToAll(m)
+
+    def checkTasksFinished(self):
+        msec = int(round(time.time() * 1000))
+
+        if msec - self.lastTasksCheck > 500:
+            self.lastTasksCheck = msec
+
+            for item in self.posts:
+                if self.posts[item]["id"] != 0:
+                    if hasattr(self.proxy[self.cmds[item]["proxy"]], "isRunning"):
+                        if self.proxy[self.cmds[item]["proxy"]].isRunning(self.posts[item]["id"]) == False:
+                            self.posts[item]["id"] = 0
+
+                            m = {"event":"event_command_change", "command":item, "state":False, "action":self.posts[item]["action"]}
+                            self.sendMessageToAll(m)
+
+    def checkHardware(self):
+        msec = int(round(time.time() * 1000))
+
+        if msec - self.lastHardwareCheck > 30000:
+            self.lastHardwareCheck = msec
+
+            if self.virtual == False:
+                percent = self.proxy["battery"].getBatteryCharge()
+                if percent != 0:
+                    r = {"event": "event_battery", "percent": percent}
+                    self.sendMessageToAll(r)
+
+                partition = self.proxy["system"].diskFree(False)
+                free = 0
+                if len(partition) > 0:
+                    for item in partition:
+                        path = False
+                        size = 0
+                        for entry in item:
+                            if entry[0] == "path":
+                                if entry[1] == "/var/persistent":
+                                    path = True
+                            if entry[0] == "free":
+                                size = entry[1]
+
+                        if path == True:
+                            free = size
+
+                #if free != 0:
+                    r = {"event": "event_diskfree", "free": free}
+                    self.sendMessageToAll(r)
+
+
+
+    def onNewClient(self, client, server):
+        pass
+
+    def onClientLeft(self, client, server):
+        if self.runlocked is not None:
+            if self.runlocked["id"] == client["id"]:
+                self.runlocked = None
+                self.nao_reset(True)
+
+        self.dbQuery("UPDATE scripts SET locked=0 WHERE locked=?", (client["id"],))
+
+    def onMessageRecv(self, client, server, message):
+        if self.websocketServer is None or self.nao_checkShutdown() == True:
+            return
+
+        self.checkTasksFinished()
+        self.checkHardware()
+
+        data = json.loads(message)
+
+        r = {"token": data["token"], "error_code": 0, "error_message": ""}
+
+        if "token" in data:
+            if "command" in data:
+                self.log("command: " + str(data["command"]))
+                if data["command"] in self.cmds:
+                    if self.cmds[data["command"]]["proxy"] in self.proxy and (self.proxy[self.cmds[data["command"]]["proxy"]] is not None and not (self.virtual == True and "virtual" in self.cmds[data["command"]])):
+                        if hasattr(self.proxy[self.cmds[data["command"]]["proxy"]], self.cmds[data["command"]]["function"]):
+                            if("noauth" in self.cmds[data["command"]] and self.cmds[data["command"]]["noauth"] == True) or (client["id"] in self.users and self.users[client["id"]] is not None):
+                                isValidData = True
+                                paramCnt = 0
+                                if "parameters" in self.cmds[data["command"]]:
+                                    paramCnt = len(self.cmds[data["command"]]["parameters"])
+                                    for param in self.cmds[data["command"]]["parameters"]:
+                                        if param["name"] in data and param["type"] != "array" and isinstance(data[param["name"]], (list, tuple, dict)):
+                                            data[param["name"]] = ""
+
+                                        if (param["name"] not in data and (param["type"] != "all" and param["type"] != "client")):
+                                            if "default" in param:
+                                                if param["type"] != "array":
+                                                    data[param["name"]] = param["default"]
+                                                else:
+                                                    data[param["name"]] = ast.literal_eval(str(param["default"]))
+                                            else:
+                                                isValidData = False
+                                                r["error_code"] = ERR_PARAMETER_MISSING
+                                                r["error_message"] = "Parameter '" + param["name"] + "' missing for '" + data["command"] + "' command"
+                                        else:
+                                            #try:
+                                                if param["type"] == "str":
+                                                    data[param["name"]] = self.clean(data[param["name"]])
+                                                elif param["type"] == "int":
+                                                    data[param["name"]] = int(data[param["name"]])
+                                                elif param["type"] == "int16":
+                                                    data[param["name"]] = int(data[param["name"]], 16)
+                                                elif param["type"] == "bool":
+                                                    data[param["name"]] = bool(data[param["name"]])
+                                                elif param["type"] == "float":
+                                                    data[param["name"]] = float(data[param["name"]])
+                                                elif param["type"] == "array":
+                                                    if not isinstance(data[param["name"]], (list, tuple, dict)):
+                                                        data[param["name"]] = ast.literal_eval(str(data[param["name"]]))
+                                                elif param["type"] == "file":
+                                                    data[param["name"]] = self.scriptdocsPath + str(data[param["name"]])
+                                                elif param["type"] == "all":
+                                                    data[param["name"]] = data
+                                                elif param["type"] == "client":
+                                                    data[param["name"]] = client
+                                            #except Exception as e:
+                                            #    isValidData = False
+                                            #    r["error_message"] = str(e) + " for command '" + data["command"] + "'"
+                                            #    self.log(e)
+
+
+                                        if isValidData == True:
+                                            if type(data[param["name"]]) is unicode:
+                                                data[param["name"]] = str(data[param["name"]])
+
+                                            if type(data[param["name"]]) is (list):
+                                                i = 0
+                                                while i < len(data[param["name"]]):
+                                                    if type(data[param["name"]][i]) is unicode:
+                                                        data[param["name"]][i] = str(data[param["name"]][i])
+
+                                                    i += 1
+
+                                if isValidData == True:
+                                    result = False
+
+                                    if self.runlocked is not None and self.runlocked["id"] == client["id"] or ("runonly" in self.cmds[data["command"]] and self.cmds[data["command"]]["runonly"] == False) or ("allowidle" in self.cmds[data["command"]] and self.cmds[data["command"]]["allowidle"] == True and self.runlocked is None):
+                                        proxy = self.proxy[self.cmds[data["command"]]["proxy"]]
+                                        post = False
+
+                                        if "post" in self.cmds[data["command"]] and self.cmds[data["command"]]["post"] == True:
+                                            post = True
+                                            proxy = proxy.post
+
+                                        if "post" == False or self.cmds[data["command"]]["function"] not in self.posts or self.posts[self.cmds[data["command"]]["function"]]["id"] == 0:
+                                            #try:
+                                                if paramCnt == 0:
+                                                    result = getattr(proxy, self.cmds[data["command"]]["function"])()
+                                                elif paramCnt == 1:
+                                                    result = getattr(proxy, self.cmds[data["command"]]["function"])(data[self.cmds[data["command"]]["parameters"][0]["name"]])
+                                                elif paramCnt == 2:
+                                                    result = getattr(proxy, self.cmds[data["command"]]["function"])(data[self.cmds[data["command"]]["parameters"][0]["name"]], data[self.cmds[data["command"]]["parameters"][1]["name"]])
+                                                elif paramCnt == 3:
+                                                    result = getattr(proxy, self.cmds[data["command"]]["function"])(data[self.cmds[data["command"]]["parameters"][0]["name"]], data[self.cmds[data["command"]]["parameters"][1]["name"]], data[self.cmds[data["command"]]["parameters"][2]["name"]])
+                                                elif paramCnt == 4:
+                                                    result = getattr(proxy, self.cmds[data["command"]]["function"])(data[self.cmds[data["command"]]["parameters"][0]["name"]], data[self.cmds[data["command"]]["parameters"][1]["name"]], data[self.cmds[data["command"]]["parameters"][2]["name"]], data[self.cmds[data["command"]]["parameters"][3]["name"]])
+                                                elif paramCnt == 5:
+                                                    result = getattr(proxy, self.cmds[data["command"]]["function"])(data[self.cmds[data["command"]]["parameters"][0]["name"]], data[self.cmds[data["command"]]["parameters"][1]["name"]], data[self.cmds[data["command"]]["parameters"][2]["name"]], data[self.cmds[data["command"]]["parameters"][3]["name"]], data[self.cmds[data["command"]]["parameters"][4]["name"]])
+                                                elif paramCnt == 6:
+                                                    result = getattr(proxy, self.cmds[data["command"]]["function"])(data[self.cmds[data["command"]]["parameters"][0]["name"]], data[self.cmds[data["command"]]["parameters"][1]["name"]], data[self.cmds[data["command"]]["parameters"][2]["name"]], data[self.cmds[data["command"]]["parameters"][3]["name"]], data[self.cmds[data["command"]]["parameters"][4]["name"]], data[self.cmds[data["command"]]["parameters"][5]["name"]])
+                                                elif paramCnt == 7:
+                                                    result = getattr(proxy, self.cmds[data["command"]]["function"])(data[self.cmds[data["command"]]["parameters"][0]["name"]], data[self.cmds[data["command"]]["parameters"][1]["name"]], data[self.cmds[data["command"]]["parameters"][2]["name"]], data[self.cmds[data["command"]]["parameters"][3]["name"]], data[self.cmds[data["command"]]["parameters"][4]["name"]], data[self.cmds[data["command"]]["parameters"][5]["name"]], data[self.cmds[data["command"]]["parameters"][6]["name"]])
+                                                elif paramCnt == 8:
+                                                    result = getattr(proxy, self.cmds[data["command"]]["function"])(data[self.cmds[data["command"]]["parameters"][0]["name"]], data[self.cmds[data["command"]]["parameters"][1]["name"]], data[self.cmds[data["command"]]["parameters"][2]["name"]], data[self.cmds[data["command"]]["parameters"][3]["name"]], data[self.cmds[data["command"]]["parameters"][4]["name"]], data[self.cmds[data["command"]]["parameters"][5]["name"]], data[self.cmds[data["command"]]["parameters"][6]["name"]], data[self.cmds[data["command"]]["parameters"][7]["name"]])
+                                                elif paramCnt == 9:
+                                                    result = getattr(proxy, self.cmds[data["command"]]["function"])(data[self.cmds[data["command"]]["parameters"][0]["name"]], data[self.cmds[data["command"]]["parameters"][1]["name"]], data[self.cmds[data["command"]]["parameters"][2]["name"]], data[self.cmds[data["command"]]["parameters"][3]["name"]], data[self.cmds[data["command"]]["parameters"][4]["name"]], data[self.cmds[data["command"]]["parameters"][5]["name"]], data[self.cmds[data["command"]]["parameters"][6]["name"]], data[self.cmds[data["command"]]["parameters"][7]["name"]], data[self.cmds[data["command"]]["parameters"][8]["name"]])
+                                                elif paramCnt == 10:
+                                                    result = getattr(proxy, self.cmds[data["command"]]["function"])(data[self.cmds[data["command"]]["parameters"][0]["name"]], data[self.cmds[data["command"]]["parameters"][1]["name"]], data[self.cmds[data["command"]]["parameters"][2]["name"]], data[self.cmds[data["command"]]["parameters"][3]["name"]], data[self.cmds[data["command"]]["parameters"][4]["name"]], data[self.cmds[data["command"]]["parameters"][5]["name"]], data[self.cmds[data["command"]]["parameters"][6]["name"]], data[self.cmds[data["command"]]["parameters"][7]["name"]], data[self.cmds[data["command"]]["parameters"][8]["name"]], data[self.cmds[data["command"]]["parameters"][9]["name"]])
+
+                                                if isinstance(result, (list, tuple, dict)):
+                                                    if "error_code" in result:
+                                                        r["error_code"] = result["error_code"]
+                                                    if "result" in self.cmds[data["command"]] and self.cmds[data["command"]]["result"] in result:
+                                                        result = result[self.cmds[data["command"]]["result"]]
+
+                                                if post == True:
+                                                    action = data[self.cmds[data["command"]]["parameters"][0]["name"]]
+                                                    if self.cmds[data["command"]]["parameters"][0]["type"] == "file":
+                                                        action = action[len(self.scriptdocsPath):]
+
+                                                    postdata = {"id":result, "action":action}
+                                                    self.posts[data["command"]] = postdata
+
+                                                    m = {"event":"event_command_change", "command":data["command"], "state":True, "action":action}
+                                                    self.sendMessageToAll(m)
+                                                else:
+                                                    if result is not None and "result" in self.cmds[data["command"]]:
+                                                        r[self.cmds[data["command"]]["result"]] = result
+                                            #except Exception as e:
+                                            #    r["error_code"] = ERR_EXCEPTION_THROWN
+                                            #    r["error_message"] = str(e) + " in command '" + data["command"] + "'"
+                                            #    self.log(e)
+
+                                    else:
+                                        r["error_code"] = ERR_RUN_LOCKED
+                                else:
+                                    r["error_code"] = ERR_PARAMETER_MISSING
+                            else:
+                                r["error_code"] = ERR_AUTHENTICATION_REQ
+                                r["error_message"] = "User authentication required for command '" + data["command"] + '"'
+                        else:
+                            r["error_code"] = ERR_FUNCTION_MISSING
+                            r["error_message"] = "Function '" + self.cmds[data["command"]]["function"] + "' missing from ALProxy '" + self.cmds[data["command"]]["proxy"] + "'"
+                    else:
+                        if "virtual" in self.cmds[data["command"]]:
+                            if "result" in self.cmds[data["command"]]:
+                                r[self.cmds[data["command"]]["result"]] = self.cmds[data["command"]]["virtual"]
+
+                        else:
+                            r["error_code"] = ERR_ALPROXY_MISSING
+                            r["error_message"] = "ALProxy '" + self.cmds[data["command"]]["proxy"] + "' was not available"
+
+                else:
+                    r["error_code"] = ERR_COMMAND_MISSING
+                    r["error_message"] = "Command '" + data["command"] + "' was not found"
+
+            else:
+                r["error_code"] = ERR_UNKNOWN_CMD
+                r["error_message"] = "No command was sent to the NAO"
+
+            if "error_code" not in r:
+                r["error_code"] = 0
+
+            self.sendMessage(client, r)
+
+    def nao_reset(self, aware):
+        behaviors = self.proxy["behavior"].getRunningBehaviors()
+        for item in behaviors:
+            if item[-2:] == "/.":
+                item = item[:-2]
+
+            if item != ".lastUploadedChoregrapheBehavior" and item != "naocadet":
+                self.proxy["behavior"].stopBehavior(item)
+
+        self.proxy["textToSpeech"].stopAll()
+
+        if self.runlocked is not None:
+            self.audioDevice_stopMicrophonesRecording(None)
+
+        self.proxy["leds"].reset("AllLeds")
+
+        self.proxy["motion"].stopMove()
+        if self.virtual == False:
+            self.proxy["audioPlayer"].stopAll()
+
+#            if aware == True:
+#                self.proxy["autonomousMoves"].setBackgroundStrategy("backToNeutral")
+#                self.proxy["basicAwareness"].startAwareness()
+#            else:
+#                self.proxy["autonomousMoves"].setBackgroundStrategy("none")
+#                self.proxy["basicAwareness"].stopAwareness()
+
+        self.proxy["posture"].setMaxTryNumber(3)
+        result = self.proxy["posture"].goToPosture("Stand", 3.0)
+
+        return result
+
+    def session_userIsRoot(self, id):
+        if id in self.users:
+            if self.users[id]["name"] == "root":
+                return True
+
+        return False
+
+    def session_userIsAdmin(self, id):
+        if id in self.users:
+            self.log("ID: " + str(id) + " " + self.users[id]["name"])
+
+            if self.users[id]["name"] == "root" or self.users[id]["name"] == "admin":
+                return True
+
+        return False
+
+    def session_userGet(self, id):
+        if id in self.users:
+            return self.users[id]
+
+        return {"id": 0, "name":""}
+
+    def session_userset(self, id, name, client):
+        self.users[client["id"]] = {"id": id, "name": name}
+
+        if name is not None and name is not "admin" and name is not "root" and self.runlocked is None:
+            configuration = {"bodyLanguageMode":"contextual"}
+
+            randomHi = ["Hi", "Hello", "Hey", "Bonjour", "Kon'nichiwa"]
+            randomSay = ["I cant wait to see you can code", "this is going to be fun", "the force is strong with you", "I think you can make me do something cool", "it is good to see you", "lets play NAO cadet"]
+
+            s = randomHi[randint(0,len(randomHi) - 1)] + ", " + name + ", " + randomSay[randint(0,len(randomSay) - 1)]
+            self.proxy["textToSpeech"].post.say(s)
+
+
+    def audioDevice_startMicrophonesRecording(self, name, client):
+        result = {}
+
+        ext = name[-4:].lower()
+        if ext != ".wav":
+            name = name + ".wav"
+
+        if "audiodevice_startmicrophonesrecording" not in self.posts or ("audiodevice_startmicrophonesrecording" in self.posts and self.posts["audiodevice_startmicrophonesrecording"]["id"] == 0):
+            if self.virtual == False:
+                self.proxy["audioDevice"].stopMicrophonesRecording()
+                self.proxy["audioDevice"].startMicrophonesRecording(name)
+
+                postdata = {"id":client["id"], "action":name}
+                self.posts["audiodevice_startmicrophonesrecording"] = postdata
+            else:
+                result["error_code"] = ERR_FUNCTION_MISSING
+        else:
+            result["error_code"] = ERR_RES_IN_USE
+
+        return result
+
+    def audioDevice_stopMicrophonesRecording(self, client):
+        result = {}
+
+        if "audiodevice_startmicrophonesrecording" in self.posts and self.posts["audiodevice_startmicrophonesrecording"]["id"] != 0:
+            if client is None or self.posts["audiodevice_startmicrophonesrecording"]["id"] == client["id"]:
+                if self.virtual == False:
+                    self.proxy["audioDevice"].stopMicrophonesRecording()
+
+                    self.posts["audiodevice_startmicrophonesrecording"]["id"] = 0
+
+                    r = {"event": "event_files_changed"}
+                    self.sendMessageToAll(r)
+                else:
+                    result["error_code"] = ERR_FUNCTION_MISSING
+            else:
+                result["error_code"] = ERR_RES_IN_USE
+
+        return result
+
+    def photoCapture_takePicture(self, name):
+        result = {}
+
+        ext = name[-4:].lower()
+        if ext != ".jpg":
+            name = name + ".jpg"
+
+        self.proxy["photoCapture"].setCameraID(0)
+        self.proxy["photoCapture"].setColorSpace(13)
+        self.proxy["photoCapture"].setResolution(2)
+        self.proxy["photoCapture"].setPictureFormat("jpg")
+        self.proxy["photoCapture"].takePicture(self.scriptdocsPath, name, True)
+
+        r = {"event": "event_files_changed"}
+        self.sendMessageToAll(r)
+        return result
+
+    def videoRecorder_startRecording(self, client, name):
+        result = {}
+
+        if "videorecorder_startrecording" not in self.posts or ("videorecorder_startrecording" in self.posts and self.posts["videorecorder_startrecording"]["id"] == 0):
+            ext = name[-4:].lower()
+            if ext != ".avi":
+                name = name + ".avi"
+
+            self.proxy["videoRecorder"].setCameraID(0)
+            self.proxy["videoRecorder"].setColorSpace(13)
+            self.proxy["videoRecorder"].setFrameRate(15)
+            self.proxy["videoRecorder"].setResolution(2)
+            self.proxy["videoRecorder"].setVideoFormat("MJPG")
+            self.proxy["videoRecorder"].startRecording(self.scriptdocsPath, name, True)
+
+            postdata = {"id":client["id"], "action":name}
+            self.posts["videorecorder_startrecording"] = postdata
+        else:
+            result["error_code"] = ERR_RES_IN_USE
+
+        return result
+
+    def videoRecorder_stopRecording(self, client):
+        result = {}
+
+        if "videorecorder_startrecording" in self.posts and self.posts["videorecorder_startrecording"]["id"] != 0:
+            if self.posts["videorecorder_startrecording"]["id"] == client["id"]:
+                self.proxy["videoRecorder"].stopRecording()
+
+                self.posts["videorecorder_startrecording"]["id"] = 0
+
+                r = {"event": "event_files_changed"}
+                self.sendMessageToAll(r)
+            else:
+                result["error_code"] = ERR_RES_IN_USE
+
+        return result
+
+    def textToSpeech_done(self):
+        result = {"running":self.speaking}
+        return result
+
+#-----
+# CADET FUNCTIONS
+#-----
+    def cadet_pong(self, client):
+        result = {"pong":"ping"}
+
+        return result
+
+    def cadet_setup(self, domain, admin, root, client):
+        result = {"id":0}
+
+        self.dbQuery("DELETE FROM settings WHERE setting=domain")
+        self.dbQuery("INSERT INTO settings (setting,value) VALUES('domain',?)", (domain,))
+        id = self.dbQuery("INSERT INTO domains (name,deleted) VALUES(?,0)", (name,))
+
+        self.dbQuery("DELETE FROM settings WHERE setting=admin_password")
+        self.dbQuery("INSERT INTO settings (setting,value) VALUES('admin_password',?)", (admin,))
+
+        self.dbQuery("DELETE FROM settings WHERE setting=root_password")
+        self.dbQuery("INSERT INTO settings (setting,value) VALUES('root_password',?)", (root,))
+
+        result["id"] = id
+        return result
+
+    def cadet_restart(self, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if admin:
+            self.nao_reset(True)
+
+            msg = {"event":"event_restart"}
+            self.sendMessageToAll(msg)
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_quit(self, client):
+        result = {}
+        #admin = self.session_userIsAdmin(client["id"])
+
+        #if admin:
+        r = {"event": "event_shutdown"}
+        self.sendMessageToAll(r)
+
+        configuration = {"bodyLanguageMode":"contextual"}
+        s = "Hey, thanks for playing"
+        self.proxy["animatedSpeech"].say(s, configuration)
+
+        self.nao_reset(True)
+
+        self.onUnload()
+        self.onStopped()
+        #else:
+        #    result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_cmdRunning(self, name, client):
+        result = {"running":False, "action":""}
+
+        if name in self.posts:
+            if self.proxy[self.cmds[name]["proxy"]].isRunning(self.posts[name]["id"]) == True:
+                result["running"] = True
+                result["action"] = self.posts[name]["action"]
+            else:
+                self.posts[name]["id"] = 0
+
+        return result
+
+    def cadet_msec(self, client):
+        result = {}
+
+        result["msec"] = int(round(time.time() * 1000))
+        return result
+
+    def cadet_touchState(self, name, client):
+        result = {"state":False}
+
+        for key, value in self.touchState.items():
+            if key.startswith(name) and value == True:
+                result["state"] = True
+
+        return result
+
+    def cadet_runLock(self, lock, client):
+        result = {}
+
+        if self.runlocked is None or self.runlocked["id"] == client["id"]:
+            if lock == True:
+                if self.nao_reset(False):
+                    self.runlocked = client
+                else:
+                    result["error_code"] = ERR_EXCEPTION_THROWN
+
+            else:
+                self.runlocked = None
+                self.nao_reset(True)
+        else:
+            result["error_code"] = ERR_RUN_LOCKED
+
+        return result
+
+#- Settings
+    def cadet_settingList(self, client):
+        result = {"settings":[]}
+
+        rows = self.dbQuery("SELECT setting,value FROM settings WHERE 1")
+        for item in rows:
+            domain = {"setting":item[0], "value":item[1]}
+            result["settings"].append(domain)
+
+        return result
+
+    def cadet_settingGet(self, setting, client):
+        result = {"value":""}
+
+        if setting != "admin_password" and setting != "root_password":
+            rows = self.dbQuery("SELECT value FROM settings WHERE setting=?", (setting,))
+            if len(rows) > 0:
+                result["value"] = rows[0][0]
+            else:
+                result["value"] = ""
+
+        return result
+
+    def cadet_settingSet(self, setting, value, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if admin:
+            self.dbQuery("DELETE FROM settings WHERE setting=?", (setting,))
+            self.dbQuery("INSERT INTO settings (setting,value) VALUES (?,?)", (setting,value))
+        else:
+            if self._cadet_domainGet() == -1 and setting == "domain":
+                self.dbQuery("DELETE FROM settings WHERE setting=?", (setting,))
+                self.dbQuery("INSERT INTO settings (setting,value) VALUES (?,?)", (setting,value))
+            else:
+                result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_settingDelete(self, setting):
+        self.dbQuery("DELETE FROM settings WHERE setting=?", (setting,))
+
+
+#- Domains
+    def _cadet_domainGet(self):
+        rows = self.dbQuery("SELECT value FROM settings WHERE setting='domain'")
+        if len(rows) > 0:
+            return rows[0][0]
+
+        return -1
+
+    def cadet_domainList(self, client):
+        result = {"domains":[]}
+        admin = self.session_userIsAdmin(client["id"])
+
+        rows = self.dbQuery("SELECT id,name,deleted FROM domains WHERE id>0")
+        for item in rows:
+            userRows = self.dbQuery("SELECT id FROM users WHERE domain=?", (item[0],))
+            scriptRows = self.dbQuery("SELECT scripts.id FROM scripts INNER JOIN users ON scripts.user=users.id WHERE users.domain=?", (item[0],))
+
+            domain = {"id":item[0], "name":item[1], "userCount":len(userRows), "scriptCount":len(scriptRows)}
+
+            if admin:
+                domain["deleted"] = item[2]
+                result["domains"].append(domain)
+            else:
+                if item[2] != 1:
+                    result["domains"].append(domain)
+
+        return result
+
+    def cadet_domainGet(self, id, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        rows = self.dbQuery("SELECT id,name,deleted FROM domains WHERE id=?", (id,))
+        if len(rows) > 0:
+            if admin:
+                result["domain"] = {"id": rows[0][0], "name": rows[0][1], "deleted": rows[0][2]}
+            else:
+                if rows[0][2] != 1:
+                    result["domain"] = {"id": rows[0][0], "name": rows[0][1]}
+        else:
+            result["domain"] = {"id": 0, "name": ""}
+
+        return result
+
+    def cadet_domainSet(self, id, name, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if admin:
+            if id == 0:
+                id = self.dbQuery("INSERT INTO domains (name,deleted) VALUES(?,0)", (name,))
+                result["id"] = id
+            else:
+                self.dbQuery("UPDATE domains SET name=? WHERE id=?", (name, id))
+                result["id"] = id
+
+
+            m = {"event": "event_domain_changed"}
+            self.sendMessageToAll(m)
+
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_domainDelete(self, id, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if admin and id > 0:
+            self.dbQuery("UPDATE domains SET deleted=1 WHERE id=?", (id,))
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_domainRestore(self, id, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if admin:
+            self.dbQuery("UPDATE domains SET deleted=0 WHERE id=?", (id,))
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_domainUnlink(self, id):
+        result = {}
+        root = self.session_userIsRoot(client["id"])
+
+        if root:
+            self.dbQuery("DELETE FROM domains WHERE id=?", (id,))
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+#- User
+    def cadet_userList(self, domain, client):
+        result = {"users":[]}
+        admin = self.session_userIsAdmin(client["id"])
+
+        rows = self.dbQuery("SELECT users.id, users.name, users.password, users.options, users.deleted, users.domain, domains.name, COUNT(scripts.id) as scriptCount, domains.deleted as domainDeleted FROM (users LEFT JOIN domains ON users.domain=domains.id) LEFT JOIN scripts ON users.id=scripts.user GROUP BY users.id")
+        if len(rows) > 0:
+            for item in rows:
+                if (domain == 0 or domain == item[5]) and (item[5] != None and item[5] != 0):
+                    user = {"id": item[0], "username": "", "name": item[1], "password": (item[2] != ""), "options": item[3], "domain": item[5], "domainName": item[6], "scriptCount": item[7], "domainDeleted": item[8]}
+                    if admin:
+                        user["deleted"] = item[4]
+                        result["users"].append(user)
+                    else:
+                        if item[4] != 1 and item[8] != 1:
+                            result["users"].append(user)
+
+        return result
+
+    def cadet_userGet(self, id, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        rows = self.dbQuery("SELECT id,username,name,password,options,deleted FROM users WHERE id=?", (id,))
+        if len(rows) > 0:
+            user = {"id": rows[0][0], "username": rows[0][1], "name": rows[0][2], "password": (rows[0][3] != ""), "options": rows[0][4]}
+
+            if admin:
+                user["deleted"] = rows[0][5]
+                result["user"] = user
+            else:
+                if rows[0][5] != 1:
+                    result["user"] = user
+        else:
+            result["error_code"] = ERR_FILE_MISSING
+
+        return result
+
+    def cadet_userSet(self, id, name, domain, options, password, currentPassword, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if id > 0:
+            rows = self.dbQuery("SELECT id,username,password FROM users WHERE id=? AND deleted=0", (id,))
+            if len(rows) > 0:
+                if admin or self.session_userGet(client["id"])['id'] == rows[0][0]:
+                    if name != "":
+                        username = re.sub("[^a-z0-9]+", "", name.lower())
+
+                        checkRows = self.dbQuery("SELECT id,username FROM users WHERE username=? AND deleted=0 AND id<>?", (username,id))
+                        if len(checkRows) == 0:
+                            self.dbQuery("UPDATE users SET username=?,name=? WHERE id=?", (username,name,id))
+                        else:
+                            result["error_code"] = ERR_FILE_EXISTS
+
+                    if options != "":
+                        self.dbQuery("UPDATE users SET options=? WHERE id=?", (options,id))
+
+                    if password != "":
+                        if password == "-1":
+                            password = ""
+
+                        if currentPassword == rows[0][2]:
+                            self.dbQuery("UPDATE users SET password=? WHERE id=?", (password,id))
+                        else:
+                            result["error_code"] = ERR_USER_PASSWORD_INCORRECT
+            else:
+                result["error_code"] = ERR_FILE_NOT_EXIST
+        else:
+            if admin:
+                username = re.sub("[^a-z0-9]+", "", name.lower())
+
+                if id == 0:
+                    rows = self.dbQuery("SELECT id,username FROM users WHERE username=?", (username,))
+                    if len(rows) == 0:
+                        if domain == 0:
+                            domain = self._cadet_domainGet()
+
+                        if password == -1:
+                            password = ""
+
+                        id = self.dbQuery("INSERT INTO users (username,name,options,password,deleted) VALUES (?,?,?,0)", (username,name,options,password))
+                        result["id"] = id
+                    else:
+                        result["error_code"] = ERR_FILE_EXISTS
+                else:
+                    if id == -1:
+                        rows = self.dbQuery("SELECT value FROM settings WHERE setting=? and value=?", ("admin_password",currentPassword))
+                        if len(rows) > 0:
+                            self.dbQuery("UPDATE settings SET value=? WHERE setting=?", (password, "admin_password"))
+                        else:
+                            result["error_code"] = ERR_USER_PASSWORD_INCORRECT
+                    elif id == -2:
+                        if self.session_userIsRoot(client["id"]):
+                            rows = self.dbQuery("SELECT value FROM settings WHERE setting=? and value=?", ("root_password",currentPassword))
+                            if len(rows) > 0:
+                                self.dbQuery("UPDATE settings SET value=? WHERE setting=?", (password, "root_password"))
+                            else:
+                                result["error_code"] = ERR_USER_PASSWORD_INCORRECT
+                        else:
+                            result["error_code"] = ERR_USER_NOT_VALID
+                    else:
+                        result["error_code"] = ERR_USER_NOT_VALID
+            else:
+                result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_userLogin(self, name, password, client):
+        result = {}
+
+        domain = self._cadet_domainGet()
+        if domain != -1:
+            username = re.sub("[^a-z0-9]+", "", name.lower())
+            if username != "naocadet" and username != "admin" and username != "root" and username != "administrator" and username != "nao":
+                rows = self.dbQuery("SELECT id,username,name,password,options FROM users WHERE domain=? AND username=? AND deleted=0", (domain,username))
+                if len(rows) > 0:
+                    if password == rows[0][3]:
+                        user = {"id": rows[0][0], "username": rows[0][1], "name": rows[0][2], "password": (rows[0][3] != ""), "options": rows[0][4], "new": False}
+                        result["user"] = user
+                        self.session_userset(rows[0][0], username, client)
+                    else:
+                        result["error_code"] = ERR_USER_PASSWORD_INCORRECT
+                else:
+                    id = self.dbQuery("INSERT INTO users (username,name,domain,password,options) VALUES(?,?,?,?,?)", (username,name,domain,"",""))
+
+                    user = {"id": id, "username": username, "name": name, "password": False, "options": "", "new": True}
+                    result["user"] = user
+                    self.session_userset(id, username, client)
+            else:
+                if username == "admin" or username == "root":
+                    rows = self.dbQuery("SELECT value FROM settings WHERE setting=? and value=?", (username + "_password",password))
+                    if len(rows) > 0:
+                        id = 0
+
+                        if(username == "root"):
+                            id = -2
+                        if(username == "admin"):
+                            id = -1
+
+                        user = {"id": id, "username": username, "name": username, "password": True, "options": ""}
+                        result["user"] = user
+                        self.session_userset(id, username, client)
+                    else:
+                        result["error_code"] = ERR_USER_PASSWORD_INCORRECT
+                else:
+                    result["error_code"] = ERR_USER_NOT_VALID
+        else:
+            result["error_code"] = ERR_DOMAIN_NOT_SET
+
+        return result
+
+    def cadet_userDelete(self, id, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if admin and id > 0:
+            self.dbQuery("UPDATE users SET deleted=1 WHERE id=?", (id,))
+#            self.dbQuery("UPDATE scripts SET deleted=1 WHERE EXISTS (SELECT * FROM users WHERE (scripts.user=users.id) AND (users.deleted=1))")
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_userRestore(self, id, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if admin:
+            rows = self.dbQuery("SELECT id,username,name,domain FROM users WHERE id=? AND deleted=1", (id,))
+            if len(rows) > 0:
+                username = rows[0][1]
+                name = rows[0][2]
+                domain = rows[0][3]
+
+                rows = self.dbQuery("SELECT id FROM users WHERE domain=? AND username=? AND deleted=0", (domain, username))
+                if len(rows) > 0:
+                    copyNumPos = name.rfind(" ")
+                    copyNum = 1
+
+                    if copyNumPos != -1:
+                        if name[copyNumPos + 1:].isdigit() == True:
+                            copyNum = int(name[copyNumPos + 1:]) + 1
+                            name = name[:copyNumPos]
+
+                    while len(rows) > 0:
+                        username = re.sub("[^a-z0-9]+", "", (name + " " + str(i)).lower())
+                        rows = self.dbQuery("SELECT id FROM users WHERE domain=? AND username=? AND deleted=0", (domain, username))
+                        i = i + 1
+
+                    self.dbQuery("UPDATE users SET name=?, username=? deleted=0 WHERE id=?", (name + " " + str(i), username, id))
+                    result["name"] = name
+                else:
+                    self.dbQuery("UPDATE users SET deleted=0 WHERE id=?", (id,))
+                    result["name"] = name
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_userUnlink(self, id):
+        result = {}
+        root = self.session_userIsRoot(client["id"])
+
+        if root:
+            self.dbQuery("DELETE FROM users WHERE id=?", (id,))
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+#- Scripts
+    def cadet_scriptList(self, domain, tutorial, client):
+        result = {"scripts":[]}
+        admin = self.session_userIsAdmin(client["id"])
+
+        rows = self.dbQuery("SELECT scripts.id,scripts.name,scripts.user,scripts.locked,scripts.deleted,scripts.options,users.name,users.deleted,domains.id,domains.name,domains.deleted FROM (scripts INNER JOIN users ON scripts.user=users.id) INNER JOIN domains ON users.domain=domains.id")
+        if len(rows) > 0:
+            for item in rows:
+                script = {"id":item[0], "name":item[1], "userid":item[2], "locked":item[3], "deleted":item[4], "options":item[5], "username":item[6], "userDeleted":item[7], "domain":item[8], "domainName":item[9], "domainDeleted":item[10]}
+                if domain == 0 or domain == item[8] or (tutorial == True and item[8] == 0):
+                    if admin:
+                        result["scripts"].append(script)
+                    else:
+                        if item[4] != 1 and item[7] != 1 and item[10] != 1:
+                            result["scripts"].append(script)
+
+        return result
+
+    def cadet_scriptGet(self, id, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        rows = self.dbQuery("SELECT name,user,locked,xml,options,deleted FROM scripts WHERE id=?", (id,))
+        if len(rows) > 0:
+            script = {"id":id, "name":rows[0][0], "user":rows[0][1], "locked": rows[0][2], "xml": rows[0][3], "options": rows[0][4]}
+
+            if admin:
+                script["deleted"] = rows[0][5]
+                result["script"] = script
+            else:
+                if rows[0][5] != 1:
+                    result["script"] = script
+                else:
+                    result["error_code"] = ERR_SCRIPT_MISSING
+        else:
+            result["error_code"] = ERR_SCRIPT_MISSING
+
+        return result
+
+    def cadet_scriptSet(self, id, name, user, options, xml, locked, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if id == 0:
+            if admin == False and user != self.session_userGet(client["id"])["id"]:
+                result["error_code"] = ERR_USER_NOT_VALID
+            else:
+                newXml = '<xml xmlns=\"http://www.w3.org/1999/xhtml\"><variables></variables><block type=\"nao_event_run\" id=\"nao_event_run\" deletable=\"false\" x=\"50\" y=\"30\"></block></xml>'
+                id = self.dbQuery("INSERT INTO scripts (name,user,options,xml,locked) VALUES(?,?,?,?,?)", (name,user,options,newXml,0))
+                if xml != "":
+                    self.dbQuery("UPDATE scripts SET xml=? WHERE id=?", (xml, id))
+                if locked != -1:
+                    self.dbQuery("UPDATE scripts SET locked=? WHERE id=?", (locked, id))
+
+                result["id"] = id
+
+                msg = {"event":"event_script_changed"}
+                self.sendMessageToAll(msg)
+        else:
+            rows = self.dbQuery("SELECT id,user FROM scripts WHERE id=?", (id,))
+            if len(rows) > 0:
+                if admin == False and rows[0][1] != self.session_userGet(client["id"])["id"]:
+                    self.log("session user id " + str(self.session_userGet(client["id"])["id"]))
+                    self.log("script user id " + str(rows[0][1]))
+                    self.log("script id " + str(rows[0][0]))
+
+                    result["error_code"] = ERR_USER_NOT_VALID
+                else:
+                    if name != "":
+                        self.dbQuery("UPDATE scripts SET name=? WHERE id=?", (name,id))
+                    if user != 0:
+                        self.dbQuery("UPDATE scripts SET user=? WHERE id=?", (user,id))
+                    if options != "":
+                        self.dbQuery("UPDATE scripts SET options=? WHERE id=?", (options,id))
+                    if xml != "":
+                        self.dbQuery("UPDATE scripts SET xml=? WHERE id=?", (xml,id))
+                    if locked != -1:
+                        if locked != 0:
+                            locked = client["id"]
+
+                        self.dbQuery("UPDATE scripts SET locked=? WHERE id=?", (id,))
+
+                    msg = {"event":"event_script_changed"}
+                    self.sendMessageToAll(msg)
+            else:
+                result["error_code"] = ERR_FILE_NOT_EXIST
+
+        return result
+
+    def cadet_scriptDelete(self, id, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        rows = self.dbQuery("SELECT user FROM scripts WHERE id=?", (id,))
+        if len(rows) > 0:
+            if admin or rows[0][0] == self.session_userGet(client["id"])["id"]:
+                self.dbQuery("UPDATE scripts SET deleted=1 WHERE id=?", (id,))
+
+                msg = {"event":"event_script_changed"}
+                self.sendMessageToAll(msg)
+            else:
+                result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_scriptRestore(self, id, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if admin:
+            self.dbQuery("UPDATE scripts SET deleted=0 WHERE id=?", (id,))
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_scriptUnlink(self, id):
+        result = {}
+        root = self.session_userIsRoot(client["id"])
+
+        if root:
+            self.dbQuery("DELETE FROM scripts WHERE id=?", (id,))
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_scriptChangeDir(self, olddir, newdir, domain, client):
+        rows = self.dbQuery("SELECT scripts.id,scripts.options FROM scripts INNER JOIN users on scripts.user=users.id WHERE users.domain=?", (domain,))
+        if len(rows) > 0:
+            olddir = re.sub("[^a-z0-9]+", "", olddir.lower())
+            for item in rows:
+                dirty = False
+                options = json.loads(item[1])
+
+                if "dir" in options:
+                    if re.sub("[^a-z0-9]+", "", options["dir"].lower()) == olddir:
+                        options["dir"] = newdir
+                        dirty = True
+                else:
+                    options["dir"] = newdir
+                    dirty = True
+
+                if dirty == True:
+                    self.dbQyery("UPDATE scripts SET options=? WHERE id=?", (json.dumps(options), item[0]))
+
+        msg = {"event":"event_script_changed"}
+        self.sendMessageToAll(msg)
+
+#- Files
+    def cadet_fileList(self, client):
+        result = {"files":[]}
+        admin = self.session_userIsAdmin(client["id"])
+
+        try:
+            files = [f for f in listdir(self.scriptdocsPath) if isfile(join(self.scriptdocsPath, f))]
+            for file in files:
+                if file[:1] <> ".":
+                    info = {"name":file, "size":os.path.getsize(join(self.scriptdocsPath, file)), "deleted":0 }
+
+                    if file[-4:] == ".del":
+                        info["deleted"] = 1
+                        info["name"] = info["name"][:-4]
+
+                    if file[-4:] == ".tmp" or info["deleted"] == 1:
+                        if admin:
+                            result["files"].append(info)
+                    else:
+                        result["files"].append(info)
+        except:
+            pass
+
+        return result
+
+    def cadet_fileUpload(self, name, offset, data, client):
+        result = {}
+
+        if name[:1] == ".":
+            name = name[1:]
+        name = re.sub("[\\\\/:\*?|<>]+", "", name)
+
+        if name[-4:] != ".del":
+            fileName = join(self.scriptdocsPath, name)
+            tmpName = join(self.scriptdocsPath, name + ".tmp")
+
+            if os.path.exists(fileName):
+                result["error_code"] = ERR_FILE_EXISTS
+            else:
+                if offset == -1:
+                    os.rename(tmpName, fileName)
+
+                    r = {"event": "event_files_changed"}
+                    self.sendMessageToAll(r)
+                else:
+                    filePermission = "ab"
+
+                    file = open(tmpName, filePermission)
+                    file.write(base64.decodestring(data))
+                    file.close()
+        else:
+            result["error_code"] = ERR_FILE_INVALID
+
+        return result
+
+    def cadet_fileRename(self, name, newname, client):
+        result = {}
+
+        if newname[:1] == ".":
+            newname = newname[1:]
+        newname = re.sub("[\\\\/:\*?|<>]+", "", newname)
+
+        if name[:4] != ".tmp" and name[:4] != ".del":
+            if newname[:4] != ".tmp" and newname[:4] != ".del":
+                namePath = join(self.scriptdocsPath, name)
+                newnamePath = join(self.scriptdocsPath, newname)
+
+                if not os.path.exists(newnamePath):
+                    if os.path.exists(namePath):
+                        os.rename(namePath, newnamePath)
+
+                        r = {"event": "event_files_changed"}
+                        self.sendMessageToAll(r)
+                    else:
+                        result["error_code"] = ERR_FILE_MISSING
+                else:
+                    result["error_code"] = ERR_FILE_EXISTS
+            else:
+                result["error_code"] = ERR_FILE_INVALID
+        else:
+            result["error_code"] = ERR_FILE_MISSING
+
+        return result
+
+    def cadet_fileDelete(self, name, client):
+        result = {}
+
+        if name[:4] <> ".tmp" and name[:4] <> ".del":
+            namePath = join(self.scriptdocsPath, name)
+            if os.path.exists(namePath):
+                if not os.path.exists(namePath + ".del"):
+                    os.rename(namePath, namePath + ".del")
+                else:
+                    extPos = namePath.rfind(".")
+                    nameWithoutExt = namePath[:extPos]
+                    copyNumPos = namePath.rfind(" ")
+                    copyNum = 1
+
+                    if copyNumPos != -1:
+                        if nameWithoutExt[copyNumPos + 1:].isdigit() == True:
+                            copyNum = int(nameWithoutExt[copyNumPos + 1:]) + 1
+                            nameWithoutExt = nameWithoutExt[:copyNumPos]
+
+                    while os.path.exists(nameWithoutExt + " " + str(copyNum) + name[extPos:] + ".del"):
+                        copyNum = copyNum + 1
+
+                    os.rename(namePath, nameWithoutExt + " " + str(copyNum) + name[extPos:] + ".del")
+
+                r = {"event": "event_files_changed"}
+                self.sendMessageToAll(r)
+            else:
+                result["error_code"] = ERR_FILE_MISSING
+        else:
+            result["error_code"] = ERR_FILE_MISSING
+
+        return result
+
+    def cadet_fileRestore(self, name, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if admin:
+            if name[:-4] != ".del":
+                name = name + ".del"
+
+            namePath = join(self.scriptdocsPath, name)
+            if not os.path.exists(namePath[:-4]):
+                os.rename(namePath, namePath[:-4])
+            else:
+                extPos = namePath[:-4].rfind(".")
+                nameWithoutExt = namePath[:-4][:extPos]
+                copyNumPos = namePath[:-4].rfind(" ")
+                copyNum = 1
+
+                if copyNumPos != -1:
+                    if nameWithoutExt[copyNumPos + 1:].isdigit() == True:
+                        copyNum = int(nameWithoutExt[copyNumPos + 1:]) + 1
+                        nameWithoutExt = nameWithoutExt[:copyNumPos]
+
+                self.log(str(extPos))
+                while os.path.exists(nameWithoutExt + " " + str(copyNum) + namePath[:-4][extPos:]):
+                    copyNum = copyNum + 1
+
+                result["name"] = nameWithoutExt + " " + str(copyNum) + namePath[:-4][extPos:]
+                os.rename(namePath, result["name"])
+
+            r = {"event": "event_files_changed"}
+            self.sendMessageToAll(r)
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+        return result
+
+    def cadet_fileUnlink(self, name, client):
+        result = {}
+        root = self.session_userIsRoot(client["id"])
+
+        if root:
+            file = join(self.scriptdocsPath, name)
+            if os.path.exists(file):
+                os.remove(file)
+
+            r = {"event": "event_files_changed"}
+            self.sendMessageToAll(r)
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_fileExists(self, name, client):
+        result = {"exists": False}
+
+        file = join(self.scriptdocsPath, name)
+        if os.path.exists(file):
+            result["exists"] = True
+
+        self.log(str(file) + ": " + str(result["exists"]))
+        return result
+
+    def cadet_fileClearTemp(self):
+        result = {}
+
+        files = os.listdir(self.scriptdocsPath)
+        for file in files:
+            if file.endswith(".tmp"):
+                os.remove(os.path.join(self.scriptdocsPath, file))
+
+        return result
+
+#- Motion
+    def cadet_motionList(self, client):
+        result = {"motions":[]}
+        admin = self.session_userIsAdmin(client["id"])
+
+        rows = self.dbQuery("SELECT id,name,deleted FROM motions WHERE 1")
+        if len(rows) > 0:
+            for item in rows:
+                movementtime = 0
+                motionRows = self.dbQuery("SELECT id,speed,delay FROM motionitems WHERE motionid=?", (item[0],))
+                for motionItem in motionRows:
+                    movementtime = movementtime + motionItem[1] + motionItem[2]
+
+                motion = {"id": item[0], "name": item[1], "movementcount": len(motionRows), "movementtime": movementtime}
+                if admin:
+                    motion["deleted"] = item[2]
+                    result["motions"].append(motion)
+                else:
+                    if item[2] != 1:
+                        result["motions"].append(motion)
+
+        return result
+
+    def cadet_motionGet(self, name, client):
+        result = {"motion": {"id": 0, "name": "", "movements": []}}
+        admin = self.session_userIsAdmin(client["id"])
+
+        rows = self.dbQuery("SELECT id,name,deleted FROM motions WHERE name=?", (name,))
+        if len(rows) > 0:
+            motion = {"id": rows[0][0], "name": rows[0][1], "movements":[]}
+
+            motionRows = self.dbQuery("SELECT id,motionid,joints,speed,delay FROM motionitems WHERE motionid=?", (rows[0][0],))
+            if len(motionRows) > 0:
+                for item in motionRows:
+                    movement = {"joints": item[2], "speed": item[3], "delay": item[4]}
+                    motion["movements"].append(movement)
+
+            if admin:
+                motion["deleted"] = rows[0][2]
+                result["motion"] = motion
+            else:
+                if rows[0][2] != 1:
+                    result["motion"] = motion
+
+        return result
+
+    def cadet_motionExists(self, name):
+        result = {"exists": 0}
+
+        name = re.sub("[^a-z0-9]+", "", name.lower())
+        rows = self.dbQuery("SELECT id,name FROM motions WHERE 1")
+        for item in rows:
+            if re.sub("[^a-z0-9]+", "", item[1].lower()) == name:
+                result["exists"] = 1
+                break
+
+        return result
+
+    def cadet_motionSet(self, name, newname, movements, client):
+        result = {"error_code": 0}
+        id = 0
+
+        rows = self.dbQuery("SELECT id,deleted FROM motions WHERE name=?", (name,))
+        if len(rows) > 0:
+            if rows[0][1] != 1:
+                id = rows[0][0]
+
+        if id == 0:
+            id = self.dbQuery("INSERT INTO motions (name,deleted) VALUES (?,0)", (name,))
+        else:
+            if newname != "":
+                rows = self.dbQuery("SELECT id,deleted FROM motions WHERE name=?", (newname,))
+                if len(rows) > 0 and rows[0][1] != 1:
+                    result["error_code"] = ERR_FILE_EXISTS
+                else:
+                    self.dbQuery("UPDATE motions SET name=? WHERE id=?", (newname,id))
+
+        if result["error_code"] == 0:
+            self.dbQuery("DELETE FROM motionitems WHERE motionid=?", (id,))
+            for item in movements:
+                speed = 2
+                delay = 0
+                joints = ""
+
+                if "speed" in item:
+                    speed = item["speed"]
+                if "delay" in item:
+                    delay = item["delay"]
+                if "joints" in item:
+                    joints = str(item["joints"])
+
+                self.dbQuery("INSERT INTO motionitems (motionid,speed,delay,joints) VALUES (?,?,?,?)", (id, speed, delay, joints))
+
+        r = {"event": "event_motions_changed"}
+        self.sendMessageToAll(r)
+        return result
+
+    def cadet_motionDelete(self, name, client):
+        self.dbQuery("UPDATE motions SET deleted=1 WHERE name=?", (name,))
+        r = {"event": "event_motions_changed"}
+        self.sendMessageToAll(r)
+
+    def cadet_motionRestore(self, name, newname, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if admin:
+            rows = self.dbQuery("SELECT id,deleted FROM motions WHERE name=? AND deleted=1", (name,))
+            if len(rows) > 0:
+                if newname == "":
+                    newname = name
+
+                rows = self.dbQuery("SELECT id FROM motions WHERE name=? AND deleted=0", (newname,))
+                if len(rows) > 0:
+                    copyNumPos = newname.rfind(" ")
+                    copyNum = 1
+
+                    if copyNumPos != -1:
+                        if newname[copyNumPos + 1:].isdigit() == True:
+                            copyNum = int(newname[copyNumPos + 1:]) + 1
+                            newname = newname[:copyNumPos]
+
+                    while len(rows) > 0:
+                        rows = self.dbQuery("SELECT id FROM motions WHERE name=? AND deleted=0", (newname + " " + str(i),))
+                        i = i + 1
+
+                    self.dbQuery("UPDATE motions SET name=?, deleted=0 WHERE name=?", (newname + " " + str(i), name))
+
+                    r = {"event": "event_files_changed"}
+                    self.sendMessageToAll(r)
+                else:
+                    self.dbQuery("UPDATE motions SET name=?, deleted=0 WHERE name=?", (newname, name))
+            else:
+                result["error_code"] = ERR_FILE_MISSING
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_motionUnlink(self, name, client):
+        result = {}
+        root = self.session_userIsRoot(client["id"])
+
+        if root:
+            rows = self.dbQuery("SELECT id FROM motions WHERE name=?", (name,))
+            if len(rows) > 0:
+                id = rows[0][0]
+
+                self.dbQuery("DELETE FROM motions WHERE id=?", (id,))
+                self.dbQuery("DELETE FROM motionitems WHERE motionid=?", (id,))
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_motionRun(self, name, client):
+        result = {}
+
+        if self.motionRunning != "":
+            result["error_code"] = ERR_RES_IN_USE
+        else:
+            self.motionRunning = name
+
+        r = {"event": "event_motions_changed", "motion":name, "state":True}
+        self.sendMessageToAll(r)
+
+        motion = self.cadet_motionGet(name, client)
+        if motion["motion"]["id"] != 0:
+            for movement in motion["motion"]["movements"]:
+                names = []
+                angles = []
+                speed = float(movement["speed"])
+                delay = float(movement["delay"])
+
+                joints = json.loads(movement["joints"])
+                for item in joints:
+                    names.append(str(item))
+                    angles.append(float(joints[item]) * 0.0174532923847)
+
+                self.proxy["motion"].angleInterpolation(names, angles, speed, True)
+                time.sleep(delay)
+
+        return result
+
+    def cadet_motionStop(self, client):
+        r = {"event": "event_motions_changed", "motion":self.motionRunning, "state":False}
+        self.motionRunning = ""
+        self.sendMessageToAll(r)
+
+    def cadet_motionRunning(self, client):
+        result = {"motion": self.motionRunning}
+
+        return result
+
+#- Backup/Restore
+    def cadet_backup(self, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if admin:
+            tar = tarfile.open(join(self.scriptdocsPath, "backup.tar.gz"), "w:gz")
+
+            shutil.copy2(join(self.app["app_path"], "db.sqlite"), self.scriptdocsPath)
+            tar.add(self.scriptdocsPath, arcname=os.path.basename(self.scriptdocsPath))
+            tar.close()
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result
+
+    def cadet_restore(self, name, client):
+        result = {}
+        admin = self.session_userIsAdmin(client["id"])
+
+        if admin:
+            backupFile = join(self.scriptdocsPath, name)
+            if os.path.exists(backupFile):
+                for file in glob.glob(os.path.join(self.scriptdocsPath, "*")):
+                    if os.path.basename(file) != name:
+                        self.log("DELETE FILE: " + file)
+                        os.remove(file)
+
+                tar = tarfile.open(backupFile, "r:gz")
+                tar.extractall(path=self.scriptdocsPath[:-1])
+                tar.close()
+
+                dbFile = join(self.scriptdocsPath, "db.sqlite")
+                if os.path.exists(dbFile):
+                    self.log("DB EXISTS")
+                    os.remove(join(self.app["app_path"], "db.sqlite"))
+                    shutil.move(dbFile, self.app["app_path"])
+                    self.cadet_restart(client)
+
+            else:
+                result["error_code"] = ERR_FILE_MISSING
+        else:
+            result["error_code"] = ERR_USER_NOT_VALID
+
+        return result]]>
+</content>
+                            </script>
+                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                            <Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                            <Input name="onTouched" type="0" type_size="1" nature="1" inner="0" tooltip="" id="3" />
+                            <Input name="behaviorRunning" type="0" type_size="1" nature="1" inner="0" tooltip="" id="4" />
+                            <Input name="onWordRecognized" type="0" type_size="1" nature="1" inner="0" tooltip="" id="5" />
+                            <Input name="onSonarLeftDetected" type="0" type_size="1" nature="1" inner="0" tooltip="" id="6" />
+                            <Input name="onSonarRightDetected" type="0" type_size="1" nature="1" inner="0" tooltip="" id="7" />
+                            <Input name="onTextToSpeechStarted" type="1" type_size="1" nature="1" inner="0" tooltip="" id="8" />
+                            <Input name="onTextToSpeechDone" type="1" type_size="1" nature="1" inner="0" tooltip="" id="9" />
+                            <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="10" />
+                        </Box>
+                        <Box name="UDP" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="366" y="154">
+                            <bitmap>media/images/box/box-python-script.png</bitmap>
+                            <script language="4">
+                                <content>
+                                    <![CDATA[import time
+import socket
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        #put initialization code here
+        pass
+
+    def onUnload(self):
+        try:
+            self.listener.close()
+            self.listener = None
+        except:
+            pass
+
+    def onInput_onStart(self, p):
+        self.app = {}
+        for item in p:
+            self.app[item[0]] = item[1]
+
+        self.robotName = "virtual-robot"
+        self.system = self.getALProxy("ALSystem")
+        if self.system != None:
+            self.robotName = self.system.robotName()
+
+        db = sqlite3.connect(self.app["app_path"] + "/db.sqlite")
+        cur = db.cursor()
+
+        self.domainId = 0
+        self.domain = "Not setup"
+        cur.execute("SELECT value FROM settings WHERE setting=\"domain\"")
+        rows = cur.fetchall()
+        for item in rows:
+            self.domainId = item[0]
+
+        cur.execute("SELECT name FROM domains WHERE id=" + self.domainId)
+        rows = cur.fetchall()
+        for item in rows:
+            self.domain = item[0]
+
+        self.colour = "blue"
+        cur.execute("SELECT value FROM settings WHERE setting=\"colour\"")
+        rows = cur.fetchall()
+        for item in rows:
+            self.colour = item[0]
+
+
+        db.close()
+
+        addrinfo = socket.getaddrinfo("225.0.0.250", None)[0]
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
+        sock.sendto(self.robotName.encode(), ("", 3002))
+
+        # listen for NAO Cadet App
+        self.listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.listener.bind(("", 3001))
+        self.listener.settimeout(2)
+
+        while self.listener != None:
+            try:
+                data, addr = self.listener.recvfrom(1024)
+                self.log("received from " + str(addr[0]))
+                if data.decode() == "naocadet":
+                    s = self.robotName + "|" + self.domain + "|" + self.colour
+
+                    self.sender = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                    self.sender.connect((str(addr[0]), 3002))
+                    self.sender.send(s.encode())
+                    self.log("sent data")
+                    self.sender.close()
+            except socket.timeout:
+                continue
+
+    def getALProxy(self, name):
+        try:
+            return ALProxy(name)
+        except:
+            return None
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]>
+</content>
+                            </script>
+                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                            <Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                            <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                            <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                        </Box>
+                        <Link inputowner="0" indexofinput="6" outputowner="2" indexofoutput="3" />
+                        <Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" />
+                        <Link inputowner="0" indexofinput="6" outputowner="4" indexofoutput="10" />
+                        <Link inputowner="4" indexofinput="2" outputowner="3" indexofoutput="3" />
+                        <Link inputowner="4" indexofinput="3" outputowner="0" indexofoutput="4" />
+                        <Link inputowner="2" indexofinput="2" outputowner="3" indexofoutput="3" />
+                        <Link inputowner="4" indexofinput="4" outputowner="0" indexofoutput="5" />
+                        <Link inputowner="1" indexofinput="2" outputowner="3" indexofoutput="3" />
+                        <Link inputowner="0" indexofinput="6" outputowner="1" indexofoutput="4" />
+                    </Diagram>
+                </BehaviorKeyframe>
+            </BehaviorLayer>
+        </Timeline>
+    </Box>
+</ChoregrapheProject>

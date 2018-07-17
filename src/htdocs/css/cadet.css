@@ -1,0 +1,122 @@
+body {background-color:#efefef}
+
+/* Bootstrap */
+.navbar {margin-bottom:40px; height:60px; background-color:#00adbc !important; box-shadow:0px 0px 10px #999; z-index:100; cursor:pointer}
+.navbar-dark .navbar-nav .nav-link {color:#fff}
+.jumbotron {overflow:hidden}
+.navbar-brand img {margin-right:0.8rem}
+.footer-error a.btn-link {font-size:inherit !important; margin-bottom:0.2rem}
+
+/* Laces */
+
+/* Cadet */
+.cadet-bad-error {white-space:pre-line; border:1px solid #ddd; font-size:0.9rem; background-color:#fff; font-size:0.9rem; color:#666; padding:1rem; text-align:left; max-width:40rem; margin-left:auto; margin-right:auto}
+.cadet-about-section {font-size:0.8rem}
+.cadet-about-section-main {font-size:1rem}
+.cadet-about-line {display:block}
+.cadet-about-line strong {display:inline-block; width:8rem}
+#cadet-view-small {display:none}
+.cadet-jumbotron-slider {width:120rem; padding:0.2rem}
+.cadet-jumbotron-slider-item {width:56rem; margin-right:2rem; display:inline-block}
+.cadet-jumbotron-slider-item .lead {margin-bottom:0}
+#cadet-btn-locationinfo {color:#999; padding:0; display:inline-block; margin-bottom:1rem}
+.cadet-welcome-about {position:absolute; top:0; right:0; padding:1rem 1.5rem 1rem 1.5rem; font-size:1.5rem; color:#000; opacity:0.3}
+#cadet-section-recent {margin:2rem 0}
+#cadet-section-recent .cadet-recent-user {width:20%; text-align:center}
+#cadet-script-navbar {margin-top:-1.4rem}
+#cadet-script-navbar .breadcrumb {background-color:transparent}
+.cadet-script-card {cursor: pointer; box-shadow:2px 2px 10px #666;margin-bottom:2rem}
+.cadet-script-card .cadet-script-edit {position:absolute; top:0; right:0; padding:0 1rem 1rem 1rem; font-size:1.5rem; color:#000; opacity:0.3}
+.cadet-script-card .cadet-script-locked {position:absolute; top:0; left:0; padding:0 1rem 1rem 0.5rem; font-size:1.5rem; color:#000; opacity:0.3}
+.cadet-script-card .card-img-top {text-align:center}
+.cadet-script-card .card-img-top .fa {font-size:6rem; margin:2rem}
+.cadet-script-card .card-title {margin-bottom:0}
+.cadet-row-deleted {text-decoration:line-through; color:#999}
+
+.cadet-welcome-close {font-size:1.5rem; position:absolute; top:0; left:0; padding: 1rem 1.5rem 1rem 1.5rem; color:#000; opacity:0.3}
+.cadet-error-close {color:#000; opacity:0.3; float:right; padding:1rem 1.5rem 1rem 1.5rem; font-size:2rem}
+
+.modal-dialog table.table thead {display:table; width:100%}
+.modal-dialog table.table tbody {display:block; height:250px; overflow:auto}
+.modal-dialog table.table tbody tr {display:table; width:100%}
+
+table.cadet-edit-motion thead {display:table; width:100%}
+table.cadet-edit-motion thead th, table.cadet-edit-motion tbody td {width:4rem; vertical-align:middle}
+table.cadet-edit-motion thead th.text-upwards {transform:rotate(270deg); padding:0}
+table.cadet-edit-motion th.speed, table.cadet-edit-motion th.delay, table.cadet-edit-motion th.action {border-bottom:2px solid #dee2e6 !important}
+table.cadet-edit-motion .speed, table.cadet-edit-motion .delay {width:3rem}
+table.cadet-edit-motion .action {width:5rem}
+table.cadet-edit-motion thead th.border-right {border-right:1px solid #dee2e6}
+table.cadet-edit-motion thead tr.border-right th {border-right:1px solid #dee2e6}
+table.cadet-edit-motion thead tr.no-border-top th {border-top:none}
+table.cadet-edit-motion thead tr.no-border-bottom th {border-bottom:none}
+table.cadet-edit-motion tbody {display:block; height:250px; overflow:auto}
+table.cadet-edit-motion tbody tr {display:table; width:100%}
+table.cadet-edit-motion tbody tr:not(.movement-none) {animation:highlight 1s ease-in-out}
+table.cadet-edit-motion tbody td {padding: .75rem .3rem; border-top:0}
+table.cadet-edit-motion tbody td .btn {margin:0; padding:.5rem}
+table.cadet-edit-motion tbody td input[type=number] {padding:.375rem .5rem; font-size:0.75rem; -moz-appearance:textfield; text-align:center}
+table.cadet-edit-motion tbody td input[type=number]::-webkit-outer-spin-button, table.cadet-edit-motion tbody td input[type=number]::-webkit-inner-spin-button {-webkit-appearance:none; margin:0}
+table.cadet-edit-motion tbody tr.movement-none td {color:#bbb; text-align:center !important}
+table.cadet-edit-motion tbody.cadet-edit-joint {height:auto}
+table.cadet-edit-motion tbody.cadet-edit-joint tr {animation:none}
+.footer-error {color: #721c24; background-color: #f8d7da; border-radius:5px; padding:0.5rem; font-style:normal}
+.footer-error a {margin-left:1rem}
+.fade-error {animation:fadeError 1s ease-in-out}
+
+.cadet-admin-card {font-size:1rem; line-height:2.3rem; margin-bottom:1rem}
+.cadet-admin-card .card-body {padding-left: 4rem}
+.cadet-admin-card .card-body .fa {float:left; font-size:2rem; line-height:2.3rem; margin-left:-3rem}
+.cadet-admin-card .card-body p {margin:0}
+.cadet-admin-card .card-body .btn {width:10rem; margin-left:1rem}
+
+@media only screen and (max-width:767px) {
+	#cadet-view-small {display:block !important; position:fixed; top:0; left:0; width: 100%; height:100%; text-align:center;margin-top:10rem; font-size:1.4rem; color:#bbb}
+	main, .navbar {display:none !important}
+	#cadet-view-small ~ div {display:none !important}
+}
+
+a[data-id=cadet-script-tbell]:hover {
+	animation:ring 0.2s ease-in;
+	animation-iteration-count: 3;
+}
+
+@keyframes highlight {
+  0%   { background-color: #F9E79F; }
+  100% { background-color: #FFFFFF; }
+}
+@keyframes fadeError {
+  0%   { background-color: #f8d7da; color: #721c24; }
+  100% { background-color: #FFFFFF; color:#000 }
+}
+@keyframes ring {
+	0% {transform: rotate(0deg)}
+	13% {transform: rotate(10deg)}
+	25% {transform: rotate(20deg)}
+	38% {transform: rotate(10deg)}
+	50% {transform: rotate(0deg)}
+	63% {transform: rotate(-10deg)}
+	75% {transform: rotate(-20deg)}
+	88% {transform: rotate(-10deg)}
+	100% {transform: rotate(0deg)}	
+}
+
+
+
+/* Blockly */
+#blockly {position: absolute; left: 0; top: 60px; right:8px; height: 100%; z-index: 1}
+/* #blocklySlider {position: absolute; right: 0; top: 60px; height: 100%; width: 8px; z-index: 1; background-color:#f00} */
+/* #blocklyJS {position: absolute; right: 0; top: 60px; height: 100%; width: 20%; z-index: 1} */
+.blocklyTreeRoot {padding:0}
+.blocklyToolboxDiv {display:block; width:64px; background-color:#f9f9f9; border-right:1px solid #ddd;font-size:9pt;overflow:hidden}
+.blocklyTreeRow {margin:0; padding:0; height:59px; color:#fff; text-align:center; line-height:64px}
+.blocklyTreeRow:hover, .blocklyTreeSelected {-webkit-filter: brightness(70%)}
+.blocklyTreeIcon {display:none !important}
+
+.blocklyTreeLabel {line-height:12px;font-size:12px;font-weight:normal;width:64px}
+.blocklyFlyoutBackground {fill:#f9f9f9}
+.blocklyFloater {position:fixed; bottom:5rem; left:5rem; border:1px solid #DBD7B5; color:#666; font-size:0.9rem; padding:0.5rem; z-index:1000; background-color:#FEF9E7; border-radius:5px; box-shadow:3px 3px 10px #999; min-width:15rem}
+.blocklyTimer {position:fixed; bottom:5rem; right:5rem; border:1px solid #b8daff; color:#666; font-size:0.9rem; padding:0.5rem; z-index:1000; background-color:#cce5ff; border-radius:5px; box-shadow:3px 3px 10px #999; min-width:14rem; text-align:center}
+.nao-waiting {position:fixed; bottom:5rem; left:50%; margin-left:-10rem; border:1px solid #999; color:#666; font-size:0.9rem; padding:0.5rem; z-index:1000; background-color:#eee; border-radius:5px; box-shadow:3px 3px 10px #999; width:20rem; text-align:center}
+#nao-reconnect {border:1px solid #999; border-radius:5px; margin:1rem 1rem 0 1rem; color:#666; background-color:#eee; width:6rem}
+#nao-close {border:1px solid #999; border-radius:5px; margin:1rem 1rem 0 1rem; color:#666; background-color:#eee; width:6rem}
