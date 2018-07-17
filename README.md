@@ -12,7 +12,7 @@ Connect your browser to the web address announced by the NAO.
 
 ## Wiki
 
-NAO Cadet has a [wiki](https://gitlab.com/nomadjimbob/nao-cadet/wikis/home) for more information about installing and using the software on your NAO robot.
+NAO Cadet has a [wiki](https://github.com/nomadjimbob/naocadet/wiki) for more information about installing and using the software on your NAO robot.
 
 If you have any questions, please email james.collins@slq.qld.gov.au. Please use the issue tracker for issues and not general questions.
 
