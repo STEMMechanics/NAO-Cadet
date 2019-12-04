@@ -1,8 +1,5 @@
 # Change Log:
 
-**1.0.1**
-- Updated eslint dependency to 6.6.0
-
 **1.0-beta.27**
 - Fixed networking issues
 
