@@ -18,34 +18,40 @@
   </head>
   <body>
     <main role="main" class="container"></main>
-    <div id="cadet-view-small"><i class="fa fa-ban fa-5x fa-fw"></i><br>NAO Cadet requires a larger display</div>
-
 
     <script src="/js/jquery.min.js"></script>
     <script src="/js/ie10-viewport-bug-workaround.js"></script>
     <script src="/js/popper.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/i18n.js"></script>
+    <script>
+    	function gotoCadet(langCode) {
+    		window.location.href='/cadet.html?lang=' + langCode;
+    	}
+    
+    	var lang = 'EN';
+    	var langHtml = '';
+    
+			if(typeof nao_i18n !== 'undefined') {
+				var langCnt = Object.keys(nao_i18n.languageNames).length;
 
-	<script src="/blockly/blockly_compressed.js"></script>
-	<script src="/js/blocks_custom.js"></script>
-	<script src="/blockly/msg/js/en.js"></script>
-<!-- 	<script src="/blockly/blocks_compressed.js"></script> -->
-	<script src="/blockly/blocks/colour.js"></script>
-	<script src="/blockly/blocks/lists.js"></script>
-	<script src="/blockly/blocks/logic.js"></script>
-	<script src="/blockly/blocks/loops.js"></script>
-	<script src="/blockly/blocks/math.js"></script>
-	<script src="/blockly/blocks/procedures.js"></script>
-	<script src="/blockly/blocks/text.js"></script>
-	<script src="/blockly/blocks/variables.js"></script>
-	<script src="/blockly/javascript_compressed.js"></script>
-	<script src="/js/blocks.js"></script>
-	<script src="/js/acorn.js"></script>
-	<script src="/js/interpreter.js"></script>
+				if(langCnt > 1) {
+					for(var item in nao_i18n.languageNames) {
+						langHtml += '<div class="cadet-language"><a href="cadet.html?lang=' + item + '">' + nao_i18n.languageNames[item] + '</a></div>';
+					}
+				} else {
+					if(langCnt == 1) {
+						gotoCadet(Object.keys(nao_i18n.languageNames)[0]);
+					} else {
+						gotoCadet(lang);
+					}
+				}
 
-    <script src="/js/workspace.js"></script>
-    <script src="/js/nao.js"></script>
-    <script src="/js/laces.js"></script>
-    <script src="/js/cadet.js"></script>
+				$('main').html('<h1 class="cadet-language-header">Select a language</h1>' + langHtml);
+				
+			} else {
+				gotoCadet(lang);
+			}
+    </script>
   </body>
 </html>

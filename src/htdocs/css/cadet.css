@@ -10,6 +10,11 @@ body {background-color:#efefef}
 /* Laces */
 
 /* Cadet */
+.cadet-language-header {margin-top:0.5em}
+.cadet-language {padding:0.5em 2em}
+.cadet-language a {display:block; width:80%; margin:0 auto; padding:0.5em 0; border:1px solid #666; border-radius:4px; text-align:center; background-color:#fff; font-size:1.5em}
+.cadet-language a:hover {background-color:#00adbc; color:#fff; text-decoration:none}
+
 .cadet-bad-error {white-space:pre-line; border:1px solid #ddd; font-size:0.9rem; background-color:#fff; font-size:0.9rem; color:#666; padding:1rem; text-align:left; max-width:40rem; margin-left:auto; margin-right:auto}
 .cadet-about-section {font-size:0.8rem}
 .cadet-about-section-main {font-size:1rem}
