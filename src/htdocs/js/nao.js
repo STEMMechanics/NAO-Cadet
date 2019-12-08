@@ -36,7 +36,7 @@ function nao() {
 	var self = this;
 
 /* Connect */
-	this.connect = function(eventSelf=null, options=null) {
+	this.connect = function(eventSelf=null, options=null) {	
 		this.state_ = 'connecting';
 
 		if(eventSelf != null || options != null) {
@@ -506,7 +506,7 @@ function nao() {
  *	Version
  */
 	this.version = function() {
-		return self.vers_;
+		return self.vers_;		// This returns the behaviour version, not the app version.
 	}
 	
 /*

@@ -1,6 +1,6 @@
 "use strict";
 
-function workspace() {
+function workspace(i18nApp, i18nFunc) {
 	this.runCb					= null;
 	this.runCbData				= null;
 	this.runEventCode			= {};
@@ -15,12 +15,14 @@ function workspace() {
 	this.naoBlockEvents			= false;
 	this.scriptTimerId			= null;
 	this.scriptTimer			= 0;
+	this.i18nApp_				= i18nApp;
+	this.i18nFunc_			= i18nFunc;
 
 	var self = this;
 
 	this.toolboxXml = '<xml xmlns="http://www.w3.org/1999/xhtml" id="blockly-toolbox" style="display:none">' + 
-		'<category name="Events" colour="#E6AC00">' + 
-			'<label text="Events"></label>' + 
+		'<category name="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_EVENTS', 'Events') + '" colour="#E6AC00">' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_EVENTS_LABEL_EVENTS', 'Looks') + '"></label>' + 
 			'<block type="nao_event_bumper_left" singleton="true"></block>' + 
 			'<block type="nao_event_bumper_right" singleton="true"></block>' + 
 			'<block type="nao_event_hand_left" singleton="true"></block>' + 
@@ -33,12 +35,12 @@ function workspace() {
 			'<block type="nao_event_block" mode="advanced"></block>' + 
 			'<block type="nao_event_ignoring" mode="advanced"></block>' + 
 		'</category>' + 
-		'<category name="Motion" colour="#C0CA33">' + 
-			'<label text="Move"></label>' + 
+		'<category name="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_MOTION', 'Motion') + '" colour="#C0CA33">' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_MOTION_LABEL_MOVE', 'Move') + '"></label>' + 
 			'<block type="motion_move_steps"><value name="steps"><shadow type="math_number"><field name="NUM">5</field></shadow></value></block>' + 
 			'<block type="motion_turn_leftright"></block>' + 
 			'<block type="motion_step_leftright"></block>' + 
-			'<label text="Motion"></label>' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_MOTION_LABEL_MOTION', 'Motion') + '"></label>' + 
 			'<block type="robotposture_sitting"></block>' + 
 			'<block type="robotposture_standing"></block>' + 
 			'<block type="motion_sethead" mode="advanced"><value name="degrees"><shadow type="math_number"><field name="NUM">30.0</field></shadow></value></block>' + 
@@ -46,68 +48,68 @@ function workspace() {
 			'<block type="motion_sethand" mode="advanced"><value name="degrees"><shadow type="math_number"><field name="NUM">30.0</field></shadow></value></block>' + 
 			'<block type="motion_setjoint" mode="advanced"><value name="degrees"><shadow type="math_number"><field name="NUM">30.0</field></shadow></value></block>' + 
 			'<block type="motion_setjointall" mode="advanced"></block>' + 
-			'<button text="Joint Builder" callbackKey="view-joints" mode="advanced"></button>' + 
+			'<button text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_MOTION_BUTTON_JOINTBUILDER', 'Joint Builder') + '" callbackKey="view-joints" mode="advanced"></button>' + 
 			'<block type="motion_wakeup" mode="advanced"></block>' + 
 			'<block type="motion_rest" mode="advanced"></block>' + 
 			'<block type="motion_run_dropdown"></block>' + 
-			'<button text="View Motions" callbackKey="view-motions"></button>' + 
-			'<label text="Behavior" mode="advanced"></label>' + 
+			'<button text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_MOTION_BUTTON_VIEWMOTIONS', 'View Motions') + '" callbackKey="view-motions"></button>' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_MOTION_LABEL_BEHAVIOR', 'Behavior') + '" mode="advanced"></label>' + 
 			'<block type="behavior_run" mode="advanced"><value name="name"><shadow type="text"><field name="TEXT"></field></shadow></value></block>' + 
 			'<block type="behavior_running" mode="advanced"><value name="name"><shadow type="text"><field name="TEXT"></field></shadow></value></block>' + 
-			'<button text="View Behaviors" callbackKey="view-behaviors" mode="advanced"></button>' + 
+			'<button text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_MOTION_BUTTON_VIEWBEHAVIORS', 'View Behaviors') + '" callbackKey="view-behaviors" mode="advanced"></button>' + 
 		'</category>' + 
-		'<category name="Sounds" colour="#4DB6AC">' + 
-			'<label text="Speech"></label>' + 
-			'<block type="animatedspeech_say" mode="simple"><value name="text"><shadow type="text"><field name="TEXT">Hello</field></shadow></value></block>' + 
-			'<block type="texttospeech_say" mode="advanced"><value name="text"><shadow type="text"><field name="TEXT">Hello</field></shadow></value></block>' + 
+		'<category name="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_SOUNDS', 'Sounds') + '" colour="#4DB6AC">' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_SOUNDS_LABEL_SPEECH', 'Speech') + '"></label>' + 
+			'<block type="animatedspeech_say" mode="simple"><value name="text"><shadow type="text"><field name="TEXT">' + self.i18nFunc_(self.i18nApp_, 'BLOCK_OPTION_HELLO', 'Hello') + '</field></shadow></value></block>' + 
+			'<block type="texttospeech_say" mode="advanced"><value name="text"><shadow type="text"><field name="TEXT">' + self.i18nFunc_(self.i18nApp_, 'BLOCK_OPTION_HELLO', 'Hello') + '</field></shadow></value></block>' + 
 			'<block type="texttospeech_wait" mode="advanced"></block>' + 
 			'<block type="texttospeech_done" mode="advanced"></block>' + 
-			'<label text="Sound"></label>' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_SOUNDS_LABEL_SOUND', 'Sound') + '"></label>' + 
 			'<block type="audioplayer_playfile_dropdown" mode="simple"></block>' + 
-			'<block type="audioplayer_playfilestring" mode="advanced"><value name="text"><shadow type="text"><field name="TEXT">My recording</field></shadow></value></block>' + 
-			'<button text="View Sounds" callbackKey="view-sounds"></button>' + 
+			'<block type="audioplayer_playfilestring" mode="advanced"><value name="text"><shadow type="text"><field name="TEXT">' + self.i18nFunc_(self.i18nApp_, 'BLOCK_OPTION_MYRECORDING', 'My recording') + '</field></shadow></value></block>' + 
+			'<button text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_SOUNDS_BUTTON_VIEWSOUNDS', 'View Sounds') + '" callbackKey="view-sounds"></button>' + 
 			'<block type="audioplayer_stopall" mode="advanced"></block>' + 
 			'<block type="audioplayer_wait" mode="advanced"></block>' + 
 			'<block type="audioplayer_playsine" mode="advanced"><value name="hertz"><shadow type="math_number"><field name="NUM">1000</field></shadow></value><value name="gain"><shadow type="math_number"><field name="NUM">75</field></shadow></value><value name="duration"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>' + 
-			'<label text="Record"></label>' + 
-			'<block type="audiodevice_startmicrophonesrecording"><value name="text"><shadow type="text"><field name="TEXT">My recording</field></shadow></value></block>' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_SOUNDS_LABEL_RECORD', 'Record') + '"></label>' + 
+			'<block type="audiodevice_startmicrophonesrecording"><value name="text"><shadow type="text"><field name="TEXT">' + self.i18nFunc_(self.i18nApp_, 'BLOCK_OPTION_MYRECORDING', 'My recording') + '</field></shadow></value></block>' + 
 			'<block type="audiodevice_stopmicrophonesrecording"></block>' + 
-			'<label text="Volume"></label>' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_SOUNDS_LABEL_VOLUME', 'Volume') + '"></label>' + 
 			'<block type="audiodevice_setoutputvolume" mode="advanced"><value name="volume"><shadow type="math_number"><field name="NUM">100</field></shadow></value></block>' + 
 			'<block type="audiodevice_getoutputvolume" mode="advanced"></block>' + 
 			'<block type="audiodevice_mute"></block>' + 
 			'<block type="audiodevice_unmute"></block>' + 
 		'</category>' + 
-		'<category name="Looks" colour="#26C6DA">' + 
-			'<label text="LEDs"></label>' + 
+		'<category name="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_LOOKS', 'Looks') + '" colour="#26C6DA">' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_LOOKS_LABEL_LEDS', 'LEDs') + '"></label>' + 
 			'<block type="leds_random_eyes"><value name="seconds"><shadow type="math_number"><field name="NUM">5</field></shadow></value></block>' + 
 			'<block type="leds_rasta"><value name="seconds"><shadow type="math_number"><field name="NUM">5</field></shadow></value></block>' + 
 			'<block type="leds_colour"><value name="colour"><shadow type="colour_picker"><field name="COLOUR">#ff0000</field></shadow></block>' + 
-			'<label text="Photos" mode="advanced"></label>' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_LOOKS_LABEL_PHOTOS', 'Photos') + '" mode="advanced"></label>' + 
 			'<block type="photo_capture" mode="advanced"><value name="name"><shadow type="text"><field name="TEXT">photo.jpg</field></shadow></value></block>' + 
-			'<label text="Video" mode="advanced"></label>' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_LOOKS_LABEL_VIDEO', 'Video') + '" mode="advanced"></label>' + 
 			'<block type="video_startrecording" mode="advanced"><value name="name"><shadow type="text"><field name="TEXT">video.avi</field></shadow></value></block>' + 
 			'<block type="video_stoprecording" mode="advanced"></block>' + 
-			'<label text="Colours"></label>' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_LOOKS_LABEL_COLOURS', 'Colours') + '"></label>' + 
 			'<block type="colour_picker" mode="advanced"></block>' + 
 			'<block type="colour_random"></block>' + 
 			'<block type="colour_rgb" mode="advanced"><value name="RED"><shadow type="math_number"><field name="NUM">100</field></shadow></value><value name="GREEN"><shadow type="math_number"><field name="NUM">50</field></shadow></value><value name="BLUE"><shadow type="math_number"><field name="NUM">0</field></shadow></value></block>' + 
 			'<block type="colour_blend" mode="advanced"><value name="COLOUR1"><shadow type="colour_picker"><field name="COLOUR">#ff0000</field></shadow></value><value name="COLOUR2"><shadow type="colour_picker"><field name="COLOUR">#3333ff</field></shadow></value><value name="RATIO"><shadow type="math_number"><field name="NUM">0.5</field></shadow></value></block>' + 
 		'</category>' + 
-		'<category name="Loops" colour="#42A5F5">' + 
-			'<label text="Loops"></label>' + 
+		'<category name="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_LOOPS', 'Loops') + '" colour="#42A5F5">' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_LOOPS_LABEL_LOOPS', 'Loops') + '"></label>' + 
 			'<block type="controls_repeat_ext"><value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>' + 
 			'<block type="wait"><value name="seconds"><shadow type="math_number"><field name="NUM">5</field></shadow></block>' + 
 			'<block type="controls_whileUntil" mode="advanced"></block>' + 
 			'<block type="controls_for" mode="advanced"><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="BY"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>' + 
 			'<block type="controls_forEach" mode="advanced"></block>' + 
 			'<block type="controls_flow_statements" mode="advanced"></block>' + 
-			'<label text="End"></label>' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_LOOPS_LABEL_END', 'End') + '"></label>' + 
 			'<block type="exit_event" mode="advanced"></block>' + 
 			'<block type="exit_script"></block>' + 
 		'</category>' + 
-		'<category name="Logic" colour="#7E57C2" mode="advanced">' + 
-			'<label text="Logic"></label>' + 
+		'<category name="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_LOGIC', 'Logic') + '" colour="#7E57C2" mode="advanced">' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_LOGIC_LABEL_LOGIC', 'Logic') + '"></label>' + 
 			'<block type="controls_if"></block>' + 
 			'<block type="logic_compare"></block>' + 
 			'<block type="logic_operation" mode="advanced"></block>' + 
@@ -116,8 +118,8 @@ function workspace() {
 			'<block type="logic_null" mode="advanced"></block>' + 
 			'<block type="logic_ternary" mode="advanced"></block>' + 
 		'</category>' + 
-		'<category name="Numbers" colour="#EC407A" mode="advanced">' + 
-			'<label text="Numbers"></label>' + 
+		'<category name="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_NUMBERS', 'Numbers') + '" colour="#EC407A" mode="advanced">' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_NUMBERS_LABEL_NUMBERS', 'Numbers') + '"></label>' + 
 			'<block type="math_number"></block>' + 
 			'<block type="math_arithmetic"><value name="A"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="B"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>' + 
 			'<block type="math_single" mode="advanced"><value name="NUM"><shadow type="math_number"><field name="NUM">9</field></shadow></value></block>' + 
@@ -132,8 +134,8 @@ function workspace() {
 			'<block type="math_random_float" mode="advanced"></block>' + 
 			'<block type="nao_msec" mode="advanced"></block>' + 
 		'</category>' + 
-		'<category name="Text" colour="#EF5350" mode="advanced">' + 
-			'<label text="Text"></label>' + 
+		'<category name="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_TEXT', 'Text') + '" colour="#EF5350" mode="advanced">' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_TEXT_LABEL_TEXT', 'Text') + '"></label>' + 
 			'<block type="text"></block>' + 
 			'<block type="system_username"></block>' + 
 			'<block type="system_robotname"></block>' + 
@@ -149,25 +151,25 @@ function workspace() {
 			'<block type="text_trim" mode="advanced"><value name="TEXT"><shadow type="text"><field name="TEXT">abc</field></shadow></value></block>' + 
 			'<block type="comment"></block>' + 
 		'</category>	' + 
-		'<category name="Lists" colour="#78909C" mode="advanced">' + 
-			'<label text="Lists"></label>' + 
+		'<category name="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_LISTS', 'Lists') + '" colour="#78909C" mode="advanced">' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_LISTS_LABEL_LISTS', 'Lists') + '"></label>' + 
 			'<block type="lists_create_with"><mutation items="0"></mutation></block>' + 
 			'<block type="lists_create_with"></block>' + 
 			'<block type="lists_repeat"><value name="NUM"><shadow type="math_number"><field name="NUM">5</field></shadow></value></block>' + 
 			'<block type="lists_length"></block>' + 
 			'<block type="lists_isEmpty"></block>' + 
-			'<block type="lists_indexOf"><value name="VALUE"><block type="variables_get"><field name="VAR">list</field></block></value></block>' + 
-			'<block type="lists_getIndex"><value name="VALUE"><block type="variables_get"><field name="VAR">list</field></block></value></block>' + 
-			'<block type="lists_setIndex"><value name="LIST"><block type="variables_get"><field name="VAR">list</field></block></value></block>' + 
-			'<block type="lists_getSublist"><value name="LIST"><block type="variables_get"><field name="VAR">list</field></block></value></block>' + 
+			'<block type="lists_indexOf"><value name="VALUE"><block type="variables_get"><field name="VAR">' + self.i18nFunc_(self.i18nApp_, 'BLOCK_OPTION_LIST', 'list') + '</field></block></value></block>' + 
+			'<block type="lists_getIndex"><value name="VALUE"><block type="variables_get"><field name="VAR">' + self.i18nFunc_(self.i18nApp_, 'BLOCK_OPTION_LIST', 'list') + '</field></block></value></block>' + 
+			'<block type="lists_setIndex"><value name="LIST"><block type="variables_get"><field name="VAR">' + self.i18nFunc_(self.i18nApp_, 'BLOCK_OPTION_LIST', 'list') + '</field></block></value></block>' + 
+			'<block type="lists_getSublist"><value name="LIST"><block type="variables_get"><field name="VAR">' + self.i18nFunc_(self.i18nApp_, 'BLOCK_OPTION_LIST', 'list') + '</field></block></value></block>' + 
 			'<block type="lists_split"><value name="DELIM"><shadow type="text"><field name="TEXT">,</field></shadow></value></block>' + 
 			'<block type="lists_sort"></block>' + 
-			'<label text="Files"></label>' + 
+			'<label text="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_LISTS_LABEL_FILES', 'Files') + '"></label>' + 
 			'<block type="file_list"></block>' + 
-			'<block type="file_exists"><value name="text"><shadow type="text"><field name="TEXT">abc</field></shadow></value></block>' + 
+			'<block type="file_exists"><value name="text"><shadow type="text"><field name="TEXT">' + self.i18nFunc_(self.i18nApp_, 'BLOCK_OPTION_FILE', 'file') + '</field></shadow></value></block>' + 
 		'</category>' + 
-		'<category name="Variables" colour="#8D6E63" custom="VARIABLE" mode="advanced"></category>' + 
-		'<category name="Functions" colour="#FF7043" custom="PROCEDURE" mode="advanced"></category>' + 
+		'<category name="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_VARIABLES', 'Variables') + '" colour="#8D6E63" custom="VARIABLE" mode="advanced"></category>' + 
+		'<category name="' + self.i18nFunc_(self.i18nApp_, 'CATEGORY_FUNCTIONS', 'Function') + '" colour="#FF7043" custom="PROCEDURE" mode="advanced"></category>' + 
 		'</xml>';
 		
 	this.registerEventCallback = function(cb, cbData) {

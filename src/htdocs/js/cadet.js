@@ -9,7 +9,10 @@ TODO
 ?view=scripts&dir=4&showall=0&action=renamescript&id=9
 */
 
-function cadetApp() {
+var cadetVersion = '1.0.1';	// Version number now stored in this file instead of the behaviour file
+var cadetDebug = true;
+
+function cadetApp(defaultLang = '') {
 	this.cadet			= this;
 	this.nao			= null;
 	this.workspace		= null;
@@ -24,32 +27,52 @@ function cadetApp() {
 	this.scriptXml		= '';
 	this.scriptOptions	= '';
 	
+	this.i18nLang = defaultLang;
+	this.i18nData = null;
+	
 /*
  *	Initalize
  */
 	this.initalize = function(self) {
-		self.laces.status('Loading NAO Cadet...');
-	
-		self.app.nao = new nao();
-		self.app.workspace = new workspace();
-
-		self.laces.status('Connecting to NAO...');
-		self.app.nao.connect(self, {
-			'eventFunc':	self.app.naoEvent,
-			'readyFunc':	function() { self.app.naoReady(self); },
-			'closeFunc':	function(state) { self.app.naoClose(self, state); },
-			'errorFunc':	function(state, errorCode, errorMessage) { self.app.naoError(self, state, errorCode, errorMessage); }
-		});
+		// Setup language data
+// 		self.laces.i18nAppFunc = this.i18n;
 		
-		self.laces.viewRegister('setup', 'NAO Cadet Setup', self.app.viewSetup);
-		self.laces.viewRegister('login', 'NAO Cadet Login', self.app.viewLogin);
-		self.laces.viewRegister('admin', 'NAO Cadet Admin', self.app.viewAdmin);
-		self.laces.viewRegister('scripts', 'NAO Cadet Scripts', self.app.viewScripts);
-		self.laces.viewRegister('workspace', 'NAO Cadet Workspace', self.app.viewWorkspace);
+		if(typeof nao_i18n !== 'undefined') {
+			self.app.i18nSetData(self, nao_i18n);			
+		}
+
+		$.getScript('/blockly/msg/js/' + defaultLang + '.js', function() { });
+
+		cadetDefBlocks(self, this.i18n);
+		window.document.title = self.app.i18n(self, 'NAO_CADET', 'NAO Cadet');
+	
+		self.laces.status(self.app.i18n(self, 'MSG_LOADING_NAO_CADET', 'Loading NAO Cadet...'));
+
+		self.app.nao = new nao();
+		self.app.workspace = new workspace(self, this.i18n);
+
+		self.laces.status(self.app.i18n(self, 'MSG_CONNECTING_TO_NAO', 'Connecting to NAO...'));
+		if(!cadetDebug) {
+			self.app.nao.connect(self, {
+				'eventFunc':	self.app.naoEvent,
+				'readyFunc':	function() { self.app.naoReady(self); },
+				'closeFunc':	function(state) { self.app.naoClose(self, state); },
+				'errorFunc':	function(state, errorCode, errorMessage) { self.app.naoError(self, state, errorCode, errorMessage); }
+			});
+		}		
+		self.laces.viewRegister('setup', self.app.i18n(self, 'TITLE_NAO_CADET_SETUP', 'NAO Cadet Setup'), self.app.viewSetup);
+		self.laces.viewRegister('login', self.app.i18n(self, 'TITLE_NAO_CADET_LOGIN', 'NAO Cadet Login'), self.app.viewLogin);
+		self.laces.viewRegister('admin', self.app.i18n(self, 'TITLE_NAO_CADET_ADMIN', 'NAO Cadet Admin'), self.app.viewAdmin);
+		self.laces.viewRegister('scripts', self.app.i18n(self, 'TITLE_NAO_CADET_SCRIPTS', 'NAO Cadet Scripts'), self.app.viewScripts);
+		self.laces.viewRegister('workspace', self.app.i18n(self, 'TITLE_NAO_CADET_WORKSPACE', 'NAO Cadet Workspace'), self.app.viewWorkspace);
 		self.laces.viewDefault('login');
 
 		if('tablet' in self.laces.options && self.laces.options.tablet == 1) {
 			self.app.nao.tablet = true;
+		}
+
+		if(cadetDebug) {
+				self.laces.view('workspace').show(0);
 		}
 
 		self.laces.tinkerbell('cadetWelcome', {
@@ -162,7 +185,7 @@ function cadetApp() {
  */
 	this.naoReconnect = function(self, pwdRequired) {
 		if(pwdRequired) {
-			alert('password required');
+			alert(self.app.i18n(self, 'MSG_PASSWORD_REQUIRED', 'Password required'));
 		}
 	
 		return {'username':self.app.userName, 'password':''};
@@ -175,9 +198,9 @@ function cadetApp() {
 		switch(event.event) {
 			case 'event_restart':
 				self.laces.alert({
-					'title': 'Restart required',
-					'message': 'There has been a system change with ' + self.app.nao.name() + ' and a restart of NAO Cadet is required.',
-					'buttons': ['Restart'],
+					'title': self.app.i18n(self, 'TITLE_RESTART_REQUIRED', 'Restart required'),
+					'message': self.app.i18n(self, 'MSG_RESTART_REQUIRED', 'There has been a system change with %NAME% and a restart of NAO Cadet is required.'),
+					'buttons': [self.app.i18n(self, 'BTN_RESTART', 'Restart')],
 					'callback': function() {
 						location.reload(true);
 					}
@@ -186,8 +209,8 @@ function cadetApp() {
 				break;
 			case 'event_shutdown':
 				self.laces.alert({
-					'title': 'NAO Cadet has quit',
-					'message': 'NAO Cadet has quit on ' + self.app.nao.name() + '. Thanks for playing!',
+					'title': self.app.i18n(self, 'TITLE_NAO_CADET_SHUTDOWN', 'NAO Cadet has quit'),
+					'message': self.app.i18n(self, 'MSG_NAO_CADET_SHUTDOWN', 'NAO Cadet has quit on %NAME%. Thanks for playing!'),
 					'callback': function() {
 						window.location.href = '/close.html';
 					}
@@ -199,8 +222,8 @@ function cadetApp() {
 					if(!self.app.warningBatteryLow) {
 						self.app.warningBatteryLow = true;
 						self.laces.alert({
-							'title': 'Battery low on ' + self.app.nao.name(),
-							'message': self.app.nao.name() + ' is running low on charge. You may need to connect ' + self.app.nao.name() + ' to power soon'
+							'title': self.app.i18n(self, 'TITLE_NAO_BATTERY_LOW', 'Battery low on %NAME%'),
+							'message': self.app.i18n(self, 'MSG_NAO_BATTERY_LOW', '%NAME% is running low on charge. You may need to connect %NAME% to power soon')
 						});
 					}
 				} else {
@@ -213,8 +236,8 @@ function cadetApp() {
 					if(!self.app.warningDiskLow) {
 						self.app.warningDiskLow = true;
 						self.laces.alert({
-							'title': 'Disk space low on ' + self.app.nao.name(),
-							'message': self.app.nao.name() + ' is running low on storage. An administrator may need to remove sounds/videos from NAO Cadet or programs from Choregraphe'
+							'title': self.app.i18n(self, 'TITLE_NAO_DISK_LOW', 'Disk space low on %NAME%'),
+							'message': self.app.i18n(self, 'MSG_NAO_DISK_LOW', '%NAME% is running low on storage. An administrator may need to remove sounds/videos from NAO Cadet or programs from Choregraphe')
 						});
 					}
 				} else {
@@ -243,11 +266,11 @@ function cadetApp() {
  *	NAO Error
  */
 	this.naoError = function(self, state, errorCode, errorMessage) {
-		self.laces.status('exclamation', 'Error connecting to NAO', false, true);
+		self.laces.status('exclamation', self.app.i18n(self, 'ERROR_CONNECTING_NAO', 'Error Connecting to NAO'), false, true);
 		self.laces.alert({
-			'title': 'Could not connect to NAO',
-			'message': self.app.nao.name() + ' has unexpectedly disconnected from us. There maybe a network issue or the NAO may need to be restarted.',
-			'details': 'Error Code: ' + self.app.nao.errorCodeToText(errorCode) + '<br><br>' + errorMessage
+			'title': self.app.i18n(self, 'TITLE_NAO_CANT_CONNECT', 'Could not connect to NAO'),
+			'message': self.app.i18n(self, 'MSG_UNEXPECTED_DISCONNECT', '%NAME% has unexpectedly disconnected from us. There maybe a network issue or the NAO may need to be restarted.'),
+			'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ':' + self.app.nao.errorCodeToText(errorCode) + '<br><br>' + errorMessage
 		});
 	}
 
@@ -255,10 +278,10 @@ function cadetApp() {
  *	NAO Close
  */
 	this.naoClose = function(self, state) {
-		self.laces.status('exclamation', 'Error connecting to NAO', false, true);
+		self.laces.status('exclamation', self.app.i18n(self, 'ERROR_CONNECTING_NAO', 'Error Connecting to NAO'), false, true);
 		self.laces.alert({
-			'title': 'NAO disconnected',
-			'message': self.app.nao.name() + ' has unexpectedly disconnected from us. There maybe a network issue or the NAO may need to be restarted.'
+			'title': self.app.i18n(self, 'TITLE_NAO_DISCONNECTED', 'NAO disconnected'),
+			'message': self.app.i18n(self, 'MSG_UNEXPECTED_DISCONNECT', '%NAME% has unexpectedly disconnected from us. There maybe a network issue or the NAO may need to be restarted.')
 		});
 	}
 
@@ -278,32 +301,32 @@ function cadetApp() {
 			
 				var html = '';
 				
-				html += '<p class="alert alert-info">We\'ve noticed that this is the first time NAO Cadet has been run on <strong>' + self.app.nao.name() + '</strong>, and we need the following information before we continue:</p>';
+				html += '<p class="alert alert-info">' + self.app.i18n(self, 'MSG_FIRST_TIME', 'We\'ve noticed that this is the first time NAO Cadet has been run on %NAME%, and we need the following information before we continue:', {NAME: {prefix: '<strong>', postfix: '</strong>'}}) + '</p>';
 
 				html += '<div class="form-group">' +
-					'<label for="cadet-setup-location">Location</label>' +
+					'<label for="cadet-setup-location">' + self.app.i18n(self, 'MSG_LOCATION', 'Location') + '</label>' +
 					'<input type="text" class="form-control" id="cadet-setup-location" aria-describedby="cadet-setup-location-help">' +
-					'<small id="cadet-setup-location-help" class="form-text text-muted">NAO Cadet identifies users and scripts per location. If <strong>' + self.app.nao.name() + '</strong> moves to a different location, it will not affect the users and scripts at this location.<br><br>Users will be able to view scripts at other locations, but not modify them.</small>' +
+					'<small id="cadet-setup-location-help" class="form-text text-muted">' + self.app.i18n(self, 'MSG_FIRST_TIME_LOCATION_INFO', 'NAO Cadet identifies users and scripts per location. If %NAME% moves to a different location, it will not affect the users and scripts at this location.<br><br>Users will be able to view scripts at other locations, but not modify them.', {NAME: {prefix: '<strong>', postfix: '</strong>'}}) + '</small>' +
 				'</div>';
 					
 				html += '<div class="form-group">' +
-					'<label for="cadet-setup-admin">Admin password</label>' +
+					'<label for="cadet-setup-admin">' + self.app.i18n(self, 'MSG_ADMIN_PASSWORD', 'Admin password') + '</label>' +
 					'<input type="text" class="form-control" id="cadet-setup-admin" aria-describedby="cadet-setup-admin-help">' +
-					'<small id="cadet-setup-admin-help" class="form-text text-muted">The <strong>admin</strong> account is used to modify NAO Cadet settings and perform bulk activities.</small>' +
+					'<small id="cadet-setup-admin-help" class="form-text text-muted">' + self.app.i18n(self, 'MSG_ADMIN_PASSWORD_INFO', 'The admin account is used to modify NAO Cadet settings and perform bulk activities.') + '</small>' +
 				'</div>';
 					
 				html += '<div class="form-group">' +
-					'<label for="cadet-setup-root">Root password</label>' +
+					'<label for="cadet-setup-root">' + self.app.i18n(self, 'MSG_ROOT_PASSWORD', 'Root password') + '</label>' +
 					'<input type="text" class="form-control" id="cadet-setup-root" aria-describedby="cadet-setup-root-help">' +
-					'<small id="cadet-setup-root-help" class="form-text text-muted">The <strong>root</strong> account is used as an emergency account and can permanently delete data.</small>' +
+					'<small id="cadet-setup-root-help" class="form-text text-muted">' + self.app.i18n(self, 'MSG_ROOT_PASSWORD_INFO', 'The <strong>root</strong> account is used as an emergency account and can permanently delete data.') + '</small>' +
 				'</div>';
 				
 				self.laces.modal('setup', {
 					'html':		html,
-					'title':	'Setup',
+					'title':	self.app.i18n(self, 'TITLE_SETUP', 'Setup'),
 					'buttons':	[{
 						'id':		'save',
-						'title':	'Save',
+						'title':	self.app.i18n(self, 'BTN_SAVE', 'Save'),
 						'style':	'primary'
 					}],
 					'callback':	function(self, action, data) {
@@ -332,9 +355,9 @@ function cadetApp() {
 										self.laces.view('login').show();
 									} else {
 										self.laces.alert({
-											'title': 'NAO Cadet Setup Error',
-											'message': 'There was an error setting up NAO Cadet.',
-											'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+											'title': self.app.i18n(self, 'TITLE_SETUP_ERROR', 'NAO Cadet Setup Error'),
+											'message': self.app.i18n(self, 'ERROR_SETUP', 'There was an error setting up NAO Cadet'),
+											'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 										});
 									}
 								});
@@ -372,27 +395,27 @@ function cadetApp() {
 				}
 				
 				html += '<a href="#" class="cadet-welcome-about"><i class="fa fa-question"></i></a>';
-				html += '<h1 class="display-4">Welcome to NAO Cadet</h1>';
+				html += '<h1 class="display-4">' + self.app.i18n(self, 'TITLE_WELCOME_NAO_CADET', 'Welcome to NAO Cadet') + '</h1>';
 				html += '<div class="cadet-jumbotron-slider">';
 					html += '<div class="cadet-jumbotron-slider-item">';
-						html += '<p class="lead">' + getTimeGreeting() + ', It\'s great to be in <strong id="cadet-location-name">' + self.app.nao.domain() + '</strong> <a class="btn btn-link fa fa-info-circle" id="cadet-btn-locationinfo"></a><br><br>Before we start, what is your name?</p>';
+						html += '<p class="lead">' + self.app.i18n(self, 'MSG_WELCOME_NAO_CADET', '%TIME_GREETING%, It\'s great to be in %LOCATION%<br><br>Before we start, what is your name?', {LOCATION: {prefix: '<strong id="cadet-location-name">', postfix: '</strong> <a class="btn btn-link fa fa-info-circle" id="cadet-btn-locationinfo"></a>'}}) + '</p>';
 					html += '</div>';
 					html += '<div class="cadet-jumbotron-slider-item">';
-						html += '<p class="lead">Hi <strong id="cadet-login-name"></strong>!<br><br>Enter your password to login:</p>';
+						html += '<p class="lead">Hi <strong id="cadet-login-name"></strong>!<br><br>' + self.app.i18n(self, 'MSG_ENTER_PASSWORD', 'Enter your password to login') + ':</p>';
 					html += '</div>';
 				html += '</div>';
 				html += '<hr class="my-4">';
 				html += '<div class="row" id="cadet-section-recent"></div>';
 				html += '<div class="cadet-jumbotron-slider">';
 					html += '<div class="cadet-jumbotron-slider-item">';
-						html += '<label class="sr-only" for="cadet-username">Name</label>';
+						html += '<label class="sr-only" for="cadet-username">' + self.app.i18n(self, 'MSG_NAME', 'Name') + '</label>';
 						html += '<input type="text" class="form-control form-control-lg mb-2 mr-sm-2" id="cadet-login-username">';
-						html += '<div class="text-center"><button type="submit" class="btn btn-primary btn-lg mb-2" id="cadet-btn-go">Lets Go</button></div>';
+						html += '<div class="text-center"><button type="submit" class="btn btn-primary btn-lg mb-2" id="cadet-btn-go">' + self.app.i18n(self, 'BTN_LETS_GO', 'Lets Go') + '</button></div>';
 					html += '</div>';
 					html += '<div class="cadet-jumbotron-slider-item">';
-						html += '<label class="sr-only" for="cadet-password">Password</label>';
+						html += '<label class="sr-only" for="cadet-password">' + self.app.i18n(self, 'MSG_PASSWORD', 'Password') + '</label>';
 						html += '<input type="password" class="form-control form-control-lg mb-2 mr-sm-2" id="cadet-login-password">';
-						html += '<div class="text-center"><button type="button" class="btn btn-secondary btn-lg mb-2 mr-2" id="cadet-btn-back">Back</button><button type="submit" class="btn btn-primary btn-lg mb-2" id="cadet-btn-login">Login</button></div>';
+						html += '<div class="text-center"><button type="button" class="btn btn-secondary btn-lg mb-2 mr-2" id="cadet-btn-back">' + self.app.i18n(self, 'BTN_BACK', 'Back') + '</button><button type="submit" class="btn btn-primary btn-lg mb-2" id="cadet-btn-login">' + self.app.i18n(self, 'BTN_Login', 'Login') + '</button></div>';
 					html += '</div>';
 				html += '</div>';
 				
@@ -489,9 +512,9 @@ function cadetApp() {
 												});
 											} else {
 												self.laces.alert({
-													'title': 'NAO Error',
-													'message': 'The NAO could not log you in because an error occurred.',
-													'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+													'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+													'message': self.app.i18n(self, 'ERROR_LOGIN', 'The NAO could not log you in because an error occurred'),
+													'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 												});
 											}
 										});
@@ -516,9 +539,9 @@ function cadetApp() {
 												self.laces.jumbotron('login').invalidate('#cadet-login-password');
 											} else {
 												self.laces.alert({
-													'title': 'NAO Error',
-													'message': 'The NAO could not log you in because an error occurred.',
-													'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+													'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+													'message': self.app.i18n(self, 'ERROR_LOGIN', 'The NAO could not log you in because an error occurred'),
+													'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 												});
 											}
 										});
@@ -535,8 +558,8 @@ function cadetApp() {
 									break;
 								case 'cadet-btn-locationinfo':
 									self.laces.alert({
-										'title': 'Location setting',
-										'message': 'This NAO is currently set for the location <strong>' + self.app.nao.domain() + '</strong> and will default to the scripts and users at <strong>' + self.app.nao.domain() + '</strong>.<br><br>If this is not correct and you would like to change this, login using the <i>admin</i> account and select <i>Change Location</i>.',
+										'title': self.app.i18n(self, 'TITLE_LOCATION_SETTING', 'Location setting'),
+										'message': self.app.i18n(self, 'MSG_LOCATION_SETTING', 'This NAO is currently set for the location %LOCATION% and will default to the scripts and users at %LOCATION%.<br><br>If this is not correct and you would like to change this, login using the <i>admin</i> account and select <i>Change Location</i>.', {LOCATION: {prefix: '<strong>', postfix: '</strong>'}}),
 										'style': 'info'
 									});
 									
@@ -579,11 +602,11 @@ function cadetApp() {
 			
 				self.laces.navbar()
 					.hide()
-					.brand('<img src="/img/naohead.png">NAO Cadet', function(self) {
+					.brand('<img src="/img/naohead.png">' + self.app.i18n(self, 'NAO_CADET', 'NAO Cadet'), function(self) {
 						self.app.viewAbout(self);
 					})
 					.clear()
-					.append('cadet-script-create', 'Create', function(self, id) { 
+					.append('cadet-script-create', self.app.i18n(self, 'BTN_CREATE', 'Create'), function(self, id) { 
 // 						if(self.laces.tinkerbellVisible()) {
 // 							self.laces.tinkerbellEvent('cadet-script-create')
 // 						} else {
@@ -591,20 +614,20 @@ function cadetApp() {
 // 						}
 					})
 					.appendDropdown('cadet-script-dropdown', '<i class="fa fa-bars"></i>', [
-						{id: 'cadet-script-import',		title: 'Upload Script'},
+						{id: 'cadet-script-import',		title: self.app.i18n(self, 'MENU_UPLOAD_SCRIPT', 'Upload Script')},
 						{id: 'sep'},
-						{id: 'cadet-view-mine',			title: 'My scripts',			checkGroup: 'view'},
-						{id: 'cadet-view-all',			title: 'All scripts',			checkGroup: 'view'},
+						{id: 'cadet-view-mine',			title: self.app.i18n(self, 'MENU_MY_SCRIPTS', 'My scripts'),			checkGroup: 'view'},
+						{id: 'cadet-view-all',			title: self.app.i18n(self, 'MENU_ALL_SCRIPTS', 'All scripts'),			checkGroup: 'view'},
 						{id: 'sep'},
-						{id: 'cadet-view-empty',		title: 'Show empty folders'},
+						{id: 'cadet-view-empty',		title: self.app.i18n(self, 'MENU_SHOW_EMPTY', 'Show empty folders')},
 						{id: 'sep'},
-						{id: 'cadet-view-sounds',		title: 'Sounds'},
-						{id: 'cadet-view-videos',		title: 'Photos/Videos'},
-						{id: 'cadet-view-behaviors',	title: 'Behaviors'},
-						{id: 'cadet-view-motions',		title: 'Motions'},
+						{id: 'cadet-view-sounds',		title: self.app.i18n(self, 'MENU_SOUNDS', 'Sounds')},
+						{id: 'cadet-view-videos',		title: self.app.i18n(self, 'MENU_PHOTOSVIDEOS', 'Photos/Videos')},
+						{id: 'cadet-view-behaviors',	title: self.app.i18n(self, 'MENU_BEHAVIORS', 'Behaviors')},
+						{id: 'cadet-view-motions',		title: self.app.i18n(self, 'MENU_MOTIONS', 'Motions')},
 						{id: 'sep'},
-						{id: 'cadet-user-profile',		title: 'My profile'},
-						{id: 'cadet-user-logout',		title: 'Logout'
+						{id: 'cadet-user-profile',		title: self.app.i18n(self, 'MENU_MY_PROFILE', 'My profile')},
+						{id: 'cadet-user-logout',		title: self.app.i18n(self, 'MENU_LOGOUT', 'Logout')
 					}], function(self, id, enabled) {
 						if(enabled == true) {
 							switch(id) {
@@ -690,13 +713,13 @@ function cadetApp() {
 						self.app.scriptEdit(self, $(this).parent().attr('data-id'));
 					} else if(type == 'dir') {
 						var name = $(this).parent().attr('data-id');
-				 		self.app.askName(self, 'Rename folder', name, 'Rename', function(self, value) {
+				 		self.app.askName(self, self.app.i18n(self, 'TITLE_RENAME_FOLDER', 'Rename folder'), name, self.app.i18n(self, 'MSG_RENAME', 'Rename'), function(self, value) {
 				 			self.app.nao.send('cadet_scriptchangedir', {'olddir': name, 'newdir': value, 'domain': self.app.userOptions['scriptDomain']}, function(r) {
 				 				if(r['error_code'] != 0) {
 									self.laces.alert({
-										'title': 'NAO Error',
-										'message': 'The NAO could not log you in because an error occurred.',
-										'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+										'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+										'message': self.app.i18n(self, 'ERROR_RENAME_FOLDER', 'Could not rename the folder because an error occurred'),
+										'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 									});
 				 				}
 				 				
@@ -710,8 +733,8 @@ function cadetApp() {
 
 				$('body').on('click', '.cadet-script-locked', function() {
 					self.laces.alert({
-						'title': 'Script locked',
-						'message': 'This script is locked because it was created by someone else or is currently being edited.<br><br>You are able to view this script however you will need to save it as a copy.',
+						'title': self.app.i18n(self, 'TITLE_SCRIPT_LOCKED', 'Script locked'),
+						'message': self.app.i18n(self, 'MSG_SCRIPT_LOCKED', 'This script is locked because it was created by someone else or is currently being edited.<br><br>You are able to view this script however you will need to save it as a copy.'),
 						'style': 'info'
 					});
 					return false;
@@ -770,9 +793,9 @@ function cadetApp() {
 		/* Script Navbar */
 		html += '<select id="cadet-domain-dropdown"></select><nav aria-label="breadcrumb" style="display:inline-block">';
 		if(self.app.userOptions.scriptDir == '') {
-			html += '<ol class="breadcrumb"><li class="breadcrumb-item"><i class="fa fa-folder-open-o"></i> Home</li></ol>';
+			html += '<ol class="breadcrumb"><li class="breadcrumb-item"><i class="fa fa-folder-open-o"></i> ' + self.app.i18n(self, 'BTN_HOME', 'Home') + '</li></ol>';
 		} else {
-			html += '<ol class="breadcrumb"><li class="breadcrumb-item"><i class="fa fa-folder-open-o"></i> <a href="#" id="cadet-folder-home">Home</a></li><li class="breadcrumb-item active" aria-current="page" data-name="' + self.app.userOptions.scriptDir + '">' + self.app.userOptions.scriptDir + '</li></ol>';
+			html += '<ol class="breadcrumb"><li class="breadcrumb-item"><i class="fa fa-folder-open-o"></i> <a href="#" id="cadet-folder-home">' + self.app.i18n(self, 'BTN_HOME', 'Home') + '</a></li><li class="breadcrumb-item active" aria-current="page" data-name="' + self.app.userOptions.scriptDir + '">' + self.app.userOptions.scriptDir + '</li></ol>';
 		}
 
 		html += '</nav>';
@@ -873,10 +896,10 @@ function cadetApp() {
 											'<h5 class="card-title">' + self.laces.escapeHtml(scriptList[i].name) + '</h5>' + 
 										('count' in scriptList[i] ? 
 											(self.app.userOptions.scriptAll ?
-												'<p class="card-text"><small class="text-muted">' + scriptList[i].count + ' script' + (scriptList[i].count != 1 ? 's' : '') + '</small></p>' :
-												'<p class="card-text"><small class="text-muted">' + scriptList[i].mine + ' script' + (scriptList[i].mine != 1 ? 's' : '') + ' (' + scriptList[i].count + ' total)</small></p>'
+												'<p class="card-text"><small class="text-muted">' + self.app.i18n(self, 'MSG_SCRIPT_COUNT', '%1% script(s)', {1: {content: scriptList[i].count}}) + '</small></p>' :
+												'<p class="card-text"><small class="text-muted">' + self.app.i18n(self, 'MSG_SCRIPT_TOTAL', '%1% script(s) [%2% total]', {1: {content: scriptList[i].mine}, 2: {content: scriptList[i].count}}) + '</small></p>'
 											) :
-											'<p class="card-text"><small class="text-muted">Created by ' + self.laces.escapeHtml(scriptList[i]['username']) + '</small></p>'
+											'<p class="card-text"><small class="text-muted">' + self.app.i18n(self, 'MSG_CREATED_BY', 'Created by') + ' ' + self.laces.escapeHtml(scriptList[i]['username']) + '</small></p>'
 										) +
 										'</div>' + 
 									'</div>' + 
@@ -895,15 +918,15 @@ function cadetApp() {
 					} else {
 						$('#cadet-script-items').queueFadeOut(200, function() {
 							$('#cadet-script-items').html(self.laces.statusInsert());
-							self.laces.status('exclamation', 'No scripts found');
+							self.laces.status('exclamation', self.app.i18n(self, 'MSG_NO_SCRIPTS_FOUND', 'No scripts found'));
 							$('#cadet-script-items').queueFadeIn();
 						});
 					}
 				} else {
-					self.laces.status('exclamation', 'No scripts found');
+					self.laces.status('exclamation', self.app.i18n(self, 'MSG_NO_SCRIPTS_FOUND', 'No scripts found'));
 				}
 			} else {
-				self.laces.status('exclamation', 'Error loading scripts', false, true);
+				self.laces.status('exclamation', self.app.i18n(self, 'ERROR_LOADING_SCRIPTS', 'Error loading scripts'), false, true);
 			}
 		});
 	}
@@ -917,32 +940,32 @@ function cadetApp() {
 		
 		html = '<div class="laces-modal-padding">' +
 			'<div class="form-group row">' +
-				'<label class="col-sm-1 col-form-label" for="cadet-script-name">Name</label>' +
-				'<div class="col-sm-11"><input id="cadet-script-name" type="text" class="form-control" value="' + self.laces.escapeHtml(self.app.userName + '\'s Script') + '"></div>' +
+				'<label class="col-sm-1 col-form-label" for="cadet-script-name">' + self.app.i18n(self, 'MSG_NAME', 'Name') + '</label>' +
+				'<div class="col-sm-11"><input id="cadet-script-name" type="text" class="form-control" value="' + self.laces.escapeHtml(self.app.userName + '\'s ' + self.app.i18n(self, 'MSG_SCRIPT', 'Script')) + '"></div>' +
 			'</div>' +
 		
 			'<div class="form-group row">' +
 				'<div class="col-sm-1">' +
-					'<label class="col-form-label" for="cadet-script-dir-home">Folder</label>' +
+					'<label class="col-form-label" for="cadet-script-dir-home">' + self.app.i18n(self, 'MSG_FOLDER', 'Folder') + '</label>' +
 				'</div>' +
 			
 				'<div class="col-sm-11">' +
 					'<select id="cadet-script-dir">' +
-					'<option selected id="cadet-script-dir-home" value="">Home</option>' +
+					'<option selected id="cadet-script-dir-home" value="">' + self.app.i18n(self, 'MSG_HOME', 'Home') + '</option>' +
 					'<option data-divider="true"></option>' +
-					'<option value="...">Other</option>' +
+					'<option value="...">' + self.app.i18n(self, 'MSG_OTHER', 'Other') + '</option>' +
 					'</select>' +
 				'</div>' +
 			'</div>' +
 
 			'<div class="row">' +
-			'<div class="col-sm-1"><label class="col-form-label" style="margin-top:0.8rem">Colour</label></div>' +
+			'<div class="col-sm-1"><label class="col-form-label" style="margin-top:0.8rem">' + self.app.i18n(self, 'MSG_COLOUR', 'Colour') + '</label></div>' +
 			'<div class="col-sm-11">' +
 			self.laces.colourSelectorCreate('cadet-script-colour', '', ['F44336', 'D81B60', '9C27B0', '3F51B5', '03A9F4', '00897B', '7CB342', 'FDD835', 'FB8C00', '6D4C41', '546E7A']) + 
 			'</div></div>' +
 
 			'<div class="row">' +
-			'<div class="col-sm-1"><label class="col-form-label" style="margin-top:0.8rem">Icon</label></div>' +
+			'<div class="col-sm-1"><label class="col-form-label" style="margin-top:0.8rem">' + self.app.i18n(self, 'MSG_ICON', 'Icon') + '</label></div>' +
 			'<div class="col-sm-11">' +
 			self.laces.iconSelectorCreate('cadet-script-icon', '', ['address-card-o','ambulance','anchor','angellist','automobile','bank','bath','bed','binoculars','birthday-cake','blind','bomb','bug','bullhorn','cab','camera-retro','cloud','code','codiepie','compass','dashboard','database','dribbble','feed','female','futbol-o','gitlab','glass','headphones','heart','info-circle','key','location-arrow']) +
 			'</div></div>' +
@@ -950,11 +973,11 @@ function cadetApp() {
  		
 		self.laces.modal('script-edit', {
 			'html':		html,
-			'title':	(id == 0 ? 'Create script' : 'Edit script'),
+			'title':	(id == 0 ? self.app.i18n(self, 'MSG_CREATE_SCRIPT', 'Create script') : self.app.i18n(self, 'MSG_EDIT_SCRIPT', 'Edit script')),
 			'buttons':	[
-				{'id': 'save',		'title': 'Save',	'style': 'primary'},
-				{'id': 'saveas',	'title': 'Save As',	'style': 'primary'},
-				{'id': 'cancel',	'title': 'Cancel',	'style': 'secondary'},
+				{'id': 'save',		'title': self.app.i18n(self, 'BTN_SAVE', 'Save'),	'style': 'primary'},
+				{'id': 'saveas',	'title': self.app.i18n(self, 'BTN_SAVE_AS', 'Save As'),	'style': 'primary'},
+				{'id': 'cancel',	'title': self.app.i18n(self, 'BTN_CANCEL', 'Cancel'),	'style': 'secondary'},
 				{'id': 'delete',	'title': '<i class="fa fa-trash"></i>',	'style': 'outline-danger',	'left': true, 'icon': true},
 				{'id': 'export',	'title': '<i class="fa fa-download"></i>',	'style': 'outline-secondary',	'left': true, 'icon': true},
 				{'id': 'duplicate',	'title': '<i class="fa fa-files-o"></i>',	'style': 'outline-secondary',	'left': true, 'icon': true}
@@ -1015,9 +1038,9 @@ function cadetApp() {
 											self.laces.modal('script-edit').loading(false, true);
 										} else {
 											self.laces.alert({
-												'title': 'Get script error',
-												'message': 'There was an error getting information about the script.',
-												'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
+												'title': self.app.i18n(self, 'TITLE_GET_SCRIPT_ERROR', 'Get script error'),
+												'message': self.app.i18n(self, 'ERROR_SCRIPT_INFO', 'There was an error getting information about the script'),
+												'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
 											});
 											
 											self.laces.modal('script-edit').close();
@@ -1034,16 +1057,16 @@ function cadetApp() {
 								self.laces.modal('script-edit').close();
 								
 								self.laces.alert({
-									'title': 'Get folders error',
-									'message': 'There was an error getting what folders are on ' + self.app.nao.name(),
-									'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
+									'title': self.app.i18n(self, 'TITLE_GET_FOLDERS_ERROR', 'Get folders error'),
+									'message': self.app.i18n(self, 'ERROR_GET_FOLDERS', 'There was an error getting what folders are on %NAME%'),
+									'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
 								});
 							}
 						});
 
 						$('body').on('change', '#cadet-script-dir', function() {
 							if($(this).val() == '...') {
-								self.app.askName(self, 'Create folder', 'New folder', 'Create', function(self, value) { 
+								self.app.askName(self, self.app.i18n(self, 'TITLE_CREATE_FOLDER', 'Create folder'), self.app.i18n(self, 'MSG_NEW_FOLDER', 'New folder'), self.app.i18n(self, 'BTN_CREATE', 'Create'), function(self, value) { 
 									var dirNew = value.toLowerCase().replace(/[^a-z0-9]/gi, '');
 									var found = false;
 		
@@ -1106,9 +1129,9 @@ function cadetApp() {
 										}
 									} else {
 										self.laces.alert({
-											'title': 'Script Save Error',
-											'message': 'Your script could not be saved because an error occured.',
-											'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
+											'title': self.app.i18n(self, 'TITLE_SAVE_SCRIPT_ERROR', 'Script Save Error'),
+											'message': self.app.i18n(self, 'ERROR_SAVE_SCRIPT', 'Your script could not be saved because an error occurred'),
+											'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
 										});
 
 										self.laces.modal('script-edit').loading(false, false);
@@ -1140,9 +1163,9 @@ function cadetApp() {
 												self.laces.modal('script-edit').close();
 											} else {
 												self.laces.alert({
-													'title': 'Save script error',
-													'message': 'There was an error saving the script.',
-													'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
+													'title': self.app.i18n(self, 'TITLE_SAVE_SCRIPT_ERROR', 'Save script error'),
+													'message': self.app.i18n(self, 'ERROR_SAVE_SCRIPT', 'There was an error saving the script'),
+													'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
 												});
 												
 												self.laces.modal('script-edit').close();
@@ -1150,9 +1173,9 @@ function cadetApp() {
 										})
 									} else {
 										self.laces.alert({
-											'title': 'Save script error',
-											'message': 'There was an error getting the original script.',
-											'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
+											'title': self.app.i18n(self, 'TITLE_SAVE_SCRIPT_ERROR', 'Save script error'),
+											'message': self.app.i18n(self, 'ERROR_GET_ORIGINAL_SCRIPT', 'There was an error getting the original script'),
+											'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
 										});
 										
 										self.laces.modal('script-edit').close();
@@ -1161,15 +1184,15 @@ function cadetApp() {
 								break;
 							case 'delete':
 								self.laces.modal('delete-script', {
-									'html':		'<p>Are you sure you want to delete this script?</p>',
+									'html':		'<p>' + self.app.i18n(self, 'MSG_CONFIRM_DELETE_SCRIPT', 'Are you sure you want to delete this script?') + '</p>',
 									'width':	'30rem',
 									'buttons':	[{
 										'id':		'yes',
-										'title':	'Yes',
+										'title':	self.app.i18n(self, 'BTN_YES', 'Yes'),
 										'style':	'primary'
 									},{
 										'id':		'no',
-										'title':	'No',
+										'title':	self.app.i18n(self, 'BTN_No', 'No'),
 										'style':	'secondary'
 									}],
 									'callback':	function(self, action, data) {
@@ -1180,9 +1203,9 @@ function cadetApp() {
 														self.laces.modal('script-edit').close();
 													} else {
 														self.laces.alert({
-															'title': 'Script Delete Error',
-															'message': 'Your script could not be saved because an error occured.',
-															'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
+															'title': self.app.i18n(self, 'TITLE_SCRIPT_DELETE_ERROR', 'Script Delete Error'),
+															'message': self.app.i18n(self, 'ERROR_SAVE_SCRIPT', 'Your script could not be saved because an error occurred'),
+															'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
 														});
 													}
 												});
@@ -1201,7 +1224,7 @@ function cadetApp() {
 									if(r['error_code'] == 0) {
 										data = {
 											'id':		0,
-											'name':		r['script']['name'] + ' copy',
+											'name':		r['script']['name'] + ' ' + self.app.i18n(self, 'MSG_COPY', 'copy'),
 											'user':		self.app.userId,
 											'options':	r['script']['options'],
 											'xml':		r['script']['xml']
@@ -1212,9 +1235,9 @@ function cadetApp() {
 												self.laces.modal('script-edit').close();
 											} else {
 												self.laces.alert({
-													'title': 'Duplicate script error',
-													'message': 'There was an error saving the duplicate script.',
-													'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
+													'title': self.app.i18n(self, 'TITLE_DUPLICATE_SCRIPT_ERROR', 'Duplicate script error'),
+													'message': self.app.i18n(self, 'ERROR_SAVE_DUPLICATE_SCRIPT', 'There was an error saving the duplicate script'),
+													'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
 												});
 												
 												self.laces.modal('script-edit').close();
@@ -1222,9 +1245,9 @@ function cadetApp() {
 										})
 									} else {
 										self.laces.alert({
-											'title': 'Duplicate script error',
-											'message': 'There was an error getting the original script.',
-											'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
+											'title': self.app.i18n(self, 'TITLE_DUPLICATE_SCRIPT_ERROR', 'Duplicate script error'),
+											'message': self.app.i18n(self, 'ERROR_GET_ORIGINAL_SCRIPT', 'There was an error getting the original script'),
+											'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
 										});
 										
 										self.laces.modal('script-edit').close();
@@ -1237,9 +1260,9 @@ function cadetApp() {
 										self.app.scriptExport(self, r['script']['name'], r['script']['xml']);
 									} else {
 										self.laces.alert({
-											'title': 'Export script error',
-											'message': 'Could not retrieve the details of the script to export',
-											'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
+											'title': self.app.i18n(self, 'TITLE_EXPORT_SCRIPT_ERROR', 'Export script error'),
+											'message': self.app.i18n(self, 'ERROR_EXPORT_SCRIPT', 'Could not retrieve the details of the script to export'),
+											'details': self.app.i18n(self, 'MSG_ERROR_CODE') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
 										});
 									}
 								});
@@ -1260,7 +1283,7 @@ function cadetApp() {
  *	Ask Name
  */
  	this.askName = function(self, title, value, button, cb, password=false) {
-		var buttons = [{'id':'create', 'title':button, 'style':'primary'},{'id':'cancel', 'title':'Cancel', 'style':'secondary'}];
+		var buttons = [{'id':'create', 'title':button, 'style':'primary'},{'id':'cancel', 'title':self.app.i18n(self, 'BTN_CANCEL', 'Cancel'), 'style':'secondary'}];
 		self.laces.modal('askname', {
 			'title':	title,
 			'html':		'<p><input type="' + (password == false ? 'text' : 'password') + '" class="form-control" id="cadet-askname" value="' + self.laces.escapeHtml(value) + '"></p>',
@@ -1347,41 +1370,41 @@ function cadetApp() {
 		
 		html = '<div>' +
 		'<div class="form-group row">' +
-			'<label class="col-sm-4 col-form-label" for="cadet-profile-name">Name</label>' +
+			'<label class="col-sm-4 col-form-label" for="cadet-profile-name">' + self.app.i18n(self, 'MSG_NAME', 'Name') + '</label>' +
 			'<div class="col-sm-8"><input type="text" id="cadet-profile-name" class="form-control" value="' + self.laces.escapeHtml(self.app.userName) + '"></div>' +
 		'</div>' +
-		'<h5>Options</h5>' +
+		'<h5>' + self.app.i18n(self, 'TITLE_OPTIONS', 'Options') + '</h5>' +
 			'<div class="form-check">' +
  			'<input class="form-check-input" type="checkbox" value="" id="cadet-profile-advanced"' + ('advanced' in self.app.userOptions && self.app.userOptions['advanced'] == true ? ' checked="checked"' : '') + '>' +
-			'<label class="form-check-label" for="cadet-profile-advanced">Show advanced blocks</label>' +
+			'<label class="form-check-label" for="cadet-profile-advanced">' + self.app.i18n(self, 'BTN_SHOW_ADVANCED_BLOCKS', 'Show advanced blocks') + '</label>' +
 			'</div>' +
-		'<h5>Change Password</h5>' +
+		'<h5>' + self.app.i18n(self, 'TITLE_CHANGE_PASSWORD', 'Change Password') + '</h5>' +
 		'<div class="form-group row">' +
-			'<label class="col-sm-4 col-form-label" for="cadet-profile-password">New Password</label>' +
+			'<label class="col-sm-4 col-form-label" for="cadet-profile-password">' + self.app.i18n(self, 'MSG_NEW_PASSWORD', 'New Password') + '</label>' +
 			'<div class="col-sm-8"><input type="password" id="cadet-profile-password" class="form-control"></div>' +
-			'<small class="offset-sm-4 col-sm-8 form-text text-muted">Leave blank unless you want to change your password</small>' +
+			'<small class="offset-sm-4 col-sm-8 form-text text-muted">' + self.app.i18n(self, 'MSG_LEAVE_BLANK_PASSWORD', 'Leave blank unless you want to change your password') + '</small>' +
 		'</div>' +
 		'<div id="cadet-profile-password-set-row" class="form-group row">' +
-			'<div class="offset-sm-4 col-sm-8"><button class="btn btn-outline-secondary" id="cadet-profile-password-clear" class="form-control">Remove Password</button></div>' +
+			'<div class="offset-sm-4 col-sm-8"><button class="btn btn-outline-secondary" id="cadet-profile-password-clear" class="form-control">' + self.app.i18n(self, 'BTN_REMOVE_PASSWORD', 'Remove Password') + '</button></div>' +
 		'</div>' +
 		'<div id="cadet-profile-password-noset-row" class="form-group row laces-hidden">' +
-			'<div class="offset-sm-3 col-sm-6"><p class="alert alert-info"><small><i class="fa fa-info-circle" style="margin-right:1rem"></i>No password has been set</small></p></div>' +
+			'<div class="offset-sm-3 col-sm-6"><p class="alert alert-info"><small><i class="fa fa-info-circle" style="margin-right:1rem"></i>' + self.app.i18n(self, 'MSG_NO_PASSWORD_SET', 'No password has been set') + '</small></p></div>' +
 		'</div>' +
 		'</div>';
 		
-		var buttons = [{'id':'save', 'title':'Save', 'style':'primary'},{'id':'cancel', 'title':'Cancel', 'style':'secondary'}];
+		var buttons = [{'id':'save', 'title':self.app.i18n(self, 'BTN_SAVE', 'Save'), 'style':'primary'},{'id':'cancel', 'title':self.app.i18n(self, 'BTN_CANCEL', 'Cancel'), 'style':'secondary'}];
 		var passwordSet = false;
 
 		self.laces.modal('user-profile', {
 			'html':		html,
-			'title':	'My Profile',
+			'title':	self.app.i18n(self, 'TITLE_MY_PROFILE', 'My Profile'),
 			'buttons':	[{
 				'id':		'save',
-				'title':	'Save',
+				'title':	self.app.i18n(self, 'BTN_SAVE', 'Save'),
 				'style':	'primary'
 			},{
 				'id':		'cancel',
-				'title':	'Cancel',
+				'title':	self.app.i18n(self, 'BTN_CANCEL', 'Cancel'),
 				'style':	'secondary'
 			}],
 			'callback':	function(self, action, data) {
@@ -1403,9 +1426,9 @@ function cadetApp() {
 								}
 							} else {
 								self.laces.alert({
-									'title': 'Load profile error',
-									'message': 'Could not load the details of your profile',
-									'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
+									'title': self.app.i18n(self, 'TITLE_LOAD_PROFILE_ERROR', 'Load profile error'),
+									'message': self.app.i18n(self, 'ERROR_LOAD_PROFILE', 'Could not load the details of your profile'),
+									'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
 								});
 								
 								self.laces.modal('user-profile').close();
@@ -1420,7 +1443,7 @@ function cadetApp() {
 								self.laces.modal('user-profile').close();
 								break;
 							case 'cadet-profile-password-clear':
-								self.app.askName(self, 'Current password', '', 'Verify', function(self, value) {
+								self.app.askName(self, self.app.i18n(self, 'MSG_CURRENT_PASSWORD', 'Current password'), '', self.app.i18n(self, 'BTN_VERIFY', 'Verify'), function(self, value) {
 									self.app.nao.send('cadet_userset', {'id':self.app.userId, 'password':-1, 'currentPassword': value}, function(r) {
 										if(r['error_code'] == 0) {
 											$('#cadet-profile-password-set-row').hide();
@@ -1430,9 +1453,9 @@ function cadetApp() {
 											self.app.nao.reauth(self.app.userName, '');
 										} else {
 											self.laces.alert({
-												'title': 'Change Password Error',
-												'message': 'Your password could not be changed because an error occured.',
-												'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
+												'title': self.app.i18n(self, 'TITLE_CHANGE_PASSWORD_ERROR', 'Change Password Error'),
+												'message': self.app.i18n(self, 'ERROR_CHANGE_PASSWORD', 'Your password could not be changed because an error occurred'),
+												'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : ''),
 											});
 										}
 									});
@@ -1462,16 +1485,16 @@ function cadetApp() {
 											self.laces.modal('user-profile').close();
 										} else {
 											self.laces.alert({
-												'title': 'Save Profile Error',
-												'message': 'Your profile could not be saved because an error occurred. Your password has not been changed.',
-												'details': 'Error Code: ' + self.app.nao.errorCodeToText(result['error_code']) + ('error_message' in result ? '<br><br>' + result['error_message'] : ''),
+												'title': self.app.i18n(self, 'TITLE_SAVE_PROFILE_ERROR', 'Save Profile Error'),
+												'message': self.app.i18n(self, 'ERROR_SAVE_PROFILE', 'Your profile could not be saved because an error occurred. Your password has not been changed'),
+												'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(result['error_code']) + ('error_message' in result ? '<br><br>' + result['error_message'] : ''),
 											});
 										}
 									});
 								}
 
 								if('password' in data && passwordSet) {
-									self.app.askName(self, 'Current password', '', 'Verify', function(self, value) {
+									self.app.askName(self, self.app.i18n(self, 'MSG_CURRENT_PASSWORD', 'Current password'), '', self.app.i18n(self, 'BTN_VERIFY', 'Verify'), function(self, value) {
 										data['currentPassword'] = value;
 										saveFunc(data);
 									}, true);
@@ -1503,7 +1526,7 @@ function cadetApp() {
 				self.laces.navbar()
 					.hide()
 					.clear()
-					.append('cadet-workspace-stop', 'Stop', function(self, id) {
+					.append('cadet-workspace-stop', self.app.i18n(self, 'BTN_STOP', 'Stop'), function(self, id) {
 						self.app.workspace.stopXml(self.app.nao);
 						self.laces.navbar()
 							.showItem('cadet-workspace-run')
@@ -1514,7 +1537,7 @@ function cadetApp() {
 							.hideItem('cadet-workspace-stop');
 					}, {backgroundColor: '#f00'})
 					.hideItem('cadet-workspace-stop')
-					.append('cadet-workspace-run', 'Run', function(self, id) { 
+					.append('cadet-workspace-run', self.app.i18n(self, 'BTN_RUN', 'Run'), function(self, id) { 
 						self.laces.navbar().disable();
 						self.app.workspace.runXml(self.app.nao, function(state, self) {
 							self.laces.navbar().enable();
@@ -1541,9 +1564,9 @@ function cadetApp() {
 									break;
 								case 'error':
 									self.laces.alert({
-										'title': 'NAO Error',
-										'message': 'An error occurred trying to run your script.',
-										'details': 'Error Code: ' + self.app.nao.errorCodeToText(state.error_code) + (state.error_message != '' ? '<br><br>' + state.error_message : '')
+										'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+										'message': self.app.i18n(self, 'ERROR_RUN_SCRIPT', 'An error occurred trying to run your script'),
+										'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(state.error_code) + (state.error_message != '' ? '<br><br>' + state.error_message : '')
 									});
 									break;
 								default:
@@ -1552,15 +1575,15 @@ function cadetApp() {
 							}
 						}, self);
 					})
-					.append('cadet-workspace-save', 'Save', function(self, id) {
+					.append('cadet-workspace-save', self.app.i18n(self, 'BTN_SAVE', 'Save'), function(self, id) {
 						var xml = self.app.workspace.getXml()
 						
 						self.app.nao.send('cadet_scriptset', {'id': self.scriptId, 'xml': xml}, function(r) {
 							if(r['error_code'] == 0) {
 								self.scriptXml = xml;
-								self.app.workspace.status('<i class="fa fa-check-circle-o fa-fw"></i> Script saved!', 2000);
+								self.app.workspace.status('<i class="fa fa-check-circle-o fa-fw"></i> ' + self.app.i18n(self, 'MSG_SCRIPT_SAVED', 'Script saved!'), 2000);
 							} else if(r['error_code'] == 16) {
-								self.app.askName(self, 'Save script as', self.scriptName, 'Save', function(self, value) {
+								self.app.askName(self, self.app.i18n(self, 'MSG_SAVE_SCRIPT_AS', 'Save script as'), self.scriptName, self.app.i18n(self, 'BTN_SAVE', 'Save'), function(self, value) {
 									var data = {
 										'id': 0,
 										'user': self.app.userId,
@@ -1581,38 +1604,38 @@ function cadetApp() {
 											self.laces.navbar().text(self.scriptName);
 										} else {
 											self.laces.alert({
-												'title': 'Error saving script',
-												'message': 'An error occurred trying to save your script.',
-												'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+												'title': self.app.i18n(self, 'TITLE_SAVE_SCRIPT_ERROR', 'Script Save Error'),
+												'message': self.app.i18n(self, 'ERROR_SAVE_SCRIPT', 'Your script could not be saved because an error occurred'),
+												'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 											});
 										}
 									});
 								});
 							} else {
 								self.laces.alert({
-									'title': 'Error saving script',
-									'message': 'An error occurred trying to save your script.',
-									'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+									'title': self.app.i18n(self, 'TITLE_SAVE_SCRIPT_ERROR', 'Script Save Error'),
+									'message': self.app.i18n(self, 'ERROR_SAVE_SCRIPT', 'Your script could not be saved because an error occurred'),
+									'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 								});
 							}
 						});
 					})
-					.append('cadet-workspace-close', 'Close', function(self, id) {
+					.append('cadet-workspace-close', self.app.i18n(self, 'BTN_CLOSE', 'Close'), function(self, id) {
 						if(self.scriptXml != self.app.workspace.getXml()) {
 							self.laces.modal('workspace-save', {
-								'html':		'<p>Do you want to save the changes to your script?</p>',
+								'html':		'<p>' + self.app.i18n(self, 'MSG_SAVE_SCRIPT_CONFIRM', 'Do you want to save the changes to your script?') + '</p>',
 								'width':	'30rem',
 								'buttons':	[{
 									'id':		'save',
-									'title':	'Save',
+									'title':	self.app.i18n(self, 'BTN_SAVE', 'Save'),
 									'style':	'primary'
 								},{
 									'id':		'no',
-									'title':	'No',
+									'title':	self.app.i18n(self, 'BTN_NO', 'No'),
 									'style':	'secondary'
 								},{
 									'id':		'cancel',
-									'title':	'Cancel',
+									'title':	self.app.i18n(self, 'BTN_CANCEL', 'Cancel'),
 									'style':	'outline-secondary',
 									'left':		true
 								}],
@@ -1627,9 +1650,9 @@ function cadetApp() {
 													self.laces.view('scripts').show();
 												} else {
 													self.laces.alert({
-														'title': 'Error saving script',
-														'message': 'An error occurred trying to save your script.',
-														'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+														'title': self.app.i18n(self, 'TITLE_SAVE_SCRIPT_ERROR', 'Script Save Error'),	
+														'message': self.app.i18n(self, 'ERROR_SAVE_SCRIPT', 'Your script could not be saved because an error occurred'),
+														'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 													});
 												}
 											});
@@ -1647,15 +1670,15 @@ function cadetApp() {
 						}
 					})
 					.appendDropdown('cadet-script-dropdown', '<i class="fa fa-bars"></i>', [
-						{id: 'cadet-workspace-export',		title: 'Export script'},
+						{id: 'cadet-workspace-export',		title: self.app.i18n(self, 'MENU_EXPORT_SCRIPT', 'Export script')},
 						{id: 'sep'},
-						{id: 'cadet-view-sounds',		title: 'Sounds'},
-						{id: 'cadet-view-videos',		title: 'Photos/Videos'},
-						{id: 'cadet-view-behaviors',	title: 'Behaviors'},
-						{id: 'cadet-view-motions',		title: 'Motions'},
+						{id: 'cadet-view-sounds',		title: self.app.i18n(self, 'MENU_SOUNDS', 'Sounds')},
+						{id: 'cadet-view-videos',		title: self.app.i18n(self, 'MENU_PHOTOSVIDEOS', 'Photos/Videos')},
+						{id: 'cadet-view-behaviors',	title: self.app.i18n(self, 'MENU_BEHAVIORS', 'Behaviors')},
+						{id: 'cadet-view-motions',		title: self.app.i18n(self, 'MENU_MOTIONS', 'Motions')},
 						{id: 'sep'},
-						{id: 'cadet-user-profile',		title: 'My profile'},
-						{id: 'cadet-user-logout',		title: 'Logout'
+						{id: 'cadet-user-profile',		title: self.app.i18n(self, 'MENU_MY_PROFILE', 'My profile')},
+						{id: 'cadet-user-logout',		title: self.app.i18n(self, 'MENU_LOGOUT', 'Logout')
 					}], function(self, id, enabled) {
 							switch(id) {
 								case 'cadet-view-sounds':
@@ -1685,7 +1708,9 @@ function cadetApp() {
 // 				.append('cadet-script-tbell', '<i class="fa fa-bell"></i>', function(self, id) { self.laces.tinkerbellEvent('tinkerbell_menu'); })
 				.show();
 				
-				var showWorkspaceFunc = function(xml = '', advanced=false) {
+				//DEBUG
+				//var showWorkspaceFunc = function(xml = '', advanced=false) {
+				var showWorkspaceFunc = function(xml = '', advanced=true) {
 					self.app.workspaceUpdateBehaviors(self);
 					self.app.workspaceUpdateMotions(self);
 					self.app.workspaceUpdateSounds(self);
@@ -1712,9 +1737,9 @@ function cadetApp() {
 							showWorkspaceFunc(r['script']['xml'], ('advanced' in self.app.userOptions ? self.app.userOptions['advanced'] : false));
  						} else {
 							self.laces.alert({
-								'title': 'Error loading script',
-								'message': 'There was a error getting the script on the ' + self.app.nao.name(),
-								'details': self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+								'title': self.app.i18n(self, 'TITLE_LOAD_SCRIPT_ERROR', 'Load script error'),
+								'message': self.app.i18n(self, 'ERROR_LOADING_SCRIPT', 'Error loading script'),
+								'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 							});
 							
 							self.laces.view('scripts').show();
@@ -1751,11 +1776,11 @@ function cadetApp() {
 			case '_show':
 				self.laces.navbar()
 					.hide()
-					.brand('NAO Cadet', function(self) {
+					.brand(self.app.i18n(self, 'NAO_CADET', 'NAO Cadet'), function(self) {
 						self.app.viewAbout(self);
 					})
 					.clear()
-					.append('cadet-admin-logout', 'Logout', function(self, id) { 
+					.append('cadet-admin-logout', self.app.i18n(self, 'MENU_LOGOUT', 'Logout'), function(self, id) { 
 						self.laces.view('login').show();
 					})
 					.show();
@@ -1763,15 +1788,15 @@ function cadetApp() {
 				
 				var html = '';
 				
-				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-location" class="btn btn-secondary float-right">Change Location</a><a href="#" id="cadet-admin-location-view" class="btn btn-secondary float-right">View Locations</a></div><i class="fa fa-map-marker fa-fw"></i><p>Location set to <strong class="cadet-viewadmin-domain">' + self.app.nao.domain() + '</strong></p></div></div>';
-				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-colour" class="btn btn-secondary float-right">Change Colour</a></div><i class="fa fa-paint-brush fa-fw"></i><p>Colour currently set to <strong class="cadet-viewadmin-colour">' + self.app.nao.colour() + '</strong></p></div></div>';
-				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-backup" class="btn btn-secondary float-right">Backup</a><a href="#" id="cadet-admin-restore" class="btn btn-secondary float-right">Restore</a></div><i class="fa fa-file-zip-o fa-fw"></i><p>Backup / Restore</p></div></div>';
-				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-users" class="btn btn-secondary float-right">View Users</a></div><i class="fa fa-users fa-fw"></i><p><strong></strong> Users</p></div></div>';
-				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-scripts" class="btn btn-secondary float-right">View Scripts</a></div><i class="fa fa-code fa-fw"></i><p><strong></strong> Scripts</p></div></div>';
-				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-files" class="btn btn-secondary float-right">View Files</a><a href="#" id="cadet-admin-temp-clear" class="btn btn-secondary float-right">Clear Temp Files</a></div><i class="fa fa-files-o fa-fw"></i><p><strong></strong> Files</p></div></div>';
-				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-password" class="btn btn-secondary float-right">Change Password</a></div><i class="fa fa-vcard-o fa-fw"></i><p>Change Admin Password</p></div></div>';
+				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-location" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_CHANGE_LOCATION', 'Change Location') + '</a><a href="#" id="cadet-admin-location-view" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_VIEW_LOCATIONS', 'View Locations') + '</a></div><i class="fa fa-map-marker fa-fw"></i><p>' + self.app.i18n(self, 'MSG_LOCATION_SET_TO', 'Location set to') + ' <strong class="cadet-viewadmin-domain">' + self.app.nao.domain() + '</strong></p></div></div>';
+				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-colour" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_CHANGE_COLOUR', 'Change Colour') + '</a></div><i class="fa fa-paint-brush fa-fw"></i><p>' + self.app.i18n(self, 'MSG_COLOUR_SET_TO', 'Colour currently set to') + ' <strong class="cadet-viewadmin-colour">' + self.app.nao.colour() + '</strong></p></div></div>';
+				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-backup" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_BACKUP', 'Backup') + '</a><a href="#" id="cadet-admin-restore" class="btn btn-secondary float-right">' + self.app.i18n('BTN_RESTORE', 'Restore') + '</a></div><i class="fa fa-file-zip-o fa-fw"></i><p>' + self.app.i18n('MSG_BACKUP_RESTORE', 'Backup / Restore') + '</p></div></div>';
+				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-users" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_VIEW_USERS', 'View Users') + '</a></div><i class="fa fa-users fa-fw"></i><p><strong></strong> ' + self.app.i18n(self, 'MSG_USERS', 'Users') + '</p></div></div>';
+				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-scripts" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_VIEW_SCRIPTS', 'View Scripts') + '</a></div><i class="fa fa-code fa-fw"></i><p><strong></strong> ' + self.app.i18n(self, 'MSG_SCRIPTS', 'Scripts') + '</p></div></div>';
+				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-files" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_VIEW_FILES', 'View Files') + '</a><a href="#" id="cadet-admin-temp-clear" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_CLEAR_TEMP_FILES', 'Clear Temp Files') + '</a></div><i class="fa fa-files-o fa-fw"></i><p><strong></strong> ' + self.app.i18n(self, 'MSG_FILES', 'Files') + '</p></div></div>';
+				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-password" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_CHANGE_PASSWORD', 'Change Password') + '</a></div><i class="fa fa-vcard-o fa-fw"></i><p>' + self.app.i18n(self, 'MSG_CHANGE_ADMIN_PASSWORD', 'Change Admin Password') + '</p></div></div>';
 				if(self.app.userName == 'root') {
-					html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-root-password" class="btn btn-secondary float-right">Change Password</a></div><i class="fa fa-vcard-o fa-fw"></i><p>Change Root Password</p></div></div>';
+					html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-root-password" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_CHANGE_PASSWORD', 'Change Password') + '</a></div><i class="fa fa-vcard-o fa-fw"></i><p>' + self.app.i18n(self, 'MSG_CHANGE_ROOT_PASSWORD', 'Change Root Password') + '</p></div></div>';
 				}
 				
 				self.app.nao.subscribe('viewadmin_domainchanged', 'event_domain_changed', function(event, self) {
@@ -1810,9 +1835,9 @@ function cadetApp() {
 								}
 							} else {
 								self.laces.alert({
-									'title': 'Error loading files',
-									'message': 'There was a error getting the list of files on the NAO.',
-									'details': self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+									'title': self.app.i18n(self, 'TITLE_LOAD_FILES_ERROR', 'Error loading files'),
+									'message': self.app.i18n(self, 'ERROR_GET_FILE_LIST', 'There was a error getting the list of files on the NAO'),
+									'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 								});
 							}
 				
@@ -1821,18 +1846,18 @@ function cadetApp() {
 					}
 	
 					self.laces.listView('view-locations', {
-						'title':	'Locations',
-						'item':		'location',
+						'title':	self.app.i18n(self, 'TITLE_LOCATIONS', 'Locations'),
+						'item':		self.app.i18n(self, 'ITEM_LOCATION', 'location'),
 						'buttons':	[{
 							'id':		'close',
-							'title':	'Close',
+							'title':	self.app.i18n(self, 'BTN_CLOSE', 'Close'),
 							'style':	'primary'
 						},{
 							'id':		'add',
-							'title':	'Create...',
+							'title':	self.app.i18n(self, 'BTN_CREATE_MORE', 'Create...'),
 							'style':	'secondary'
 						}],
-						'columns':	['Name', 'Users', 'Scripts', 'Actions'],
+						'columns':	[self.app.i18n(self, 'TITLE_NAME', 'Name'), self.app.i18n(self, 'TITLE_USERS', 'Users'), self.app.i18n(self, 'TITLE_SCRIPTS', 'Scripts'), self.app.i18n(self, 'TITLE_ACTIONS', 'Actions')],
 						'widths': ['40%', '20%', '20%', '20%'],
 						'callback':	function(self, action, data) {
 							switch(action) {
@@ -1844,24 +1869,24 @@ function cadetApp() {
 										case 'edit':
 											self.app.nao.send('cadet_domainget', {'id': data.value}, function(r) {
 												if(r['error_code'] == 0) {
-													self.app.askName(self, 'Rename location', r['domain']['name'], 'Rename', function(self, value) {
+													self.app.askName(self, self.app.i18n(self, 'TITLE_RENAME_LOCATION', 'Rename location'), r['domain']['name'], self.app.i18n(self, 'BTN_RENAME', 'Rename'), function(self, value) {
 														self.app.nao.send('cadet_domainset', {'id': data.value, 'name': value}, function(r) {
 															if(r['error_code'] == 0) {
 																rowsFunc(self);
 															} else {
 																self.laces.alert({
-																	'title': 'Rename location error',
-																	'message': 'Could not rename the location because an error occured.',
-																	'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+																	'title': self.app.i18n(self, 'TITLE_RENAME_LOCATION_ERROR', 'Rename location error'),
+																	'message': self.app.i18n(self, 'ERROR_RENAME_LOCATION', 'Could not rename the location because an error occurred'),
+																	'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 																});
 															}
 														});
 													});
 												} else {
 													self.laces.alert({
-														'title': 'Get location error',
-														'message': 'Could not retrieve details about the selected location.',
-														'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+														'title': self.app.i18n(self, 'TITLE_GET_LOCATION_ERROR', 'Get location error'),
+														'message': self.app.i18n(self, 'ERROR_GET_LOCATION', 'Could not retrieve details about the selected location'),
+														'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 													});
 												}
 											});
@@ -1875,15 +1900,15 @@ function cadetApp() {
 										case 'delete':
 											var id = data.value;
 											self.laces.modal('location-delete', {
-												'html':		'<p>Are you sure you want to delete this location?</p>',
+												'html':		'<p>' + self.app.i18n(self, 'MSG_CONFIRM_DELETE_LOCATION', 'Are you sure you want to delete this location?') + '</p>',
 												'width':	'30rem',
 												'buttons':	[{
 													'id':		'yes',
-													'title':	'Yes',
+													'title':	self.app.i18n(self, 'BTN_YES', 'Yes'),
 													'style':	'primary'
 												},{
 													'id':		'no',
-													'title':	'No',
+													'title':	self.app.i18n(self, 'BTN_NO', 'No'),
 													'style':	'secondary'
 												}],
 												'callback':	function(self, action, data) {
@@ -1895,9 +1920,9 @@ function cadetApp() {
 																	rowsFunc(self);
 																} else {
 																	self.laces.alert({
-																		'title': 'Error deleting location',
-																		'message': 'An problem occurred trying to delete the location.',
-																		'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+																		'title': self.app.i18n(self, 'TITLE_DELETE_LOCATION_ERROR', 'Error deleting location'),
+																		'message': self.app.i18n(self, 'ERROR_DELETE_LOCATION', 'An problem occurred trying to delete the location'),
+																		'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 																	});
 																}
 															});
@@ -1917,16 +1942,16 @@ function cadetApp() {
 													rowsFunc(self);
 												} else {
 													self.laces.alert({
-														'title': 'Error restoring location',
-														'message': 'An problem occurred trying to restore the location.',
-														'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+														'title': self.app.i18n(self, 'TITLE_RESTORE_LOCATION_ERROR', 'Error restoring location'),
+														'message': self.app.i18n(self, 'ERROR_RESTORE_LOCATION', 'An problem occurred trying to restore the location'),
+														'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 													});
 												}
 											});
 											
 											break;
 										case 'add':
-											self.app.askName(self, 'Create location', '', 'Create', function(self, value) { 
+											self.app.askName(self, self.app.i18n(self, 'TITLE_CREATE_LOCATION', 'Create location'), '', self.app.i18n(self, 'BTN_CREATE', 'Create'), function(self, value) { 
 												self.app.nao.send('cadet_domainset', {'id':0, 'name':value}, function(r) {
 													if(r['error_code'] == 0) {
 														var val = self.laces.escapeHtml(value);
@@ -1935,9 +1960,9 @@ function cadetApp() {
 														$('#cadet-select-location').lacesSelect('refresh');
 													} else {
 														self.laces.alert({
-															'title': 'NAO Cadet Location Error',
-															'message': 'Could not create the location on the NAO.',
-															'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+															'title': self.app.i18n(self, 'TITLE_LOCATION_ERROR', 'Location error'),
+															'message': self.app.i18n(self, 'ERROR_CREATE_LOCATION', 'There was an error creating the location'),
+															'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 														});
 													}
 												});
@@ -1961,29 +1986,29 @@ function cadetApp() {
 						if(r['error_code'] == 0) {
 							var html = '';
 							
-							html += '<div class="form-group"><label for="cadet-select-location">Location:</label> <select id="cadet-select-location">';
+							html += '<div class="form-group"><label for="cadet-select-location">' + self.app.i18n(self, 'MSG_LOCATION', 'Location') + ':</label> <select id="cadet-select-location">';
 							
 							for(var i=0; i<r['domains'].length; i++) {
 								html += '<option value="' + r['domains'][i]['id'] + '"' + (self.app.nao.domainId() == r['domains'][i]['id'] ? ' selected' : '') + '>' + self.laces.escapeHtml(r['domains'][i]['name']) + '</option>';
 							}
 							
 							html += '<option data-divider="true"></option>';
-							html += '<option value="...">Create...</option>';
+							html += '<option value="...">' + self.app.i18n(self, 'BTN_CREATE_MORE', 'Create...') + '</option>';
 							html += '</select></div>';
 							
-							html += '<div class="alert alert-danger"><strong>Warning</strong> Changing this setting will force all connected users to be disconnected</div>';
+							html += '<div class="alert alert-danger"><strong>' + self.app.i18n(self, 'MSG_WARNING', 'Warning') + '</strong> ' + self.app.i18n(self, 'MSG_CHANGE_DISCONNECT_USERS', 'Changing this setting will force all connected users to be disconnected') + '</div>';
 
 							self.laces.modal('setup', {
 								'html':		html,
-								'title':	'Change Location',
+								'title':	self.app.i18n(self, 'TITLE_CHANGE_LOCATION', 'Change Location'),
 								'width':	'28rem',
 								'buttons':	[{
 									'id':		'save',
-									'title':	'Save',
+									'title':	self.app.i18n(self, 'BTN_SAVE', 'Save'),
 									'style':	'primary'
 								},{
 									'id':		'cancel',
-									'title':	'Cancel',
+									'title':	self.app.i18n(self, 'BTN_CANCEL', 'Cancel'),
 									'style':	'secondary'
 								}],
 								'callback':	function(self, action, data) {
@@ -1994,7 +2019,7 @@ function cadetApp() {
 										case '_ready':
 											$('body').on('change', '#cadet-select-location', function() {
 												if($(this).val() == '...') {
-													self.app.askName(self, 'Create location', '', 'Create', function(self, value) { 
+													self.app.askName(self, self.app.i18n(self, 'TITLE_CREATE_LOCATION', 'Create location'), '', self.app.i18n(self, 'BTN_CREATE', 'Create'), function(self, value) { 
 														var titleNew = value.toLowerCase().replace(/[^a-z0-9]/gi, '');
 														var found = false;
 		
@@ -2019,9 +2044,9 @@ function cadetApp() {
 																	$('#cadet-select-location').lacesSelect('refresh');
 																} else {
 																	self.laces.alert({
-																		'title': 'NAO Cadet Location Error',
-																		'message': 'Could not create the location on the NAO.',
-																		'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+																		'title': self.app.i18n(self, 'TITLE_LOCATION_ERROR', 'Location Error'),
+																		'message': self.app.i18n(self, 'ERROR_CREATE_LOCATION', 'Could not create the location on the NAO'),
+																		'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 																	});
 																}
 															});														
@@ -2048,9 +2073,9 @@ function cadetApp() {
 																self.laces.modal('setup').close();
 															} else {
 																self.laces.alert({
-																	'title': 'NAO Cadet Location Error',
-																	'message': 'Could not set the location on the NAO.',
-																	'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+																	'title': self.app.i18n(self, 'TITLE_LOCATION_ERROR', 'Location Error'),
+																	'message': self.app.i18n(self, 'ERROR_SET_LOCATION', 'Could not set the location on the NAO'),
+																	'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 																});
 															}
 														});
@@ -2058,8 +2083,8 @@ function cadetApp() {
 														self.laces.modal('setup').loading(false);
 														
 														self.laces.alert({
-															'title': 'Could not set Location',
-															'message': 'You need to select a valid location before it can be saved'
+															'title': self.app.i18n(self, 'TITLE_SET_LOCATION_ERROR', 'Set location error'),
+															'message': self.app.i18n(self, 'MSG_SET_LOCATION_TO_SAVE', 'You need to select a valid location before it can be saved')
 														});
 													}
 
@@ -2075,16 +2100,16 @@ function cadetApp() {
 							}).show();
 						} else {
 							self.laces.alert({
-								'title': 'NAO Cadet Location Error',
-								'message': 'Could not retrieve the locations on the NAO.',
-								'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+								'title': self.app.i18n(self, 'TITLE_LOCATION_ERROR', 'Location Error'),
+								'message': self.app.i18n(self, 'ERROR_GETTING_LOCATIONS', 'Could not retrieve the locations on the NAO'),
+								'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 							});
 						}
 					});
 				}
 
 				var backupFunc = function() {
-					self.laces.progress('Backing up');
+					self.laces.progress(self.app.i18n(self, 'TITLE_BACKUP_PROGRESS', 'Backing up...'));
 					self.app.nao.send('cadet_backup', null, function(r) {
 						self.laces.progress().close();
 						
@@ -2092,9 +2117,9 @@ function cadetApp() {
 							window.location = '/file/backup.tar.gz';
 						} else {
 							self.laces.alert({
-								'title': 'NAO Cadet Backup Failed',
-								'message': 'An error occurred backing up NAO Cadet.',
-								'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+								'title': self.app.i18n(self, 'TITLE_BACKUP_ERROR', 'Backup error'),
+								'message': self.app.i18n(self, 'ERROR_BACKUP', 'An error occurred backing up NAO Cadet'),
+								'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 							});
 						}
 					});
@@ -2118,9 +2143,9 @@ function cadetApp() {
 											
 										} else {
 											self.laces.alert({
-												'title': 'NAO Cadet Restore Failed',
-												'message': 'An error occurred restoring NAO Cadet.',
-												'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+												'title': self.app.i18n(self, 'TITLE_RESTORE_ERROR', 'Restore error'),
+												'message': self.app.i18n(self, 'ERROR_RESTORE', 'An error occurred restoring NAO Cadet'),
+												'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 											});
 										}
 									});
@@ -2131,8 +2156,8 @@ function cadetApp() {
 							} else {
 								self.laces.progress().close();
 								self.laces.alert({
-									'title': 'Error loading file',
-									'message': 'There was an error uploading the file to the ' + self.app.nao.name() + '.',
+									'title': self.app.i18n(self, 'TITLE_UPLOAD_ERROR', 'Upload error'),
+									'message': self.app.i18n(self, 'ERROR_UPLOADING_FILE', 'There was an error uploading the file'),
 									'details': self.app.nao.errorCodeToText(result.error_code) + ('error_message' in result ? '<br><br>' + result['error_message'] : '')
 								});
 							}
@@ -2179,9 +2204,9 @@ function cadetApp() {
 								}
 							} else {
 								self.laces.alert({
-									'title': 'Error loading files',
-									'message': 'There was a error getting the list of files on the NAO.',
-									'details': self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+									'title': self.app.i18n(self, 'TITLE_LOAD_FILES_ERROR', 'Error loading files'),
+									'message': self.app.i18n(self, 'ERROR_GET_FILE_LIST', 'There was a error getting the list of files on the NAO'),
+									'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 								});
 							}
 				
@@ -2190,12 +2215,12 @@ function cadetApp() {
 					}
 	
 					self.laces.listView('view-users', {
-						'title':	'Users',
-						'item':		'user',
+						'title':	self.app.i18n(self, 'TITLE_USERS', 'Users'),
+						'item':		self.app.i18n(self, 'ITEM_USER', 'user'),
  						'search':	search,
 						'buttons':	[{
 							'id':		'close',
-							'title':	'Close',
+							'title':	self.app.i18n(self, 'BTN_CLOSE', 'Close'),
 							'style':	'primary'
 						}],
 						'columns':	['Name', 'Domain', 'Scripts', 'Actions'],
@@ -2208,16 +2233,16 @@ function cadetApp() {
 								case '_click':
 									switch(data.id) {
 										case 'edit':
-											self.app.askName(self, 'Rename user', data.value, 'Record', function(self, value) {
+											self.app.askName(self, self.app.i18n(self, 'TITLE_RENAME_USER', 'Rename user'), data.value, self.app.i18n(self, 'BTN_RENAME', 'Rename'), function(self, value) {
 												self.app.nao.send('audiodevice_startmicrophonesrecording', {"name": value}, function(r) {
 													if(r['error_code'] == 0) {
 														$('#stoprecord').show();
 														$('#record').hide();
 													} else {
 														self.laces.alert({
-															'title': 'NAO Error',
-															'message': 'The NAO could not record audio because an error occurred.',
-															'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+															'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+															'message': self.app.i18n(self, 'ERROR_RENAME_USER', 'An error occurred renaming the user'),
+															'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 														});
 													}
 												});
@@ -2232,15 +2257,15 @@ function cadetApp() {
 										case 'delete':
 											var id = data.value;
 											self.laces.modal('user-delete', {
-												'html':		'<p>Are you sure you want to delete this user?</p>',
+												'html':		'<p>' + self.app.i18n(self, 'MSG_CONFIRM_DELETE_USER', 'Are you sure you want to delete this user?') + '</p>',
 												'width':	'30rem',
 												'buttons':	[{
 													'id':		'yes',
-													'title':	'Yes',
+													'title':	self.app.i18n(self, 'BTN_YES', 'Yes'),
 													'style':	'primary'
 												},{
 													'id':		'no',
-													'title':	'No',
+													'title':	self.app.i18n(self, 'BTN_NO', 'No'),
 													'style':	'secondary'
 												}],
 												'callback':	function(self, action, data) {
@@ -2252,9 +2277,9 @@ function cadetApp() {
 																	rowsFunc(self);
 																} else {
 																	self.laces.alert({
-																		'title': 'Error deleting user',
-																		'message': 'An problem occurred trying to delete the user.',
-																		'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+																		'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+																		'message': self.app.i18n(self, 'ERROR_DELETE_USER', 'An problem occurred trying to delete the user'),
+																		'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 																	});
 																}
 															});
@@ -2272,9 +2297,9 @@ function cadetApp() {
 													rowsFunc(self);
 												} else {
 													self.laces.alert({
-														'title': 'Error restoring user',
-														'message': 'An problem occurred trying to restore the user.',
-														'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+														'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+														'message': self.app.i18n(self, 'ERROR_RESTORE_USER', 'An problem occurred trying to restore the user'),
+														'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 													});
 												}
 											});
@@ -2338,8 +2363,8 @@ function cadetApp() {
 								}
 							} else {
 								self.laces.alert({
-									'title': 'Error loading scripts',
-									'message': 'There was a error getting the list of scripts on the NAO.',
+									'title': self.app.i18n(self, 'TITLE_LOADING_SCRIPTS_ERROR', 'Error loading scripts'),
+									'message': self.app.i18n(self, 'ERROR_LOADING_SCRIPTS', 'Error loading scripts'),
 									'details': self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 								});
 							}
@@ -2349,15 +2374,15 @@ function cadetApp() {
 					}
 	
 					self.laces.listView('view-scripts', {
-						'title':	'Scripts',
-						'item':		'script',
+						'title':	self.app.i18n(self, 'TITLE_SCRIPTS', 'Scripts'),
+						'item':		self.app.i18n(self, 'ITEM_SCRIPT', 'script'),
  						'search':	search,
 						'buttons':	[{
 							'id':		'close',
-							'title':	'Close',
+							'title':	self.app.i18n(self, 'BTN_CLOSE', 'Close'),
 							'style':	'primary'
 						}],
-						'columns':	['Name', 'User', 'Domain', 'Actions'],
+						'columns':	[self.app.i18n(self, 'TITLE_NAME', 'Name'), self.app.i18n(self, 'TITLE_USER', 'User'), self.app.i18n(self, 'TITLE_DOMAIN', 'Domain'), self.app.i18n(self, 'TITLE_ACTIONS', 'Actions')],
 						'widths': ['40%', '20%', '20%', '20%'],
 						'callback':	function(self, action, data) {
 							switch(action) {
@@ -2367,16 +2392,16 @@ function cadetApp() {
 								case '_click':
 									switch(data.id) {
 										case 'edit':
-											self.app.askName(self, 'Rename script', data.value, 'Record', function(self, value) {
+											self.app.askName(self, self.app.i18n(self, 'TITLE_RECORD_AUDIO', 'Record audio'), data.value, self.app.i18n(self, 'BTN_RECORD', 'Record'), function(self, value) {
 												self.app.nao.send('audiodevice_startmicrophonesrecording', {"name": value}, function(r) {
 													if(r['error_code'] == 0) {
 														$('#stoprecord').show();
 														$('#record').hide();
 													} else {
 														self.laces.alert({
-															'title': 'NAO Error',
-															'message': 'The NAO could not record audio because an error occurred.',
-															'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+															'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+															'message': self.app.i18n(self, 'ERROR_RECORDING', 'The NAO could not record audio because an error occurred'),
+															'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 														});
 													}
 												});
@@ -2391,15 +2416,15 @@ function cadetApp() {
 										case 'delete':
 											var id = data.value;
 											self.laces.modal('script-delete', {
-												'html':		'<p>Are you sure you want to delete this script?</p>',
+												'html':		'<p>' + self.app.i18n(self, 'MSG_CONFIRM_DELETE_SCRIPT', 'Are you sure you want to delete this script?') + '</p>',
 												'width':	'30rem',
 												'buttons':	[{
 													'id':		'yes',
-													'title':	'Yes',
+													'title':	self.app.i18n(self, 'BTN_YES', 'Yes'),
 													'style':	'primary'
 												},{
 													'id':		'no',
-													'title':	'No',
+													'title':	self.app.i18n(self, 'BTN_NO', 'No'),
 													'style':	'secondary'
 												}],
 												'callback':	function(self, action, data) {
@@ -2411,9 +2436,9 @@ function cadetApp() {
 																	rowsFunc(self);
 																} else {
 																	self.laces.alert({
-																		'title': 'Error deleting script',
-																		'message': 'An problem occurred trying to delete the script.',
-																		'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+																		'title': self.app.i18n(self, 'TITLE_SCRIPT_DELETE_ERROR', 'Script Delete Script'),
+																		'message': self.app.i18n(self, 'ERROR_DELETE_SCRIPT', 'There was an error deleting the script'),
+																		'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 																	});
 																}
 															});
@@ -2431,9 +2456,9 @@ function cadetApp() {
 													rowsFunc(self);
 												} else {
 													self.laces.alert({
-														'title': 'Error restoring script',
-														'message': 'An problem occurred trying to restore the script.',
-														'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+														'title': self.app.i18n(self, 'TITLE_RESTORE_SCRIPT_ERROR', 'Error restoring script'),
+														'message': self.app.i18n(self, 'ERROR_RESTORE_SCRIPT', 'There was an error restoring the script'),
+														'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 													});
 												}
 											});
@@ -2474,9 +2499,9 @@ function cadetApp() {
 								}
 							} else {
 								self.laces.alert({
-									'title': 'Error loading files',
-									'message': 'There was a error getting the list of files on the NAO.',
-									'details': self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+									'title': self.app.i18n(self, 'TITLE_LOAD_FILES_ERROR', 'Error loading files'),
+									'message': self.app.i18n(self, 'ERROR_GET_FILE_LIST', 'There was a error getting the list of files on the NAO'),
+									'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 								});
 							}
 				
@@ -2487,18 +2512,18 @@ function cadetApp() {
 					// TODO add callback to reload when files change
 	
 					self.laces.listView('view-files', {
-						'title':	'Files',
-						'item':		'file',
+						'title':	self.app.i18n(self, 'TITLE_FILES', 'Files'),
+						'item':		self.app.i18n(self, 'ITEM_FILE', 'file'),
 						'buttons':	[{
 							'id':		'close',
-							'title':	'Close',
+							'title':	self.app.i18n(self, 'BTN_CLOSE', 'Close'),
 							'style':	'primary'
 						},{
 							'id':		'upload',
-							'title':	'Upload',
+							'title':	self.app.i18n(self, 'BTN_UPLOAD', 'Upload'),
 							'style':	'secondary'
 						}],
-						'columns':	['Name', 'Size', 'Actions'],
+						'columns':	[self.app.i18n(self, 'TITLE_NAME', 'Name'), self.app.i18n(self, 'TITLE_SIZE', 'Size'), self.app.i18n(self, 'TITLE_ACTIONS', 'Actions')],
 						'widths': ['50%', '20%', '30%'],
 						'callback':	function(self, action, data) {
 							switch(action) {
@@ -2508,15 +2533,15 @@ function cadetApp() {
 								case '_click':
 									switch(data.id) {
 										case 'edit':
-											self.app.askName(self, 'Rename file', data.value, 'Rename', function(self, value) {
+											self.app.askName(self, self.app.i18n(self, 'TITLE_RENAME_FILE', 'Rename file'), data.value, self.app.i18n(self, 'MSG_RENAME', 'Rename'), function(self, value) {
 												self.app.nao.send('cadet_filerename', {'name': data.value, 'newname': value}, function(r) {
 													if(r['error_code'] == 0) {
 														rowsFunc(self);
 													} else {
 														self.laces.alert({
-															'title': 'NAO Error',
-															'message': 'The NAO could not record audio because an error occurred.',
-															'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+															'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+															'message': self.app.i18n(self, 'ERROR_RENAME_FILE', 'Could not rename the file because an error occurred'),
+															'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 														});
 													}
 												});
@@ -2529,15 +2554,15 @@ function cadetApp() {
 										case 'delete':
 											name = data.value;
 											self.laces.modal('file-delete', {
-												'html':		'<p>Are you sure you want to delete this file?</p>',
+												'html':		'<p>' + self.app.i18n(self, 'MSG_CONFIRM_DELETE_FILE', 'Are you sure you want to delete this file?') + '</p>',
 												'width':	'30rem',
 												'buttons':	[{
 													'id':		'yes',
-													'title':	'Yes',
+													'title':	self.app.i18n(self, 'BTN_YES', 'Yes'),
 													'style':	'primary'
 												},{
 													'id':		'no',
-													'title':	'No',
+													'title':	self.app.i18n(self, 'BTN_NO', 'No'),
 													'style':	'secondary'
 												}],
 												'callback':	function(self, action, data) {
@@ -2549,9 +2574,9 @@ function cadetApp() {
 																	rowsFunc(self);
 																} else {
 																	self.laces.alert({
-																		'title': 'Error deleting file',
-																		'message': 'An problem occurred trying to delete the file.',
-																		'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+																		'title': self.app.i18n(self, 'TITLE_DELETE_FILE_ERROR', 'Error deleting file'),
+																		'message': self.app.i18n(self, 'ERROR_DELETE_FILE', 'There was an error deleting the file'),
+																		'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 																	});
 																}
 															});
@@ -2569,9 +2594,9 @@ function cadetApp() {
 													rowsFunc(self);
 												} else {
 													self.laces.alert({
-														'title': 'Error restoring file',
-														'message': 'An problem occurred trying to restore the file.',
-														'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+														'title': self.app.i18n(self, 'TITLE_ERROR_RESTORE_FILE', 'Error restoring file'),
+														'message': self.app.i18n(self, 'ERROR_RESTORING_FILE', 'An problem occurred trying to restore the file'),
+														'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 													});
 												}
 											});
@@ -2598,14 +2623,14 @@ function cadetApp() {
 						if(r['error_code'] == 0) {
 							self.laces.alert({
 								'style': 'success',
-								'title': 'Clear Temp Files Success',
-								'message': 'Temp files cleared'
+								'title': self.app.i18n(self, 'TITLE_CLEAR_TEMP_FILES_SUCCESS', 'Clear Temp Files Success'),
+								'message': self.app.i18n(self, 'MSG_CLEAR_TEMP_FILES_SUCCESS', 'Temporary files have been cleared successfully')
 							});
 						} else {
 							self.laces.alert({
-								'title': 'Clear Temp Files Error',
-								'message': 'There was an error clearing the temporary files from NAO Cadet.',
-								'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+								'title': self.app.i18n(self, 'TITLE_CLEAR_TEMP_FILES_ERROR', 'Clear Temp Files Error'),
+								'message': self.app.i18n(self, 'ERROR_CLEAR_TEMP_FILES', 'There was an error clearing the temporary files from NAO Cadet'),
+								'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 							});
 						}
 					});
@@ -2615,30 +2640,30 @@ function cadetApp() {
 					var html = '';
 				
 					html += '<div class="form-group">' +
-						'<label for="cadet-setup-admin">Current password</label>' +
+						'<label for="cadet-setup-admin">' + self.app.i18n(self, 'MSG_CURRENT_PASSWORD', 'Current password') + '</label>' +
 						'<input type="password" class="form-control" id="cadet-password-current">' +
 					'</div>';
 					
 					html += '<div class="form-group">' +
-						'<label for="cadet-setup-admin">New password</label>' +
+						'<label for="cadet-setup-admin">' + self.app.i18n(self, 'MSG_NEW_PASSWORD', 'New password') + '</label>' +
 						'<input type="password" class="form-control" id="cadet-password-new">' +
 					'</div>';
 					
 					html += '<div class="form-group">' +
-						'<label for="cadet-setup-admin">New password (again)</label>' +
+						'<label for="cadet-setup-admin">' + self.app.i18n(self, 'MSG_NEW_PASSWORD_AGAIN', 'New password (again)') + '</label>' +
 						'<input type="password" class="form-control" id="cadet-password-repeat">' +
 					'</div>';
 					
 					self.laces.modal('change-password', {
 						'html':		html,
-						'title':	'Change ' + user + ' password',
+						'title':	self.app.i18n(self, 'TITLE_CHANGE_USER_PASSWORD', 'Change %USERNAME% password'),
 						'buttons':	[{
 							'id':		'save',
-							'title':	'Save',
+							'title':	self.app.i18n(self, 'BTN_SAVE', 'Save'),
 							'style':	'primary'
 						},{
 							'id':		'cancel',
-							'title':	'Cancel',
+							'title':	self.app.i18n(self, 'BTN_CANCEL', 'Cancel'),
 							'style':	'outline-secondary'
 						}],
 						'callback':	function(self, action, data) {
@@ -2668,19 +2693,19 @@ function cadetApp() {
 											if(r['error_code'] == 0) {
 												self.laces.alert({
 													'style': 'success',
-													'title': 'Password changed',
-													'message': 'The password for the ' + name + ' account has not changed.'
+													'title': self.app.i18n(self, 'TITLE_CHANGE_PASSWORD_SUCCESS', 'Password changed'),
+													'message': self.app.i18n(self, 'MSG_PASSWORD_CHANGED', 'The password for the %ACCOUNT% account has been changed', {ACCOUNT: {content: name}})
 												});
 											} else if(r['error_code'] == 15) {
 												self.laces.alert({
-													'title': 'Cannot change password',
-													'message': 'The current password you entered was incorrect. The password for the ' + name + ' account has not been changed.'
+													'title': self.app.i18n(self, 'TITLE_CHANGE_PASSWORD_ERROR', 'Change Password Error'),
+													'message': self.app.i18n(self, 'ERROR_CHANGE_PASSWORD_INCORRECT', 'The current password you entered was incorrect. The password for the %ACCOUNT% account has not been changed', {ACCOUNT: {content: name}}),
 												});
 											} else {
 												self.laces.alert({
-													'title': 'Change password error',
-													'message': 'There was an error changing the password NAO Cadet.',
-													'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+													'title': self.app.i18n(self, 'TITLE_CHANGE_PASSWORD_ERROR', 'Change Password Error'),
+													'message': self.app.i18n(self, 'ERROR_CHANGE_PASSWORD', 'Your password could not be changed because an error occurred'),
+													'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 												});
 											}
 
@@ -2700,14 +2725,14 @@ function cadetApp() {
 					var html = '';
 				
 					html += '<div class="form-group">' +
-						'<label for="cadet-colour" class="mr-3">Colour</label>' +
+						'<label for="cadet-colour" class="mr-3">' + self.app.i18n(self, 'MSG_COLOUR', 'Colour') + '</label>' +
 						'<select id="cadet-colour" class="custom-select custom-select-lg mb-3">' +
-							'<option value="aqua">Aqua</option>' +
-							'<option value="blue">Blue</option>' +
-							'<option value="green">Green</option>' +
-							'<option value="grey">Grey</option>' +
-							'<option value="orange">Orange</option>' +
-							'<option value="red">Red</option>' +
+							'<option value="aqua">' + self.app.i18n(self, 'MSG_COLOUR_AQUA', 'Aqua') + '</option>' +
+							'<option value="blue">' + self.app.i18n(self, 'MSG_COLOUR_BLUE', 'Blue') + '</option>' +
+							'<option value="green">' + self.app.i18n(self, 'MSG_COLOUR_GREEN', 'Green') + '</option>' +
+							'<option value="grey">' + self.app.i18n(self, 'MSG_COLOUR_GREY', 'Grey') + '</option>' +
+							'<option value="orange">' + self.app.i18n(self, 'MSG_COLOUR_ORANGE', 'Orange') + '</option>' +
+							'<option value="red">' + self.app.i18n(self, 'MSG_COLOUR_RED', 'Red') + '</option>' +
 						'</select>' +
 					'</div>';
 					
@@ -2716,11 +2741,11 @@ function cadetApp() {
 						'title':	'Change NAO colour',
 						'buttons':	[{
 							'id':		'save',
-							'title':	'Save',
+							'title':	self.app.i18n(self, 'BTN_SAVE', 'Save'),
 							'style':	'primary'
 						},{
 							'id':		'cancel',
-							'title':	'Cancel',
+							'title':	self.app.i18n(self, 'BTN_CANCEL', 'Cancel'),
 							'style':	'outline-secondary'
 						}],
 						'callback':	function(self, action, data) {
@@ -2800,9 +2825,9 @@ function cadetApp() {
 					}
 				} else {
 					self.laces.alert({
-						'title': 'Error loading files',
-						'message': 'There was a error getting the list of files on the NAO.',
-						'details': self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+						'title': self.app.i18n(self, 'TITLE_LOAD_FILES_ERROR', 'Error loading files'),
+						'message': self.app.i18n(self, 'ERROR_GET_FILE_LIST', 'There was a error getting the list of files on the NAO'),
+						'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 					});
 				}
 				
@@ -2811,15 +2836,15 @@ function cadetApp() {
 		}
 	
 		self.laces.listView('view-sounds', {
-			'title':	'Sounds',
-			'item':		'sound',
+			'title':	self.app.i18n(self, 'TITLE_SOUNDS', 'Sounds'),
+			'item':		self.app.i18n(self, 'ITEM_SOUND', 'sound'),
 			'buttons':	[{
 				'id':		'close',
-				'title':	'Close',
+				'title':	self.app.i18n(self, 'BTN_CLOSE', 'Close'),
 				'style':	'primary'
 			},{
 				'id':		'upload',
-				'title':	'Upload...',
+				'title':	self.app.i18n(self, 'BTN_UPLOAD', 'Upload...'),
 				'style':	'secondary'
 			},{
 				'id':		'record',
@@ -2834,7 +2859,7 @@ function cadetApp() {
 				'icon':		true,
 				'left':		true
 			}],
-			'columns':	['Name', 'Size', 'Actions'],
+			'columns':	[self.app.i18n(self, 'TITLE_NAME', 'Name'), self.app.i18n(self, 'TITLE_SIZE', 'Size'), self.app.i18n(self, 'TITLE_ACTION', 'Actions')],
 			'widths': ['50%', '25%', '25%'],
 			'callback':	function(self, action, data) {
 				switch(action) {
@@ -2861,16 +2886,16 @@ function cadetApp() {
 					case '_click':
 						switch(data.id) {
 							case 'record':
-								self.app.askName(self, 'Recording name', 'My recording', 'Record', function(self, value) {
+								self.app.askName(self, self.app.i18n(self, 'MSG_RECORDING_NAME', 'Recording name'), self.app.i18n(self, 'MSG_MY_RECORDING', 'My recording'), self.app.i18n(self, 'BTN_RECORD', 'Record'), function(self, value) {
 									self.app.nao.send('audiodevice_startmicrophonesrecording', {"name": value}, function(r) {
 										if(r['error_code'] == 0) {
 											$('#stoprecord').show();
 											$('#record').hide();
 										} else {
 											self.laces.alert({
-												'title': 'NAO Error',
-												'message': 'The NAO could not record audio because an error occurred.',
-												'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+												'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+												'message': self.app.i18n(self, 'ERROR_RECORDING', 'The NAO could not record audio because an error occurred'),
+												'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 											});
 										}
 									});
@@ -2895,9 +2920,9 @@ function cadetApp() {
 								self.app.nao.send('audioplayer_playfile', {'name': data.value}, function(r) {
 									if(r['error_code']) {
 										self.laces.alert({
-											'title': 'Cannot play sound',
-											'message': 'There was a problem playing the sound on ' + self.app.nao.name(),
-											'details': self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+											'title': self.app.i18n(self, 'TITLE_SOUND_PLAYBACK_ERROR', 'Play sound error'),
+											'message': self.app.i18n(self, 'ERROR_SOUND_PLAYBACK', 'There was an error playing sound'),
+											'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 										});
 									} else {
 										self.laces.listView('view-sounds').find('a[data-value="' + data.value + '"]').
@@ -2910,15 +2935,15 @@ function cadetApp() {
 							case 'delete':
 								name = data.value;
 								self.laces.modal('file-delete', {
-									'html':		'<p>Are you sure you want to delete this sound?</p>',
+									'html':		'<p>' + self.app.i18n(self, 'MSG_CONFIRM_DELETE_SOUND', 'Are you sure you want to delete this sound?') + '</p>',
 									'width':	'30rem',
 									'buttons':	[{
 										'id':		'yes',
-										'title':	'Yes',
+										'title':	self.app.i18n(self, 'BTN_YES', 'Yes'),
 										'style':	'primary'
 									},{
 										'id':		'no',
-										'title':	'No',
+										'title':	self.app.i18n(self, 'BTN_NO', 'No'),
 										'style':	'secondary'
 									}],
 									'callback':	function(self, action, data) {
@@ -2930,9 +2955,9 @@ function cadetApp() {
 
 													} else {
 														self.laces.alert({
-															'title': 'Error deleting sound',
-															'message': 'An problem occurred trying to delete the sound.',
-															'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+															'title': self.app.i18n(self, 'TITLE_DELETE_SOUND_ERROR', 'Error deleting sound'),
+															'message': self.app.i18n(self, 'ERROR_DELETE_SOUND', 'There was an error deleting the sound'),
+															'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 														});
 													}
 												});
@@ -2970,7 +2995,7 @@ function cadetApp() {
 									});
 								}
 
-								self.app.workspace.status('<i class="fa fa-check-circle-o fa-fw"></i> Sound added!', 2000);
+								self.app.workspace.status('<i class="fa fa-check-circle-o fa-fw"></i> ' + self.app.i18n(self, 'MSG_SOUND_ADDED', 'Sound added!'), 2000);
 								break;
 						}
 
@@ -3003,9 +3028,9 @@ function cadetApp() {
 					}
 				} else {
 					self.laces.alert({
-						'title': 'Error loading files',
-						'message': 'There was a error getting the list of files on the NAO.',
-						'details': self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+						'title': self.app.i18n(self, 'TITLE_LOAD_FILES_ERROR', 'Error loading files'),
+						'message': self.app.i18n(self, 'ERROR_GET_FILE_LIST', 'There was a error getting the list of files on the NAO'),
+						'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 					});
 				}
 				
@@ -3014,18 +3039,18 @@ function cadetApp() {
 		}
 	
 		self.laces.listView('view-videos', {
-			'title':	'Photos/Videos',
-			'item':		'file',
+			'title':	self.app.i18n(self, 'TITLE_PHOTOSVIDEOS', 'Photos/Videos'),
+			'item':		self.app.i18n(self, 'ITEM_FILE', 'file'),
 			'buttons':	[{
 				'id':		'close',
-				'title':	'Close',
+				'title':	self.app.i18n(self, 'BTN_CLOSE', 'Close'),
 				'style':	'primary'
 			},{
 				'id':		'upload',
-				'title':	'Upload...',
+				'title':	self.app.i18n(self, 'BTN_UPLOAD', 'Upload...'),
 				'style':	'secondary'
 			}],
-			'columns':	['Name', 'Size', 'Actions'],
+			'columns':	[self.app.i18n(self, 'TITLE_NAME', 'Name'), self.app.i18n(self, 'TITLE_SIZE', 'Size'), self.app.i18n(self, 'TITLE_ACTIONS', 'Actions')],
 			'callback':	function(self, action, data) {
 				switch(action) {
 					case '_ready':
@@ -3048,15 +3073,15 @@ function cadetApp() {
 							case 'delete':
 								name = data.value;
 								self.laces.modal('file-delete', {
-									'html':		'<p>Are you sure you want to delete this photo/video?</p>',
+									'html':		'<p>' + self.app.i18n(self, 'MSG_CONFIRM_DELETE_PHOTOVIDEO', 'Are you sure you want to delete this photo/video?') + '</p>',
 									'width':	'30rem',
 									'buttons':	[{
 										'id':		'yes',
-										'title':	'Yes',
+										'title':	self.app.i18n(self, 'BTN_YES', 'Yes'),
 										'style':	'primary'
 									},{
 										'id':		'no',
-										'title':	'No',
+										'title':	self.app.i18n(self, 'BTN_NO', 'No'),
 										'style':	'secondary'
 									}],
 									'callback':	function(self, action, data) {
@@ -3068,9 +3093,9 @@ function cadetApp() {
 
 													} else {
 														self.laces.alert({
-															'title': 'Error deleting photo/video',
-															'message': 'An problem occurred trying to delete the photo/video.',
-															'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+															'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+															'message': self.app.i18n(self, 'ERROR_DELETE_PHOTOVIDEO', 'An problem occurred trying to delete the photo/video'),
+															'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 														});
 													}
 												});
@@ -3115,9 +3140,9 @@ function cadetApp() {
 					}
 				} else {
 					self.laces.alert({
-						'title': 'Error loading behaviors',
-						'message': 'There was a error getting the list of behaviors on the NAO.',
-						'details': self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+						'title': self.app.i18n(self, 'TITLE_LOADING_BEHAVIORS_ERROR', 'Error loading behaviors'),
+						'message': self.app.i18n(self, 'ERROR_LOADING_BEHAVIORS', 'There was a error getting the list of behaviors on the NAO'),
+						'details': self.app.i18n(self, 'ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 					});
 				}
 				
@@ -3126,14 +3151,14 @@ function cadetApp() {
 		}
 	
 		self.laces.listView('view-behaviors', {
-			'title':	'Behaviors',
-			'item':		'behavior',
+			'title':	self.app.i18n(self, 'TITLE_BEHAVIORS', 'Behaviors'),
+			'item':		self.app.i18n(self, 'ITEM)_BEHAVIOR', 'behavior'),
 			'buttons':	[{
 				'id':		'close',
-				'title':	'Close',
+				'title':	self.app.i18n(self, 'BTN_CLOSE', 'Close'),
 				'style':	'primary'
 			}],
-			'columns':	['Name', 'Actions'],
+			'columns':	[self.app.i18n(self, 'TITLE_NAME', 'Name'), self.app.i18n(self, 'TITLE_ACTIONS', 'Actions')],
 			'widths': ['80%', '20%'],
 			'callback':	function(self, action, data) {
 				switch(action) {
@@ -3209,7 +3234,7 @@ function cadetApp() {
 									}]
 								});
 
-								self.app.workspace.status('<i class="fa fa-check-circle-o fa-fw"></i> Behavior added!', 2000);
+								self.app.workspace.status('<i class="fa fa-check-circle-o fa-fw"></i> ' + self.app.i18n(self, 'MSG_BEHAVIOR_ADDED', 'Behavior added!'), 2000);
 								break;
 						}
 
@@ -3229,9 +3254,9 @@ function cadetApp() {
 		var html = '';
 		
 		html += '<ul class="nav nav-tabs" id="jointTab" role="tablist">';
-			html += '<li class="nav-item"><a class="nav-link active" id="jointhead-tab" data-toggle="tab" href="#jointhead" aria-controls="jointhead" aria=selected="true">Head</a></li>';
-			html += '<li class="nav-item"><a class="nav-link" id="jointlarm-tab" data-toggle="tab" href="#jointlarm" aria-controls="jointlarm" aria=selected="false">Left Arm</a></li>';
-			html += '<li class="nav-item"><a class="nav-link" id="jointrarm-tab" data-toggle="tab" href="#jointrarm" aria-controls="jointrarm" aria=selected="false">Right Arm</a></li>';
+			html += '<li class="nav-item"><a class="nav-link active" id="jointhead-tab" data-toggle="tab" href="#jointhead" aria-controls="jointhead" aria=selected="true">' + self.app.i18n(self, 'MSG_HEAD', 'Head') + '</a></li>';
+			html += '<li class="nav-item"><a class="nav-link" id="jointlarm-tab" data-toggle="tab" href="#jointlarm" aria-controls="jointlarm" aria=selected="false">' + self.app.i18n(self, 'MSG_LEFT_ARM', 'Left Arm') + '</a></li>';
+			html += '<li class="nav-item"><a class="nav-link" id="jointrarm-tab" data-toggle="tab" href="#jointrarm" aria-controls="jointrarm" aria=selected="false">' + self.app.i18n(self, 'MSG_RIGHT_ARM', 'Right Arm') + '</a></li>';
 		html += '</ul>';
 		html += '<div class="tab-content" id="jointTabContent">';
 			html += '<div class="tab-pane fade show active text-center" id="jointhead" role="tabpanel" aria-labelledby="jointhead-tab"><img src="/img/hardware_headjoint_3.3.png"></div>';
@@ -3240,11 +3265,11 @@ function cadetApp() {
 		html += '</div>';
 		
 		self.laces.modal('view-jointhelp', {
-			'title':	'Joint Information',
+			'title':	self.app.i18n(self, 'TITLE_JOINT_INFORMATION', 'Joint Information'),
 			'html':		html,
 			'buttons':	[{
 				'id':		'close',
-				'title':	'Close',
+				'title':	self.app.i18n(self, 'BTN_CLOSE', 'Close'),
 				'style':	'primary'
 			}],
 			'callback':	function(self, action, data) {
@@ -3277,13 +3302,13 @@ function cadetApp() {
 		html += '<table class="table cadet-edit-motion">';
 			html += '<thead>';
 				html += '<tr class="border-right no-border-bottom no-border-top">';
-					html += '<th colspan="2" rowspan="2">Head</th><th colspan="5">Left</th><th colspan="5">Right</th><th rowspan="3" class="speed text-upwards">Speed</th><th rowspan="3" class="action text-upwards">Action</th>';
+					html += '<th colspan="2" rowspan="2">' + self.app.i18n(self, 'MSG_HEAD', 'Head') + '</th><th colspan="5">' + self.app.i18n(self, 'MSG_LEFT', 'Left') + '</th><th colspan="5">' + self.app.i18n(self, 'MSG_RIGHT', 'Right') + '</th><th rowspan="3" class="speed text-upwards">' + self.app.i18n(self, 'MSG_SPEED', 'Speed') + '</th><th rowspan="3" class="action text-upwards">' + self.app.i18n(self, 'MSG_ACTION', 'Action') + '</th>';
 				html += '</tr>';
 				html += '<tr class="border-right no-border-bottom no-border-top">';
-					html += '<th colspan="2">Shoulder</th><th colspan="2">Elbow</th><th class="border-right">Wrist</th><th colspan="2">Shoulder</th><th colspan="2">Elbow</th><th>Wrist</th>';
+					html += '<th colspan="2">' + self.app.i18n(self, 'MSG_SHOULDER', 'Shoulder') + '</th><th colspan="2">' + self.app.i18n(self, 'MSG_ELBOW', 'Elbow') + '</th><th class="border-right">' + self.app.i18n(self, 'MSG_WRIST', 'Wrist') + '</th><th colspan="2">' + self.app.i18n(self, 'MSG_SHOULDER', 'Shoulder') + '</th><th colspan="2">' + self.app.i18n(self, 'MSG_ELBOW', 'Elbow') + '</th><th>Wrist</th>';
 				html += '</tr>';
 				html += '<tr class="border-right no-border-top">';
-					html += '<th>Pitch</th><th>Yaw</th><th>Roll</th><th>Pitch</th><th>Yaw</th><th>Roll</th><th>Yaw</th><th>Roll</th><th>Pitch</th><th>Yaw</th><th>Roll</th><th>Yaw</th>';
+					html += '<th>' + self.app.i18n(self, 'MSG_PITCH', 'Pitch') + '</th><th>' + self.app.i18n(self, 'MSG_YAW', 'Yaw') + '</th><th>' + self.app.i18n(self, 'MSG_ROLL', 'Roll') + '</th><th>' + self.app.i18n(self, 'MSG_PITCH', 'Pitch') + '</th><th>' + self.app.i18n(self, 'MSG_YAW', 'Yaw') + '</th><th>' + self.app.i18n(self, 'MSG_ROLL', 'Roll') + '</th><th>' + self.app.i18n(self, 'MSG_YAW', 'Yaw') + '</th><th>' + self.app.i18n(self, 'MSG_ROLL', 'Roll') + '</th><th>' + self.app.i18n(self, 'MSG_PITCH', 'Pitch') + '</th><th>' + self.app.i18n(self, 'MSG_YAW', 'Yaw') + '</th><th>' + self.app.i18n(self, 'MSG_ROLL', 'Roll') + '</th><th>' + self.app.i18n(self, 'MSG_YAW', 'Yaw') + '</th>';
 				html += '</tr>';
 			html += '</thead>';
 			html += '<tbody class="cadet-edit-joint">';
@@ -3307,17 +3332,17 @@ function cadetApp() {
 		html += '</table>';
 		
 		self.laces.modal('view-createeditmotion', {
-			'title':	'Set Joints',
+			'title':	self.app.i18n(self, 'TITLE_SET_JOINTS', 'Set Joints'),
 			'help':		function() {self.app.viewJointHelp(self);},
 			'html':		html,
 			'width':	'63rem',
 			'buttons':	[{
 				'id':		'save',
-				'title':	'Add',
+				'title':	self.app.i18n(self, 'BTN_ADD', 'Add'),
 				'style':	'primary'
 			},{
 				'id':		'cancel',
-				'title':	'Cancel',
+				'title':	self.app.i18n(self, 'BTN_CANCEL', 'Cancel'),
 				'style':	'secondary'
 			},{
 				'id':		'stand',
@@ -3443,8 +3468,8 @@ function cadetApp() {
 									
 									} else {
 										self.laces.alert({
-											'title': 'Cannot move joints',
-											'message': 'There was a problem moving the joints on ' + self.app.nao.name(),
+											'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+											'message': self.app.i18n(self, 'ERROR_MOVE_JOINTS', 'There was a problem moving the joints'),
 											'details': self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 										});
 									}
@@ -3484,8 +3509,8 @@ function cadetApp() {
 			} else {
 				self.laces.progress().close();
 				self.laces.alert({
-					'title': 'Error loading file',
-					'message': 'There was an error uploading the file to the ' + self.app.nao.name() + '.',
+					'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+					'message': self.app.i18n(self, 'ERROR_UPLOADING_FILE', 'There was an error uploading the file'),
 					'details': self.app.nao.errorCodeToText(result.error_code) + ('error_message' in result ? '<br><br>' + result['error_message'] : '')
 				});
 			}
@@ -3497,7 +3522,7 @@ function cadetApp() {
  */
 	this.viewAbout = function(self) {
 		var html = '<p class="cadet-about-section-main">';
-			html += '<span class="cadet-about-line"><strong>Version</strong>' + self.app.nao.version() + '<span>';
+			html += '<span class="cadet-about-line"><strong>Version</strong>' + self.app.version + '<span>';
 			html += '<span class="cadet-about-line"><strong>Created by</strong>James Collins<span>';
 			html += '<span class="cadet-about-line"><br><i>Copyright &copy; 2018, <a href="http://www.slq.qld.gov.au/" target="_blank">State Library of Queensland</a></i><span>';
 		html += '</p>';
@@ -3523,25 +3548,25 @@ function cadetApp() {
 
 		self.laces.modal('cadet-about', {
 			'html':		html,
-			'title':	'About NAO Cadet',
+			'title':	self.app.i18n(self, 'TITLE_ABOUT', 'About NAO Cadet'),
 			'buttons':	[
-				{'id': 'close', 'title':'Close', 'style': 'primary'},
-				{'id': 'quit', 'title':'Quit NAO Cadet', 'style': 'danger', 'left':true}
+				{'id': 'close', 'title':self.app.i18n(self, 'BTN_CLOSE', 'Close'), 'style': 'primary'},
+				{'id': 'quit', 'title':self.app.i18n(self, 'BTN_QUIT', 'Quit NAO Cadet'), 'style': 'danger', 'left':true}
 			],
 			'callback':	function(self, action, data) {
 				switch(action) {
 					case '_click':
 						if(data.id == 'quit') {
 							self.laces.modal('cadet-quit', {
-								'html':		'<p>Are you sure you want to quit NAO Cadet for all users?</p>',
+								'html':		'<p>' + self.app.i18n(self, 'MSG_CONFIRM_QUIT_CADET', 'Are you sure you want to quit NAO Cadet for all users?') + '</p>',
 								'width':	'30rem',
 								'buttons':	[{
 									'id':		'yes',
-									'title':	'Yes',
+									'title':	self.app.i18n(self, 'BTN_YES', 'Yes'),
 									'style':	'primary'
 								},{
 									'id':		'no',
-									'title':	'No',
+									'title':	self.app.i18n(self, 'BTN_NO', 'No'),
 									'style':	'secondary'
 								}],
 								'callback':	function(self, action, data) {
@@ -3553,8 +3578,8 @@ function cadetApp() {
 													window.location.href = '/close.html';
 												} else {
 													self.laces.alert({
-														'title': 'Error quitting NAO Cadet',
-														'message': 'An problem occurred trying to quit NAO Cadet.',
+														'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+														'message': self.app.i18n(self, 'ERROR_QUITTING_CADET', 'An problem occurred trying to quit NAO Cadet'),
 														'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 													});
 												}
@@ -3597,8 +3622,8 @@ function cadetApp() {
 					}
 				} else {
 					self.laces.alert({
-						'title': 'Error loading motions',
-						'message': 'There was a error getting the list of motions on the NAO.',
+						'title': self.app.i18n(self, 'TITLE_LOADING_MOTIONS_ERROR', 'Error loading motions'),
+						'message': self.app.i18n(self, 'ERROR_LOADING_MOTIONS', 'There was a error getting the list of motions on the NAO'),
 						'details': self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 					});
 				}
@@ -3608,11 +3633,11 @@ function cadetApp() {
 		}
 	
 		self.laces.listView('view-motions', {
-			'title':	'Motions',
-			'item':		'motion',
+			'title':	self.app.i18n(self, 'TITLE_MOTIONS', 'Motions'),
+			'item':		self.app.i18n(self, 'ITEM_MOTION', 'motion'),
 			'buttons':	[{
 				'id':		'close',
-				'title':	'Close',
+				'title':	self.app.i18n(self, 'BTN_CLOSE', 'Close'),
 				'style':	'primary'
 			},{
 				'id':		'stand',
@@ -3628,10 +3653,10 @@ function cadetApp() {
 				'left':		true
 			},{
 				'id':		'import',
-				'title':	'Upload...',
+				'title':	self.app.i18n(self, 'BTN_UPLOAD', 'Upload...'),
 				'style':	'secondary'
 			}],
-			'columns':	['Name', 'Movements', 'Time', 'Actions'],
+			'columns':	[self.app.i18n(self, 'TITLE_NAME', 'Name'), self.app.i18n(self, 'TITLE_MOVEMENTS', 'Movements'), self.app.i18n(self, 'TITLE_TIME', 'Time'), self.app.i18n(self, 'TITLE_ACTIONS', 'Actions')],
 			'widths':	['40%', '15%', '15%', '30%'],
 			'callback':	function(self, action, data) {
 				switch(action) {
@@ -3672,8 +3697,8 @@ function cadetApp() {
 													if(r['error_code'] == 0) {
 														if(r['exists'] == 1) {
 															self.laces.alert({
-																'title': 'Motion already exists',
-																'message': 'You cannot use that name for this motion as it already exists'
+																'title': self.app.i18n(self, 'TITLE_MOTION_EXISTS', 'Motion already exists'),
+																'message': self.app.i18n(self, 'ERROR_MOTION_EXISTS', 'You cannot use that name for this motion as it already exists')
 															});
 														} else {
 															self.app.askNameClose(self);
@@ -3699,18 +3724,18 @@ function cadetApp() {
 																	// TODO here!
 																} else {
 																	self.laces.alert({
-																		'title': 'Error uploading motion',
-																		'message': 'An problem occurred trying to upload the motion.',
-																		'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+																		'title': self.app.i18n(self, 'TITLE_UPLOAD_MOTION_ERROR', 'Motion upload error'),
+																		'message': self.app.i18n(self, 'ERROR_MOTION_UPLOAD', 'An problem occurred trying to upload the motion'),
+																		'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 																	});
 																}
 															});
 														}
 													} else {
 														self.laces.alert({
-															'title': 'Error uploading motion',
-															'message': 'An problem occurred trying to upload the motion.',
-															'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+															'title': self.app.i18n(self, 'TITLE_UPLOAD_MOTION_ERROR', 'Motion upload error'),
+															'message': self.app.i18n(self, 'ERROR_MOTION_UPLOAD', 'An problem occurred trying to upload the motion'),
+															'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 														});
 													}
 												});
@@ -3719,9 +3744,9 @@ function cadetApp() {
 											});
 										} catch(e) {
 											self.laces.alert({
-												'title': 'Error uploading motion',
-												'message': 'An problem occurred trying to upload the motion.',
-												'details': 'JSON parse error'
+												'title': self.app.i18n(self, 'TITLE_UPLOAD_MOTION_ERROR', 'Motion upload error'),
+												'message': self.app.i18n(self, 'ERROR_MOTION_UPLOAD', 'An problem occurred trying to upload the motion'),
+												'details': self.app.i18n(self, 'ERROR_JSON_PARSE', 'JSON parse error')
 											});
 										}
 										
@@ -3754,15 +3779,15 @@ function cadetApp() {
 							case 'delete':
 								var name = data.value;
 								self.laces.modal('motion-delete', {
-									'html':		'<p>Are you sure you want to delete this motion?</p>',
+									'html':		'<p>' + self.app.i18n(self, 'MSG_CONFIRM_DELETE_MOTION', 'Are you sure you want to delete this motion?') + '</p>',
 									'width':	'30rem',
 									'buttons':	[{
 										'id':		'yes',
-										'title':	'Yes',
+										'title':	self.app.i18n(self, 'BTN_YES', 'Yes'),
 										'style':	'primary'
 									},{
 										'id':		'no',
-										'title':	'No',
+										'title':	self.app.i18n(self, 'BTN_NO', 'No'),
 										'style':	'secondary'
 									}],
 									'callback':	function(self, action, data) {
@@ -3774,9 +3799,9 @@ function cadetApp() {
 
 													} else {
 														self.laces.alert({
-															'title': 'Error deleting motion',
-															'message': 'An problem occurred trying to delete the motion.',
-															'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+															'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+															'message': self.app.i18n(self, 'ERROR_MOTION_DELETE', 'An problem occurred trying to delete the motion'),
+															'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 														});
 													}
 												});
@@ -3799,9 +3824,9 @@ function cadetApp() {
 										self.app.scriptExport(self, name, JSON.stringify(r['motion']['movements']), 'json');
 									} else {
 										self.laces.alert({
-											'title': 'Error exporting motion',
-											'message': 'An problem occurred trying to export the motion.',
-											'details': 'Error Code: ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+											'title': self.app.i18n(self, 'TITLE_NAO_ERROR', 'NAO Error'),
+											'message': self.app.i18n(self, 'ERROR_MOTION_EXPORT', 'An problem occurred trying to export the motion'),
+											'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error Code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 										});
 									}
 								});
@@ -3823,7 +3848,7 @@ function cadetApp() {
 									});
 								}
 
-								self.app.workspace.status('<i class="fa fa-check-circle-o fa-fw"></i> Motion added!', 2000);
+								self.app.workspace.status('<i class="fa fa-check-circle-o fa-fw"></i> ' + self.app.i18n(self, 'MSG_MOTION_ADDED', 'Motion added!'), 2000);
 								break;
 						}
 
@@ -3871,32 +3896,32 @@ function cadetApp() {
 		html += '<table class="table cadet-edit-motion">';
 			html += '<thead>';
 				html += '<tr class="border-right no-border-bottom no-border-top">';
-					html += '<th colspan="2" rowspan="2">Head</th><th colspan="5">Left</th><th colspan="5">Right</th><th rowspan="3" class="speed text-upwards">Speed</th><th rowspan="3" class="delay text-upwards">Delay</th><th rowspan="3" class="action text-upwards">Action</th>';
+					html += '<th colspan="2" rowspan="2">' + self.app.i18n(self, 'MSG_HEAD', 'Head') + '</th><th colspan="5">' + self.app.i18n(self, 'MSG_LEFT', 'Left') + '</th><th colspan="5">' + self.app.i18n(self, 'MSG_RIGHT', 'Right') + '</th><th rowspan="3" class="speed text-upwards">' + self.app.i18n(self, 'MSG_SPEED', 'Speed') + '</th><th rowspan="3" class="delay text-upwards">' + self.app.i18n(self, 'MSG_DELAY', 'Delay') + '</th><th rowspan="3" class="action text-upwards">' + self.app.i18n(self, 'MSG_ACTION', 'Action') + '</th>';
 				html += '</tr>';
 				html += '<tr class="border-right no-border-bottom no-border-top">';
-					html += '<th colspan="2">Shoulder</th><th colspan="2">Elbow</th><th class="border-right">Wrist</th><th colspan="2">Shoulder</th><th colspan="2">Elbow</th><th>Wrist</th>';
+					html += '<th colspan="2">' + self.app.i18n(self, 'MSG_SHOULDER', 'Shoulder') + '</th><th colspan="2">' + self.app.i18n(self, 'MSG_ELBOW', 'Elbow') + '</th><th class="border-right">' + self.app.i18n(self, 'MSG_WRIST', 'Wrist') + '</th><th colspan="2">' + self.app.i18n(self, 'MSG_SHOULDER', 'Shoulder') + '</th><th colspan="2">' + self.app.i18n(self, 'MSG_ELBOW', 'Elbow') + '</th><th>' + self.app.i18n(self, 'MSG_WRIST', 'Wrist') + '</th>';
 				html += '</tr>';
 				html += '<tr class="border-right no-border-top">';
-					html += '<th>Pitch</th><th>Yaw</th><th>Roll</th><th>Pitch</th><th>Yaw</th><th>Roll</th><th>Yaw</th><th>Roll</th><th>Pitch</th><th>Yaw</th><th>Roll</th><th>Yaw</th>';
+					html += '<th>' + self.app.i18n(self, 'MSG_PITCH', 'Pitch') + '</th><th>' + self.app.i18n(self, 'MSG_YAW', 'Yaw') + '</th><th>' + self.app.i18n(self, 'MSG_ROLL', 'Roll') + '</th><th>' + self.app.i18n(self, 'MSG_PITCH', 'Pitch') + '</th><th>' + self.app.i18n(self, 'MSG_YAW', 'Yaw') + '</th><th>' + self.app.i18n(self, 'MSG_ROLL', 'Roll') + '</th><th>' + self.app.i18n(self, 'MSG_YAW', 'Yaw') + '</th><th>' + self.app.i18n(self, 'MSG_ROLL', 'Roll') + '</th><th>' + self.app.i18n(self, 'MSG_PITCH', 'Pitch') + '</th><th>' + self.app.i18n(self, 'MSG_YAW', 'Yaw') + '</th><th>' + self.app.i18n(self, 'MSG_ROLL', 'Roll') + '</th><th>' + self.app.i18n(self, 'MSG_YAW', 'Yaw') + '</th>';
 				html += '</tr>';
 			html += '</thead>';
 			html += '<tbody>';
-				html += '<tr class="movement-none"><td colspan="15"><i class="fa fa-exclamation fa-5x fa-fw"></i><br>No movements found</td></tr>';
+				html += '<tr class="movement-none"><td colspan="15"><i class="fa fa-exclamation fa-5x fa-fw"></i><br>' + self.app.i18n(self, 'MSG_NO_MOVEMENTS_FOUND', 'No movements found') + '</td></tr>';
 			html += '</tbody>';
 		html += '</table>';
 		
-		self.laces.modal('view-createeditmotion', {
-			'title':	'Create motion <input type="text" class="form-control" id="cadet-motion-name" value="' + self.laces.escapeHtml((name != '' ? name : self.app.userName + '\'s move')) + '">',
+		self.laces.modal('view-createeditmotion', {			
+			'title':	self.app.i18n(self, 'TITLE_CREATE_MOTION', 'Create motion') + ' <input type="text" class="form-control" id="cadet-motion-name" value="' + self.laces.escapeHtml((name != '' ? name : self.app.userName + '\'s move')) + '">',
 			'help':		function() {self.app.viewJointHelp(self);},
 			'html':		html,
 			'width':	'63rem',
 			'buttons':	[{
 				'id':		'save',
-				'title':	'Save',
+				'title':	self.app.i18n(self, 'BTN_SAVE', 'Save'),
 				'style':	'primary'
 			},{
 				'id':		'cancel',
-				'title':	'Cancel',
+				'title':	self.app.i18n(self, 'BTN_CANCEL', 'Cancel'),
 				'style':	'secondary'
 			},{
 				'id':		'stand',
@@ -3942,9 +3967,9 @@ function cadetApp() {
 									self.laces.modal('view-createeditmotion').loading(false, true);
 								} else {
 									self.laces.alert({
-										'title': 'Cannot load movement',
-										'message': 'There was a problem loading the movement on ' + self.app.nao.name(),
-										'details': self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+										'title': self.app.i18n(self, 'TITLE_LOADING_MOVEMENT_ERROR', 'Cannot load movement'),
+										'message': self.app.i18n(self, 'ERROR_LOADING_MOVEMENT', 'There was a problem loading the movement'),
+										'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 									});
 									
 									self.laces.modal('view-createeditmotion').close();
@@ -4054,9 +4079,9 @@ function cadetApp() {
 											self.laces.modal('view-createeditmotion').close()
 										} else {
 											self.laces.alert({
-												'title': 'Cannot save motion',
-												'message': 'There was a problem saving the joints on ' + self.app.nao.name(),
-												'details': self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+												'title': self.app.i18n(self, 'TITLE_SAVING_MOTION_ERROR', 'Cannot save motion'),
+												'message': self.app.i18n(self, 'ERROR_SAVING_JOINTS', 'There was a problem saving the joints'),
+												'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': '+ self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 											});
 										}
 									});
@@ -4067,17 +4092,17 @@ function cadetApp() {
 										if(r['error_code'] == 0) {
 											if(r['exists'] == 1) {
 												self.laces.alert({
-													'title': 'Motion already exists',
-													'message': 'You cannot use that name for this motion as it already exists'
+													'title': self.app.i18n(self, 'TITLE_MOTION_EXISTS', 'Motion already exists'),
+													'message': self.app.i18n(self, 'ERROR_MOTION_EXISTS', 'You cannot use that name for this motion as it already exists')
 												});
 											} else {
 												updateMotionFunc();
 											}
 										} else {
 											self.laces.alert({
-												'title': 'Cannot save motion',
-												'message': 'There was a problem saving the motion on ' + self.app.nao.name(),
-												'details': self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+												'title': self.app.i18n(self, 'TITLE_SAVING_MOTION_ERROR', 'Cannot save motion'),
+												'message': self.app.i18n(self, 'ERROR_SAVING_MOTION', 'There was a problem saving the motion'),
+												'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 											});
 										}
 									});
@@ -4114,9 +4139,9 @@ function cadetApp() {
 									
 									} else {
 										self.laces.alert({
-											'title': 'Cannot move joints',
-											'message': 'There was a problem moving the joints on ' + self.app.nao.name(),
-											'details': self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+											'title': self.app.i18n(self, 'TITLE_MOVE_JOINTS_ERROR', 'Cannot move joints'),
+											'message': self.app.i18n(self, 'ERROR_MOVE_JOINTS', 'There was a problem moving the joints'),
+											'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 										});
 									}
 								});
@@ -4198,9 +4223,9 @@ function cadetApp() {
 								}
 							} else {
 								self.laces.alert({
-									'title': 'Cannot run movement',
-									'message': 'There was a problem loading the movement on ' + self.app.nao.name(),
-									'details': self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+									'title': self.app.i18n(self, 'TITLE_RUNNING_MOVEMENT_ERROR', 'Cannot run movement'),
+									'message': self.app.i18n(self, 'ERROR_RUNNING_MOVEMENT', 'There was a problem running the movement'),
+									'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 								});
 							}
 						});
@@ -4210,9 +4235,9 @@ function cadetApp() {
 				window.setTimeout(playMotionFunc, 0, movements);				
 			} else {
 				self.laces.alert({
-					'title': 'Cannot load movement',
-					'message': 'There was a problem loading the movement on ' + self.app.nao.name(),
-					'details': self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+					'title': self.app.i18n(self, 'TITLE_LOADING_MOVEMENT_ERROR', 'Cannot load movement'),
+					'message': self.app.i18n(self, 'ERROR_LOADING_MOVEMENT', 'There was a problem loading the movement'),
+					'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r['error_code']) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 				});
 			}
 		});
@@ -4237,9 +4262,9 @@ function cadetApp() {
 				}
 			} else {
 				self.laces.alert({
-					'title': 'Error loading sounds',
-					'message': 'There was a error getting the list of sounds on the NAO.',
-					'details': self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+					'title': self.app.i18n(self, 'TITLE_LOADING_SOUNDS_ERROR', 'Error loading sounds'),
+					'message': self.app.i18n(self, 'ERROR_LOADING_SOUNDS', 'There was a error getting the list of sounds on the NAO'),
+					'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 				});
 			}
 			
@@ -4257,9 +4282,9 @@ function cadetApp() {
 				}
 			} else {
 				self.laces.alert({
-					'title': 'Error loading motions',
-					'message': 'There was a error getting the list of motions on the NAO.',
-					'details': self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+					'title': self.app.i18n(self, 'TITLE_LOADING_MOTIONS_ERROR', 'Error loading motions'),
+					'message': self.app.i18n(self, 'ERROR_LOADING_MOTIONS', 'There was a error getting the list of motions on the NAO'),
+					'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 				});
 			}
 		
@@ -4283,9 +4308,9 @@ function cadetApp() {
 				}
 			} else {
 				self.laces.alert({
-					'title': 'Error loading behaviors',
-					'message': 'There was a error getting the list of behaviors on the NAO.',
-					'details': self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
+					'title': self.app.i18n(self, 'TITLE_LOADING_BEHAVIORS_ERROR', 'Error loading behaviors'),
+					'message': self.app.i18n(self, 'ERROR_LOADING_BEHAVIORS', 'There was a error getting the list of behaviors on the NAO'),
+					'details': self.app.i18n(self, 'MSG_ERROR_CODE', 'Error code') + ': ' + self.app.nao.errorCodeToText(r.error_code) + ('error_message' in r ? '<br><br>' + r['error_message'] : '')
 				});
 			}
 			
@@ -4308,10 +4333,115 @@ function cadetApp() {
 		a.download = url;
 		a.dispatchEvent(event);
 	}
+	
+/*
+ *	i18n
+ */
+	this.i18n = function(self, id, def = '', operations = {}) {
+		var s = def;
+	
+		if(typeof self.app.i18nData !== 'undefined' && self.app.i18nData != null && self.app.i18nData.hasOwnProperty(id) && self.app.i18nData[id].hasOwnProperty(self.app.i18nLang) && self.app.i18nData[id][self.app.i18nLang].length > 0) {
+			s = self.app.i18nData[id][self.app.i18nLang];
+		}
+		
+		// Add operations
+		for(var item in operations) {
+			if(operations[item].hasOwnProperty('prefix')) {
+				var idx = s.indexOf('%'+item+'%');
+				if(idx > -1) s = s.substring(0, idx) + operations[item]['prefix'] + s.substring(idx);
+			}
+	
+			if(operations[item].hasOwnProperty('prefix')) {
+				var idx = s.indexOf('%'+item+'%');
+				if(idx > -1) s = s.substring(0, idx + item.length + 2) + operations[item]['postfix'] + s.substring(idx + item.length + 2);
+			}
+	
+			if(operations[item].hasOwnProperty('content')) {
+				s = s.replace('%'+item+'%', operations[item]['content']);
+			}
+		}
+		
+		// Replace value placeholders
+		if(typeof self.app.nao !== 'undefined' && self.app.nao != null) {
+			s = s.replace('%NAME%', self.app.nao.name());
+			s = s.replace('%LOCATION%', self.app.nao.domain());
+		}
+		
+		s = s.replace('%USERNAME%', self.app.userName);
+
+		if(s.indexOf('%TIME_GREETING%') > -1) {
+			var d = new Date();
+			var n = d.getHours();
+			var tg = 'MSG_GOOD_MORNING';
+	
+			if(n < 12) {
+				tg = 'MSG_GOOD_MORNING';
+			} else if(n < 18) {
+				tg = 'MSG_GOOD_AFTERNOON';
+			} else {
+				tg = 'MSG_GOOD_EVENING';
+			}
+		
+			if(self.app.i18nData != null && self.app.i18nData.hasOwnProperty(tg) && self.app.i18nData[tg].hasOwnProperty(self.app.i18nLang)) {
+				s = s.replace('%TIME_GREETING%', self.app.i18nData[tg][self.app.i18nLang]);
+			} else {
+				s = s.replace('%TIME_GREETING%', 'Welcome');
+			}
+		}
+		
+		return s;
+	}
+	
+/*
+ *	i18n Language Name
+ */
+	this.i18nLanguageName = function(languageCode) {
+			if(this.i18nData != null && this.i18nData.hasOwnProperty('languageNames') && this.i18nData.langaugeNames.hasOwnProperty(code)) {
+				return this.i18nData.langaugeNames[languageCode];
+			}
+			
+			return ('Unknown');
+	}
+
+/*
+ *	i18n Languages Available
+ */
+	this.i18nLangaugesAvail = function() {
+			var languages = Array();
+	
+			if(this.i18nData != null && this.i18nData.hasOwnProperty('languageNames') && this.i18nData.languageNames) {
+					for(var prop in this.i18nData.languageNames) {
+						languages.push(prop);
+					}
+			}
+			
+			return languages;
+	}
+
+/*
+ *	i18n Get Language
+ */
+	this.i18nGetLanguage = function() {
+		return(this.i18nLang);
+	}
+
+/*
+ *	i18n Set Language
+ */
+	this.i18nSetLanguage = function(code) {
+		this.i18nLang = code;
+	}
+
+/*
+ *	i18n Set Data
+ */
+ 	this.i18nSetData = function(self, data) {
+ 		self.app.i18nData = data;
+ 	}
 }
 
 window.onerror = function(error, url, line) {
-	$('body').html((window.location.href.indexOf('tablet=1') >= 0 ? '<a href="/close.html" class="cadet-error-close"><i class="fa fa-close"></i></a>' : '') + '<div class="laces-status"><i class="fa fa-exclamation fa-5x fa-fw"></i><br><p>An error occurred</p><p class="cadet-bad-error">The following error occurred:<br><br><span style="color:#000">version: %APP_VERSION%<br>line: ' + line + '<br>sourceURL: ' + url + '<br>ReferenceError: ' + error + '</span><br><br>Please let State Library of Queensland - Inclusive Communities know about this problem on:<br><br>Phone: +61 7 4042 5207<br>Email: james.collins@slq.qld.gov.au</p></div>');
+	$('body').html((window.location.href.indexOf('tablet=1') >= 0 ? '<a href="/close.html" class="cadet-error-close"><i class="fa fa-close"></i></a>' : '') + '<div class="laces-status"><i class="fa fa-exclamation fa-5x fa-fw"></i><br><p>An error occurred</p><p class="cadet-bad-error">The following error occurred:<br><br><span style="color:#000">version: ' + cadetVersion + '<br>line: ' + line + '<br>sourceURL: ' + url + '<br>ReferenceError: ' + error + '</span><br><br>Please let State Library of Queensland - Inclusive Communities know about this problem on:<br><br>Phone: +61 7 3842 9978<br>Email: james.collins@slq.qld.gov.au</p></div>');
 };
 
 function strStartsWith(str, starting, caseSensitive=false) {
@@ -4323,8 +4453,25 @@ function strStartsWith(str, starting, caseSensitive=false) {
 	return(str.substr(0, starting.length) == starting);
 }
 
+function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        vars[key] = value;
+    });
+    return vars;
+}
+
+function getUrlParam(parameter, defaultvalue){
+    var urlparameter = defaultvalue;
+    if(window.location.href.indexOf(parameter) > -1){
+        urlparameter = getUrlVars()[parameter];
+        }
+    return urlparameter;
+}
+
 $(document).ready(function() {
- 	new lacesApp(new cadetApp());
+	var lang = getUrlParam('lang', 'EN');
+ 	new lacesApp(new cadetApp(lang.toUpperCase()));
 	
 	$('body').on('input', 'input[type=text]', function(event) {
 		var map = {0x2018:'\'', 0x201B:'\'', 0x201C:'"', 0x201F:'"', 0x2019:'\'', 0x201D:'"', 0x2032: '\'', 0x2033:'"', 0x2035:'\'', 0x2036:'"', 0x2014:'-', 0x2013:'-'};

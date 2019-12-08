@@ -1154,17 +1154,6 @@ function lacesApp(instance) {
 	this.isApp = function() {
 		return this.isApp_;
 	}
-
-	/** Initalize **/
-	this.navbar_		= new this.navbarObject_();
-
-	window.addEventListener('popstate', function(event) {
-		//self.ready();		TODO workout state
-	});
-
-	if(typeof this.instance_.app.initalize === 'function') {
-		this.instance_.app.initalize(this.instance_);
-	}
 	
 /*
  *	un/escapeHTML
@@ -1232,6 +1221,18 @@ function lacesApp(instance) {
 	this.tableSortable = function(table) {
 		$(table).addClass('laces-table-sortable');
 		sortTable(table, 0);
+	}
+
+
+	/** Initalize **/
+	this.navbar_		= new this.navbarObject_();
+
+	window.addEventListener('popstate', function(event) {
+		//self.ready();		TODO workout state
+	});
+
+	if(typeof this.instance_.app.initalize === 'function') {
+		this.instance_.app.initalize(this.instance_);
 	}
 }
 
