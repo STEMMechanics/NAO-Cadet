@@ -10,7 +10,7 @@ TODO
 */
 
 var cadetVersion = '1.0.1';	// Version number now stored in this file instead of the behaviour file
-var cadetDebug = true;
+var cadetDebug = false;
 
 function cadetApp(defaultLang = '') {
 	this.cadet			= this;
