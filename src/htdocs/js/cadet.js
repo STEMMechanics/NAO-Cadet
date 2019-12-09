@@ -9,7 +9,7 @@ TODO
 ?view=scripts&dir=4&showall=0&action=renamescript&id=9
 */
 
-var cadetVersion = '1.0.1';	// Version number now stored in this file instead of the behaviour file
+var cadetVersion = '1.0.2';	// Version number now stored in this file instead of the behaviour file
 var cadetDebug = false;
 
 function cadetApp(defaultLang = '') {
@@ -41,7 +41,7 @@ function cadetApp(defaultLang = '') {
 			self.app.i18nSetData(self, nao_i18n);			
 		}
 
-		$.getScript('/blockly/msg/js/' + defaultLang + '.js', function() { });
+		$.getScript('/blockly/msg/js/' + defaultLang.toLowerCase() + '.js', function() { });
 
 		cadetDefBlocks(self, this.i18n);
 		window.document.title = self.app.i18n(self, 'NAO_CADET', 'NAO Cadet');
