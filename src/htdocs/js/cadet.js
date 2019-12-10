@@ -37,12 +37,32 @@ function cadetApp(defaultLang = '') {
 		// Setup language data
 // 		self.laces.i18nAppFunc = this.i18n;
 		
+		self.app.i18nLang = self.app.i18nLang.toUpperCase();
+		self.app.i18nLang = self.app.i18nLang.substr(0, 2);
+		
 		if(typeof nao_i18n !== 'undefined') {
-			self.app.i18nSetData(self, nao_i18n);			
+			self.app.i18nSetData(self, nao_i18n);
+	
+			if(self.app.i18nData.hasOwnProperty('languageNames') && self.app.i18nData['languageNames'].hasOwnProperty(self.app.i18nLang)) {
+				// valid language
+			} else {
+				self.app.i18nLang = 'EN';
+			}			
 		}
 
-		$.getScript('/blockly/msg/js/' + defaultLang.toLowerCase() + '.js', function() { });
-
+		$.getScript('/blockly/msg/js/' + defaultLang.toLowerCase() + '.js', function() {
+			// Script loaded	
+			self.app.setWindowError();
+		}).fail(function() {
+	    if(arguments[0].readyState==0){
+				//script failed to load
+			} else {
+				//script loaded but failed to parse
+  	  }
+  	  self.app.setWindowError();
+		});
+		
+    
 		cadetDefBlocks(self, this.i18n);
 		window.document.title = self.app.i18n(self, 'NAO_CADET', 'NAO Cadet');
 	
@@ -179,6 +199,18 @@ function cadetApp(defaultLang = '') {
 			'location':	{'elem': 'a[data-id=cadet-workspace-run]'}
 		});
 	}
+
+/*
+ *
+ */
+	this.setWindowError = function() {
+		window.onerror = function(error, url, line) {
+			$('body').html((window.location.href.indexOf('tablet=1') >= 0 ? '<a href="/close.html" class="cadet-error-close"><i class="fa fa-close"></i></a>' : '') + '<div class="laces-status"><i class="fa fa-exclamation fa-5x fa-fw"></i><br><p>An error occurred</p><p class="cadet-bad-error">The following error occurred:<br><br><span style="color:#000">version: ' + cadetVersion + '<br>line: ' + line + '<br>sourceURL: ' + url + '<br>ReferenceError: ' + error + '</span><br><br>Please let State Library of Queensland - Inclusive Communities know about this problem on:<br><br>Phone: +61 7 3842 9978<br>Email: james.collins@slq.qld.gov.au</p></div>');
+
+			return false;
+		};
+	}
+
 	
 /*
  *	NAO Reconnect
@@ -1348,11 +1380,15 @@ function cadetApp(defaultLang = '') {
  *	Script Export
  */
  	this.scriptExport = function(self, name, data, type='xml') {
- 		if(name.substr(0, 1) == ".") {
- 			name = name.substr(1)
- 		}
- 		name = name.replace(/[\/:*?|<>]/g, "");
- 	
+ 		if(typeof name == 'string') {
+			if(name.substr(0, 1) == ".") {
+				name = name.substr(1)
+			}
+			name = name.replace(/[\/:*?|<>]/g, "");
+		} else {
+			name = 'script';
+		}
+
 		var event = new MouseEvent('click', { 'view': window, 'bubbles': true, 'cancelable': false });
 		var data = new Blob([data], {type: 'text/' + type});
 
@@ -4396,7 +4432,7 @@ function cadetApp(defaultLang = '') {
  *	i18n Language Name
  */
 	this.i18nLanguageName = function(languageCode) {
-			if(this.i18nData != null && this.i18nData.hasOwnProperty('languageNames') && this.i18nData.langaugeNames.hasOwnProperty(code)) {
+			if(this.i18nData != null && this.i18nData.hasOwnProperty('languageNames') && this.i18nData.languageNames.hasOwnProperty(code)) {
 				return this.i18nData.langaugeNames[languageCode];
 			}
 			
@@ -4440,10 +4476,6 @@ function cadetApp(defaultLang = '') {
  	}
 }
 
-window.onerror = function(error, url, line) {
-	$('body').html((window.location.href.indexOf('tablet=1') >= 0 ? '<a href="/close.html" class="cadet-error-close"><i class="fa fa-close"></i></a>' : '') + '<div class="laces-status"><i class="fa fa-exclamation fa-5x fa-fw"></i><br><p>An error occurred</p><p class="cadet-bad-error">The following error occurred:<br><br><span style="color:#000">version: ' + cadetVersion + '<br>line: ' + line + '<br>sourceURL: ' + url + '<br>ReferenceError: ' + error + '</span><br><br>Please let State Library of Queensland - Inclusive Communities know about this problem on:<br><br>Phone: +61 7 3842 9978<br>Email: james.collins@slq.qld.gov.au</p></div>');
-};
-
 function strStartsWith(str, starting, caseSensitive=false) {
 	if(!caseSensitive) {
 		str = str.toLowerCase();
@@ -4469,9 +4501,10 @@ function getUrlParam(parameter, defaultvalue){
     return urlparameter;
 }
 
+var app_ = null;
 $(document).ready(function() {
-	var lang = getUrlParam('lang', 'EN');
- 	new lacesApp(new cadetApp(lang.toUpperCase()));
+	var lang = getUrlParam('lang', 'EN').substr(0, 2);
+	app_ = new lacesApp(new cadetApp(lang));
 	
 	$('body').on('input', 'input[type=text]', function(event) {
 		var map = {0x2018:'\'', 0x201B:'\'', 0x201C:'"', 0x201F:'"', 0x2019:'\'', 0x201D:'"', 0x2032: '\'', 0x2033:'"', 0x2035:'\'', 0x2036:'"', 0x2014:'-', 0x2013:'-'};
