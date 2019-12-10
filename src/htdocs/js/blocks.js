@@ -1,5 +1,11 @@
 'use strict';
 
+var blocklyDropDowns = {
+	'motions': [['', '']],
+	'sounds': [['', '']],
+	'behaviors': [['', '']]
+};
+
 function cadetDefBlocks(self, i18nFunc) {
 
 	var colourEvents = '#E6AC00';
@@ -25,12 +31,6 @@ function cadetDefBlocks(self, i18nFunc) {
 	// var colourData = '#FF8000';
 	// var colourFunctions = '#FF4D6A';
 
-
-	var blocklyDropDowns = {
-		'motions': [['', '']],
-		'sounds': [['', '']],
-		'behaviors': [['', '']]
-	};
 
 	var blocklyDropDownFiles = [['', '']];
 	var blocklyDropDownMotions = [['', '']];
