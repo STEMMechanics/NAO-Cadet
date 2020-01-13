@@ -1,5 +1,11 @@
 # Change Log:
 
+**1.0.2**
+- Fixed caching issues around language selection
+- Fixed [otential error displayed when a script is exported without a name
+- Fixed potential typecase issues with language codes
+- When a language code is used and is not found, the app defaults back to English instead of generating an error
+
 **1.0.1**
 - Updated eslint dependency to 6.6.0
 
