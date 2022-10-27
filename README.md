@@ -20,6 +20,9 @@ Over time, it has grown to support:
 - Multiple domains or locations
 - Template scripts
 - Hiding advanced robot feature blocks to simplify the interface
+- Support for v6 NAOs (from version 1.1.0 onwards)
+
+> **NOTE:** Only the virtual robot in Choregraphe 2.8 is supported due to dependencies not present in version 2.1
 
 ## 🖥️ Installation
 
