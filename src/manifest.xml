@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package version="1.0.1" uuid="naocadet">
+<package installOnlyAtStartup="false" version="1.0.3" uuid="naocadet">
  <names>
   <name lang="en_US">NAOCadet</name>
  </names>

@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Package name="NAOCadet" format_version="4">
+<Package name="NAOCadet" format_version="5">
     <Manifest src="manifest.xml" />
     <BehaviorDescriptions>
         <BehaviorDescription name="behavior" src="." xar="behavior.xar" />
     </BehaviorDescriptions>
     <Dialogs />
     <Resources>
-        <File name="websocket_server" src="lib/websocket_server.py" />
         <File name="db" src="db.sqlite" />
         <File name="README" src="htdocs/blockly/accessible/README.md" />
         <File name="app.component" src="htdocs/blockly/accessible/app.component.js" />
@@ -449,7 +448,6 @@
         <File name="defaults-zh_TW.min" src="htdocs/js/i18n/defaults-zh_TW.min.js" />
         <File name="ie10-viewport-bug-workaround" src="htdocs/js/ie10-viewport-bug-workaround.js" />
         <File name="interpreter" src="htdocs/js/interpreter.js" />
-        <File name="jquery.min copy" src="htdocs/js/jquery.min copy.js" />
         <File name="jquery.min" src="htdocs/js/jquery.min.js" />
         <File name="laces" src="htdocs/js/laces.js" />
         <File name="nao" src="htdocs/js/nao.js" />
@@ -478,7 +476,14 @@
         <File name="Door Opening" src="scriptdocs/Door Opening.wav" />
         <File name="Running" src="scriptdocs/Running.wav" />
         <File name="Woosh" src="scriptdocs/Woosh.wav" />
+        <File name="websocket_server2" src="lib/websocket_server2.py" />
+        <File name="cadet" src="htdocs/cadet.html" />
+        <File name="i18n" src="htdocs/js/i18n.js" />
+        <File name="icon" src="icon.png" />
     </Resources>
     <Topics />
     <IgnoredPaths />
+    <Translations auto-fill="en_US">
+        <Translation name="translation_en_US" src="translations/translation_en_US.ts" language="en_US" />
+    </Translations>
 </Package>

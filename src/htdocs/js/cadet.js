@@ -9,7 +9,7 @@ TODO
 ?view=scripts&dir=4&showall=0&action=renamescript&id=9
 */
 
-var cadetVersion = '1.0.2';	// Version number now stored in this file instead of the behaviour file
+var cadetVersion = '%APP_VERSION%';	// Version number now stored in this file instead of the behaviour file
 var cadetDebug = false;
 
 function cadetApp(defaultLang = '') {
@@ -205,7 +205,7 @@ function cadetApp(defaultLang = '') {
  */
 	this.setWindowError = function() {
 		window.onerror = function(error, url, line) {
-			$('body').html((window.location.href.indexOf('tablet=1') >= 0 ? '<a href="/close.html" class="cadet-error-close"><i class="fa fa-close"></i></a>' : '') + '<div class="laces-status"><i class="fa fa-exclamation fa-5x fa-fw"></i><br><p>An error occurred</p><p class="cadet-bad-error">The following error occurred:<br><br><span style="color:#000">version: ' + cadetVersion + '<br>line: ' + line + '<br>sourceURL: ' + url + '<br>ReferenceError: ' + error + '</span><br><br>Please let State Library of Queensland - Inclusive Communities know about this problem on:<br><br>Phone: +61 7 3842 9978<br>Email: james.collins@slq.qld.gov.au</p></div>');
+			$('body').html((window.location.href.indexOf('tablet=1') >= 0 ? '<a href="/close.html" class="cadet-error-close"><i class="fa fa-close"></i></a>' : '') + '<div class="laces-status"><i class="fa fa-exclamation fa-5x fa-fw"></i><br><p>An error occurred</p><p class="cadet-bad-error">The following error occurred:<br><br><span style="color:#000">version: ' + cadetVersion + '<br>line: ' + line + '<br>sourceURL: ' + url + '<br>ReferenceError: ' + error + '</span><br><br>Please let STEMMechanics know about this problem at james@stemmechanics.com.au</p></div>');
 
 			return false;
 		};
@@ -430,7 +430,7 @@ function cadetApp(defaultLang = '') {
 				html += '<h1 class="display-4">' + self.app.i18n(self, 'TITLE_WELCOME_NAO_CADET', 'Welcome to NAO Cadet') + '</h1>';
 				html += '<div class="cadet-jumbotron-slider">';
 					html += '<div class="cadet-jumbotron-slider-item">';
-						html += '<p class="lead">' + self.app.i18n(self, 'MSG_WELCOME_NAO_CADET', '%TIME_GREETING%, It\'s great to be in %LOCATION%<br><br>Before we start, what is your name?', {LOCATION: {prefix: '<strong id="cadet-location-name">', postfix: '</strong> <a class="btn btn-link fa fa-info-circle" id="cadet-btn-locationinfo"></a>'}}) + '</p>';
+						html += '<p class="lead">' + self.app.i18n(self, 'MSG_WELCOME_NAO_CADET', '%TIME_GREETING%, It\'s great to be at %LOCATION%<br><br>Before we start, what is your name?', {LOCATION: {prefix: '<strong id="cadet-location-name">', postfix: '</strong> <a class="btn btn-link fa fa-info-circle" id="cadet-btn-locationinfo"></a>'}}) + '</p>';
 					html += '</div>';
 					html += '<div class="cadet-jumbotron-slider-item">';
 						html += '<p class="lead">Hi <strong id="cadet-login-name"></strong>!<br><br>' + self.app.i18n(self, 'MSG_ENTER_PASSWORD', 'Enter your password to login') + ':</p>';
@@ -1826,7 +1826,7 @@ function cadetApp(defaultLang = '') {
 				
 				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-location" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_CHANGE_LOCATION', 'Change Location') + '</a><a href="#" id="cadet-admin-location-view" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_VIEW_LOCATIONS', 'View Locations') + '</a></div><i class="fa fa-map-marker fa-fw"></i><p>' + self.app.i18n(self, 'MSG_LOCATION_SET_TO', 'Location set to') + ' <strong class="cadet-viewadmin-domain">' + self.app.nao.domain() + '</strong></p></div></div>';
 				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-colour" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_CHANGE_COLOUR', 'Change Colour') + '</a></div><i class="fa fa-paint-brush fa-fw"></i><p>' + self.app.i18n(self, 'MSG_COLOUR_SET_TO', 'Colour currently set to') + ' <strong class="cadet-viewadmin-colour">' + self.app.nao.colour() + '</strong></p></div></div>';
-				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-backup" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_BACKUP', 'Backup') + '</a><a href="#" id="cadet-admin-restore" class="btn btn-secondary float-right">' + self.app.i18n('BTN_RESTORE', 'Restore') + '</a></div><i class="fa fa-file-zip-o fa-fw"></i><p>' + self.app.i18n('MSG_BACKUP_RESTORE', 'Backup / Restore') + '</p></div></div>';
+				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-backup" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_BACKUP', 'Backup') + '</a><a href="#" id="cadet-admin-restore" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_RESTORE', 'Restore') + '</a></div><i class="fa fa-file-zip-o fa-fw"></i><p>' + self.app.i18n(self, 'MSG_BACKUP_RESTORE', 'Backup / Restore') + '</p></div></div>';
 				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-users" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_VIEW_USERS', 'View Users') + '</a></div><i class="fa fa-users fa-fw"></i><p><strong></strong> ' + self.app.i18n(self, 'MSG_USERS', 'Users') + '</p></div></div>';
 				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-scripts" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_VIEW_SCRIPTS', 'View Scripts') + '</a></div><i class="fa fa-code fa-fw"></i><p><strong></strong> ' + self.app.i18n(self, 'MSG_SCRIPTS', 'Scripts') + '</p></div></div>';
 				html += '<div class="card cadet-admin-card"><div class="card-body"><div><a href="#" id="cadet-admin-files" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_VIEW_FILES', 'View Files') + '</a><a href="#" id="cadet-admin-temp-clear" class="btn btn-secondary float-right">' + self.app.i18n(self, 'BTN_CLEAR_TEMP_FILES', 'Clear Temp Files') + '</a></div><i class="fa fa-files-o fa-fw"></i><p><strong></strong> ' + self.app.i18n(self, 'MSG_FILES', 'Files') + '</p></div></div>';
@@ -3558,13 +3558,13 @@ function cadetApp(defaultLang = '') {
  */
 	this.viewAbout = function(self) {
 		var html = '<p class="cadet-about-section-main">';
-			html += '<span class="cadet-about-line"><strong>Version</strong>' + self.app.version + '<span>';
+			html += '<span class="cadet-about-line"><strong>Version</strong>' + cadetVersion + '<span>';
 			html += '<span class="cadet-about-line"><strong>Created by</strong>James Collins<span>';
-			html += '<span class="cadet-about-line"><br><i>Copyright &copy; 2018, <a href="http://www.slq.qld.gov.au/" target="_blank">State Library of Queensland</a></i><span>';
+			html += '<span class="cadet-about-line"><br><i>Copyright &copy; 2022, <a href="http://www.stemmechanics.com.au/" target="_blank">STEMMechanics</a></i><span>';
 		html += '</p>';
 		html += '<hr>';
 		html += '<p class="cadet-about-section">';
-			html += 'NAO Cadet is distributed under the <a href="/licenses/gnugplv3.txt" target="_blank">GNU GPL v3 license</a>. Contributions to the code are welcome over on <a href="https://github.com/slqic/naocadet" target="_blank">GitHub</a>.';
+			html += 'NAO Cadet is distributed under the <a href="/licenses/gnugplv3.txt" target="_blank">GNU GPL v3 license</a>. Contributions to the code are welcome over on <a href="https://github.com/STEMMechanics/NAO-Cadet" target="_blank">GitHub</a>.';
 		html += '</p>';
 		html += '<p class="cadet-about-section">';
 			html += 'Portions of this product are based on <a href="https://developers.google.com/blockly/" target="_blank">Blockly</a> created and shared by <a href="http://google.com.au/" target="_blank">Google</a> and used according to terms described in the <a href="/licenses/apache2license.txt" target="_blank">Apache 2.0 license</a>. Blockly is Copyright 2018 Google Inc.';
@@ -4375,7 +4375,7 @@ function cadetApp(defaultLang = '') {
  */
 	this.i18n = function(self, id, def = '', operations = {}) {
 		var s = def;
-	
+		
 		if(typeof self.app.i18nData !== 'undefined' && self.app.i18nData != null && self.app.i18nData.hasOwnProperty(id) && self.app.i18nData[id].hasOwnProperty(self.app.i18nLang) && self.app.i18nData[id][self.app.i18nLang].length > 0) {
 			s = self.app.i18nData[id][self.app.i18nLang];
 		}
@@ -4393,17 +4393,17 @@ function cadetApp(defaultLang = '') {
 			}
 	
 			if(operations[item].hasOwnProperty('content')) {
-				s = s.replace('%'+item+'%', operations[item]['content']);
+				s = s.replaceAll('%'+item+'%', operations[item]['content']);
 			}
 		}
 		
 		// Replace value placeholders
 		if(typeof self.app.nao !== 'undefined' && self.app.nao != null) {
-			s = s.replace('%NAME%', self.app.nao.name());
-			s = s.replace('%LOCATION%', self.app.nao.domain());
+			s = s.replaceAll('%NAME%', self.app.nao.name());
+			s = s.replaceAll('%LOCATION%', self.app.nao.domain());
 		}
 		
-		s = s.replace('%USERNAME%', self.app.userName);
+		s = s.replaceAll('%USERNAME%', self.app.userName);
 
 		if(s.indexOf('%TIME_GREETING%') > -1) {
 			var d = new Date();

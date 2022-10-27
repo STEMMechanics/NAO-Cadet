@@ -1,135 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3">
-    <Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0">
-        <bitmap>media/images/box/root.png</bitmap>
-        <script language="4">
-            <content>
-                <![CDATA[]]>
-</content>
-        </script>
-        <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
-        <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
-        <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
-        <Input name="TouchChanged" type="0" type_size="1" nature="4" stm_value_name="TouchChanged" inner="1" tooltip="TouchChanged desc" id="4" />
-        <Input name="BehaviorsRun" type="0" type_size="1" nature="4" stm_value_name="BehaviorsRun" inner="1" tooltip="BehaviorsRun desc" id="5" />
-        <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="6" />
-        <Timeline enable="0">
-            <BehaviorLayer name="behavior_layer1">
-                <BehaviorKeyframe name="keyframe1" index="1">
-                    <Diagram scale="35.3553">
-                        <Box name="BasicHTTPServer" id="2" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="352" y="33">
-                            <bitmap>media/images/box/box-python-script.png</bitmap>
-                            <script language="4">
-                                <content>
-                                    <![CDATA[import os
-import time
-import urllib
-import mimetypes
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-
-class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        try:
-            domain = re.findall('Host: (.*?)\r\n',str(self.headers))[0]
-            domain = domain.split(":")[0]
-
-            filePath = self.htdocsPath + "/index.html"
-
-            path = urllib.unquote(urllib.unquote(self.path))
-            path = path.split("?")[0]
-
-            if path[0:6] == "/file/":
-                filePath = self.app["app_path"] + "/scriptdocs/" + path[6:]
-            elif path <> "/":
-                filePath = self.htdocsPath + path
-
-            self.log(path + ' = ' + filePath)
-
-            fileHndl = open(filePath, "rb")
-            mimeType = mimetypes.guess_type(filePath)[0]
-
-            if self.path[-8:] == "cadet.js" or self.path[-6:] == "nao.js":
-                data = fileHndl.read()
-                data = data.replace("%APP_VERSION%", self.app["app_version"])
-                data = data.replace("%NAO_NAME%", self.app["nao_name"])
-                data = data.replace("%NAO_IPADDR%", domain)
-
-                self.send_response(200)
-                self.send_header("Cache-Control", "no-store")
-                self.send_header("Content-type", mimeType)
-                self.send_header("Content-length", len(data))
-                self.send_header("Accept-Ranges", "bytes")
-                self.send_header("Last-Modified", time.strftime("%a %d %b %Y %H:%M:%S GMT", time.localtime(os.path.getmtime(filePath))))
-                self.end_headers()
-
-                self.wfile.write(data)
-            else:
-                self.send_response(200)
-                self.send_header("Cache-Control", "no-store")
-                self.send_header("Content-type", mimeType)
-                self.send_header("Content-length", os.path.getsize(filePath))
-                self.send_header("Accept-Ranges", "bytes")
-                self.send_header("Last-Modified", time.strftime("%a %d %b %Y %H:%M:%S GMT", time.localtime(os.path.getmtime(filePath))))
-                self.end_headers()
-                self.wfile.write(fileHndl.read())
-
-            fileHndl.close()
-
-        except IOError:
-            self.send_error(404, 'File Not Found: %s' % self.path)
-
-    def do_POST(self):
-        self.send_error(500, 'Internal Error')
-
-    def address_string(self):
-        host, port = self.client_address[:2]
-        return host
-
-
-class Server(HTTPServer):
-    def serve_forever(self, app, log, path):
-        self.RequestHandlerClass.app = app
-        self.RequestHandlerClass.htdocsPath = path
-        self.RequestHandlerClass.log = log
-        HTTPServer.serve_forever(self)
-
-
-class MyClass(GeneratedClass):
-    def __init__(self):
-        GeneratedClass.__init__(self)
-
-    def onLoad(self):
-        pass
-
-    def onUnload(self):
-        self.running = 0
-        try:
-            self.httpServer.shutdown()
-            self.httpServer.socket.close()
-        except:
-            pass
-
-    def onInput_onStart(self, p):
-        self.app = {}
-        for item in p:
-            self.app[item[0]] = item[1]
-
-        self.htdocsPath = self.app["app_path"] + "/htdocs"
-
-        self.httpServer = Server(('', self.app["http_port"]), Handler)
-        self.httpServer.allow_reuse_address = True
-        self.httpServer.serve_forever(self.app, self.log, self.htdocsPath)]]>
-</content>
-                            </script>
-                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
-                            <Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
-                            <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" />
-                        </Box>
-                        <Box name="App Details" id="3" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="229" y="8">
-                            <bitmap>media/images/box/box-python-script.png</bitmap>
-                            <script language="4">
-                                <content>
-                                    <![CDATA[class MyClass(GeneratedClass):
+<ChoregrapheProject xmlns="http://www.ald.softbankrobotics.com/schema/choregraphe/project.xsd" xar_version="3">
+  <Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0">
+    <bitmap>media/images/box/root.png</bitmap>
+    <script language="4">
+      <content>
+        <![CDATA[]]>
+      </content>
+    </script>
+    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+    <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+    <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+    <Input name="TouchChanged" type="0" type_size="1" nature="4" stm_value_name="TouchChanged" inner="1" tooltip="TouchChanged desc" id="4" />
+    <Input name="BehaviorsRun" type="0" type_size="1" nature="4" stm_value_name="BehaviorsRun" inner="1" tooltip="BehaviorsRun desc" id="5" />
+    <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="6" />
+    <Timeline enable="0">
+      <BehaviorLayer name="behavior_layer1">
+        <BehaviorKeyframe name="keyframe1" index="1">
+          <Diagram scale="100">
+            <Box name="App Details" id="3" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="189" y="37">
+              <bitmap>media/images/box/box-python-script.png</bitmap>
+              <script language="4">
+                <content>
+                  <![CDATA[class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
 
@@ -140,14 +32,15 @@ class MyClass(GeneratedClass):
         pass
 
     def onInput_onStart(self):
+        import os
         import socket
-        import fcntl
+        #import fcntl
         import struct
 
         app = {}
 
         #---- EDIT THESE IF NEEDED ----
-        app["app_version"] = "1.0"
+        app["app_version"] = "1.0.3"
         app["http_port"] = 3000
         app["websocket_port"] = 4000
 
@@ -175,42 +68,47 @@ class MyClass(GeneratedClass):
             app["nao_name"] = socket.gethostname()
 
             try:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                strInterfaceName = "eth0"
-                strInterfaceName = strInterfaceName[:15]
-                packedInterfaceName = struct.pack('256s', strInterfaceName)
-                ret = fcntl.ioctl(sock.fileno(), 0x8915, packedInterfaceName)
-                ret = ret[20:24]
-                app["nao_eth_ip"] = socket.inet_ntoa(ret)
+                #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                #strInterfaceName = "eth0"
+                #strInterfaceName = strInterfaceName[:15]
+                #packedInterfaceName = struct.pack('256s', strInterfaceName)
+                #ret = fcntl.ioctl(sock.fileno(), 0x8915, packedInterfaceName)
+                #ret = ret[20:24]
+                #app["nao_eth_ip"] = socket.inet_ntoa(ret)
+                app["nao_eth_ip"] = os.popen('ip addr show eth0 | grep "\<inet\>" | awk \'{ print $2 }\' | awk -F "/" \'{ print $1 }\'').read().strip()
             except:
                 app["nao_eth_ip"] = ""
 
             try:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                strInterfaceName = "wlan0"
-                strInterfaceName = strInterfaceName[:15]
-                packedInterfaceName = struct.pack('256s', strInterfaceName)
-                ret = fcntl.ioctl(sock.fileno(), 0x8915, packedInterfaceName)
-                ret = ret[20:24]
-                app["nao_wlan_ip"] = socket.inet_ntoa(ret)
+                #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                #strInterfaceName = "wlan0"
+                #strInterfaceName = strInterfaceName[:15]
+                #packedInterfaceName = struct.pack('256s', strInterfaceName)
+                #ret = fcntl.ioctl(sock.fileno(), 0x8915, packedInterfaceName)
+                #ret = ret[20:24]
+                #app["nao_wlan_ip"] = socket.inet_ntoa(ret)
+                app["nao_wlan_ip"] = os.popen('ip addr show wlan0 | grep "\<inet\>" | awk \'{ print $2 }\' | awk -F "/" \'{ print $1 }\'').read().strip()
             except:
                 app["nao_wlan_ip"] = ""
+
+        if app["nao_eth_ip"] == app["nao_wlan_ip"]:
+                app["nao_eth_ip"] = ""
 
         self.frameMgr = ALProxy("ALFrameManager")
         app["app_path"] = self.frameMgr.getBehaviorPath(self.behaviorId)
 
         self.onStopped(app)]]>
-</content>
-                            </script>
-                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
-                            <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
-                            <Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" />
-                        </Box>
-                        <Box name="WebSocket Server" id="4" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="371" y="272">
-                            <bitmap>media/images/box/box-python-script.png</bitmap>
-                            <script language="4">
-                                <content>
-                                    <![CDATA[# NAO CADET 1.0
+                </content>
+              </script>
+              <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+              <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+              <Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" />
+            </Box>
+            <Box name="WebSocket Server" id="4" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="412" y="253">
+              <bitmap>media/images/box/box-python-script.png</bitmap>
+              <script language="4">
+                <content>
+                  <![CDATA[# NAO CADET
 
 import sqlite3
 import json
@@ -442,7 +340,7 @@ class MyClass(GeneratedClass):
 
         self.dbQuery("UPDATE scripts SET locked=0 WHERE 1")
 
-        from websocket_server import WebsocketServer
+        from websocket_server2 import WebsocketServer
 
         self.websocketServer = WebsocketServer(self.app["websocket_port"], '')
         self.websocketServer.set_fn_new_client(self.onNewClient)
@@ -482,7 +380,7 @@ class MyClass(GeneratedClass):
             time.sleep(1.0)
             self.proxy["posture"].goToPosture("Stand", 3.0)
 
-            self.websocketServer.run_forever(ping_interval=30, ping_timeout=10)
+            self.websocketServer.run_forever()#ping_interval=30, ping_timeout=10)
 
     def onInput_onStop(self):
         self.cadet_quit(None)
@@ -2059,24 +1957,132 @@ class MyClass(GeneratedClass):
             result["error_code"] = ERR_USER_NOT_VALID
 
         return result]]>
-</content>
-                            </script>
-                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
-                            <Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
-                            <Input name="onTouched" type="0" type_size="1" nature="1" inner="0" tooltip="" id="3" />
-                            <Input name="behaviorRunning" type="0" type_size="1" nature="1" inner="0" tooltip="" id="4" />
-                            <Input name="onWordRecognized" type="0" type_size="1" nature="1" inner="0" tooltip="" id="5" />
-                            <Input name="onSonarLeftDetected" type="0" type_size="1" nature="1" inner="0" tooltip="" id="6" />
-                            <Input name="onSonarRightDetected" type="0" type_size="1" nature="1" inner="0" tooltip="" id="7" />
-                            <Input name="onTextToSpeechStarted" type="1" type_size="1" nature="1" inner="0" tooltip="" id="8" />
-                            <Input name="onTextToSpeechDone" type="1" type_size="1" nature="1" inner="0" tooltip="" id="9" />
-                            <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="10" />
-                        </Box>
-                        <Box name="UDP" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="366" y="154">
-                            <bitmap>media/images/box/box-python-script.png</bitmap>
-                            <script language="4">
-                                <content>
-                                    <![CDATA[import time
+                </content>
+              </script>
+              <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+              <Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+              <Input name="onTouched" type="0" type_size="1" nature="1" inner="0" tooltip="" id="3" />
+              <Input name="behaviorRunning" type="0" type_size="1" nature="1" inner="0" tooltip="" id="4" />
+              <Input name="onWordRecognized" type="0" type_size="1" nature="1" inner="0" tooltip="" id="5" />
+              <Input name="onSonarLeftDetected" type="0" type_size="1" nature="1" inner="0" tooltip="" id="6" />
+              <Input name="onSonarRightDetected" type="0" type_size="1" nature="1" inner="0" tooltip="" id="7" />
+              <Input name="onTextToSpeechStarted" type="1" type_size="1" nature="1" inner="0" tooltip="" id="8" />
+              <Input name="onTextToSpeechDone" type="1" type_size="1" nature="1" inner="0" tooltip="" id="9" />
+              <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="10" />
+            </Box>
+            <Box name="BasicHTTPServer" id="2" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="395" y="28">
+              <bitmap>media/images/box/box-python-script.png</bitmap>
+              <script language="4">
+                <content>
+                  <![CDATA[import os
+import time
+import urllib
+import mimetypes
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        try:
+            domain = re.findall('Host: (.*?)\r\n',str(self.headers))[0]
+            domain = domain.split(":")[0]
+
+            filePath = self.htdocsPath + "/index.html"
+
+            path = urllib.unquote(urllib.unquote(self.path))
+            path = path.split("?")[0]
+
+            if path[0:6] == "/file/":
+                filePath = self.app["app_path"] + "/scriptdocs/" + path[6:]
+            elif path <> "/":
+                filePath = self.htdocsPath + path
+
+            self.log(path + ' = ' + filePath)
+
+            fileHndl = open(filePath, "rb")
+            mimeType = mimetypes.guess_type(filePath)[0]
+
+            if self.path[-8:] == "cadet.js" or self.path[-6:] == "nao.js":
+                data = fileHndl.read()
+                data = data.replace("%APP_VERSION%", self.app["app_version"])
+                data = data.replace("%NAO_NAME%", self.app["nao_name"])
+                data = data.replace("%NAO_IPADDR%", domain)
+
+                self.send_response(200)
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Content-type", mimeType)
+                self.send_header("Content-length", len(data))
+                self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Last-Modified", time.strftime("%a %d %b %Y %H:%M:%S GMT", time.localtime(os.path.getmtime(filePath))))
+                self.end_headers()
+
+                self.wfile.write(data)
+            else:
+                self.send_response(200)
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Content-type", mimeType)
+                self.send_header("Content-length", os.path.getsize(filePath))
+                self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Last-Modified", time.strftime("%a %d %b %Y %H:%M:%S GMT", time.localtime(os.path.getmtime(filePath))))
+                self.end_headers()
+                self.wfile.write(fileHndl.read())
+
+            fileHndl.close()
+
+        except IOError:
+            self.send_error(404, 'File Not Found: %s' % self.path)
+
+    def do_POST(self):
+        self.send_error(500, 'Internal Error')
+
+    def address_string(self):
+        host, port = self.client_address[:2]
+        return host
+
+
+class Server(HTTPServer):
+    def serve_forever(self, app, log, path):
+        self.RequestHandlerClass.app = app
+        self.RequestHandlerClass.htdocsPath = path
+        self.RequestHandlerClass.log = log
+        HTTPServer.serve_forever(self)
+
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        pass
+
+    def onUnload(self):
+        self.running = 0
+        try:
+            self.httpServer.shutdown()
+            self.httpServer.socket.close()
+        except:
+            pass
+
+    def onInput_onStart(self, p):
+        self.app = {}
+        for item in p:
+            self.app[item[0]] = item[1]
+
+        self.htdocsPath = self.app["app_path"] + "/htdocs"
+
+        self.httpServer = Server(('', self.app["http_port"]), Handler)
+        self.httpServer.allow_reuse_address = True
+        self.httpServer.serve_forever(self.app, self.log, self.htdocsPath)]]>
+                </content>
+              </script>
+              <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+              <Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+              <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" />
+            </Box>
+            <Box name="UDP" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="401" y="139">
+              <bitmap>media/images/box/box-python-script.png</bitmap>
+              <script language="4">
+                <content>
+                  <![CDATA[import time
 import socket
 
 class MyClass(GeneratedClass):
@@ -2099,10 +2105,10 @@ class MyClass(GeneratedClass):
         for item in p:
             self.app[item[0]] = item[1]
 
-        self.robotName = "virtual-robot"
         self.system = self.getALProxy("ALSystem")
-        if self.system != None:
-            self.robotName = self.system.robotName()
+        if self.system == None:
+            return
+        self.robotName = self.system.robotName()
 
         db = sqlite3.connect(self.app["app_path"] + "/db.sqlite")
         cur = db.cursor()
@@ -2127,8 +2133,6 @@ class MyClass(GeneratedClass):
 
 
         db.close()
-
-        addrinfo = socket.getaddrinfo("225.0.0.250", None)[0]
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
@@ -2163,25 +2167,25 @@ class MyClass(GeneratedClass):
     def onInput_onStop(self):
         self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
         self.onStopped() #activate the output of the box]]>
-</content>
-                            </script>
-                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
-                            <Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
-                            <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
-                            <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
-                        </Box>
-                        <Link inputowner="0" indexofinput="6" outputowner="2" indexofoutput="3" />
-                        <Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" />
-                        <Link inputowner="0" indexofinput="6" outputowner="4" indexofoutput="10" />
-                        <Link inputowner="4" indexofinput="2" outputowner="3" indexofoutput="3" />
-                        <Link inputowner="4" indexofinput="3" outputowner="0" indexofoutput="4" />
-                        <Link inputowner="2" indexofinput="2" outputowner="3" indexofoutput="3" />
-                        <Link inputowner="4" indexofinput="4" outputowner="0" indexofoutput="5" />
-                        <Link inputowner="1" indexofinput="2" outputowner="3" indexofoutput="3" />
-                        <Link inputowner="0" indexofinput="6" outputowner="1" indexofoutput="4" />
-                    </Diagram>
-                </BehaviorKeyframe>
-            </BehaviorLayer>
-        </Timeline>
-    </Box>
+                </content>
+              </script>
+              <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+              <Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+              <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+              <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+            </Box>
+            <Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" />
+            <Link inputowner="0" indexofinput="6" outputowner="4" indexofoutput="10" />
+            <Link inputowner="4" indexofinput="2" outputowner="3" indexofoutput="3" />
+            <Link inputowner="4" indexofinput="3" outputowner="0" indexofoutput="4" />
+            <Link inputowner="4" indexofinput="4" outputowner="0" indexofoutput="5" />
+            <Link inputowner="2" indexofinput="2" outputowner="3" indexofoutput="3" />
+            <Link inputowner="0" indexofinput="6" outputowner="2" indexofoutput="3" />
+            <Link inputowner="1" indexofinput="2" outputowner="3" indexofoutput="3" />
+            <Link inputowner="0" indexofinput="6" outputowner="1" indexofoutput="4" />
+          </Diagram>
+        </BehaviorKeyframe>
+      </BehaviorLayer>
+    </Timeline>
+  </Box>
 </ChoregrapheProject>

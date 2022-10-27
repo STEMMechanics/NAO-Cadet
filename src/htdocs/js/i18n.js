@@ -38,52 +38,52 @@ var nao_i18n = {
 	
 	ERROR_SETUP: {
 		EN: 'There was an error setting up NAO Cadet',
-		IT: 'Si è verificato un errore durante l\'impostazione del cadetto NAO'
+		IT: 'Si ÔøΩ verificato un errore durante l\'impostazione del cadetto NAO'
 	},
 	
 	ERROR_LOGIN: {
 		EN: 'The NAO could not log you in because an error occurred',
-		IT: 'Il NAO non è riuscito ad accedere perché si è verificato un errore'
+		IT: 'Il NAO non ÔøΩ riuscito ad accedere perchÔøΩ si ÔøΩ verificato un errore'
 	},
 	
 	ERROR_RENAME_FOLDER: {
 		EN: 'Could not rename the folder because an error occurred',
-		IT: 'Impossibile rinominare la cartella perché si è verificato un errore'
+		IT: 'Impossibile rinominare la cartella perchÔøΩ si ÔøΩ verificato un errore'
 	},
 	
 	ERROR_RENAME_FILE: {
 		EN: 'Could not rename the file because an error occurred',
-		IT: 'Impossibile rinominare il file perché si è verificato un errore'
+		IT: 'Impossibile rinominare il file perchÔøΩ si ÔøΩ verificato un errore'
 	},
 	
 	ERROR_LOADING_BEHAVIORS: {
 		EN: 'There was a error getting the list of behaviors on the NAO',
-		IT: 'Si è verificato un errore durante il recupero dell\'elenco dei comportamenti sul NAO'
+		IT: 'Si ÔøΩ verificato un errore durante il recupero dell\'elenco dei comportamenti sul NAO'
 	},
 	
 	ERROR_LOADING_MOVEMENT: {
 		EN: 'There was a problem loading the movement',
-		IT: 'Si è verificato un problema durante il caricamento del movimento'
+		IT: 'Si ÔøΩ verificato un problema durante il caricamento del movimento'
 	},
 	
 	ERROR_RUNNING_MOVEMENT: {
 		EN: 'There was a problem running the movement',
-		IT: 'Si è verificato un problema durante l\'esecuzione del movimento'
+		IT: 'Si ÔøΩ verificato un problema durante l\'esecuzione del movimento'
 	},
 	
 	ERROR_MOVE_JOINTS: {
 		EN: 'There was a problem moving the joints',
-		IT: 'Si è verificato un problema durante lo spostamento delle articolazioni'
+		IT: 'Si ÔøΩ verificato un problema durante lo spostamento delle articolazioni'
 	},
 	
 	ERROR_SAVING_JOINTS: {
 		EN: 'There was a problem saving the joints',
-		IT: 'Si è verificato un problema durante il salvataggio delle articolazioni'
+		IT: 'Si ÔøΩ verificato un problema durante il salvataggio delle articolazioni'
 	},
 	
 	ERROR_LOADING_SOUNDS: {
 		EN: 'There was a error getting the list of sounds on the NAO',
-		IT: 'Si è verificato un errore durante il recupero dell\'elenco dei suoni sul NAO'
+		IT: 'Si ÔøΩ verificato un errore durante il recupero dell\'elenco dei suoni sul NAO'
 	},
 	
 	ERROR_LOADING_SCRIPTS: {
@@ -98,82 +98,82 @@ var nao_i18n = {
 	
 	ERROR_LOADING_MOTIONS: {
 		EN: 'There was a error getting the list of motions on the NAO',
-		IT: 'Si è verificato un errore durante il recupero dell\'elenco dei movimenti sulla NAO'
+		IT: 'Si ÔøΩ verificato un errore durante il recupero dell\'elenco dei movimenti sulla NAO'
 	},
 	
 	ERROR_SAVING_MOTION: {
 		EN: 'There was a problem saving the motion',
-		IT: 'Si è verificato un problema durante il salvataggio del movimento'
+		IT: 'Si ÔøΩ verificato un problema durante il salvataggio del movimento'
 	},
 	
 	ERROR_MOTION_EXISTS: {
 		EN: 'You cannot use that name for this motion as it already exists',
-		IT: '"Non puoi usare quel nome per questa mozione in quanto esiste già'
+		IT: '"Non puoi usare quel nome per questa mozione in quanto esiste giÔøΩ'
 	},
 	
 	ERROR_MOTION_UPLOAD: {
 		EN: 'An problem occurred trying to upload the motion',
-		IT: 'Si è verificato un problema durante il tentativo di caricare il movimento'
+		IT: 'Si ÔøΩ verificato un problema durante il tentativo di caricare il movimento'
 	},
 	
 	ERROR_MOTION_DELETE: {
 		EN: 'An problem occurred trying to delete the motion',
-		IT: 'Si è verificato un problema durante il tentativo di eliminare il movimento'
+		IT: 'Si ÔøΩ verificato un problema durante il tentativo di eliminare il movimento'
 	},
 	
 	ERROR_MOTION_EXPORT: {
 		EN: 'An problem occurred trying to export the motion',
-		IT: 'Si è verificato un problema durante il tentativo di esportare il movimento'
+		IT: 'Si ÔøΩ verificato un problema durante il tentativo di esportare il movimento'
 	},
 	
 	ERROR_SCRIPT_INFO: {
 		EN: 'There was an error getting information about the script',
-		IT: 'Si è verificato un errore durante il recupero delle informazioni sullo script'
+		IT: 'Si ÔøΩ verificato un errore durante il recupero delle informazioni sullo script'
 	},
 	
 	ERROR_DELETE_SCRIPT: {
 		EN: 'There was an error deleting the script',
-		IT: 'Si è verificato un errore durante l\'eliminazione dello script'
+		IT: 'Si ÔøΩ verificato un errore durante l\'eliminazione dello script'
 	},
 	
 	ERROR_DELETE_PHOTOVIDEO: {
 		EN: 'An problem occurred trying to delete the photo/video',
-		IT: 'Si è verificato un problema durante il tentativo di eliminare la foto / il video'
+		IT: 'Si ÔøΩ verificato un problema durante il tentativo di eliminare la foto / il video'
 	},
 	
 	ERROR_GET_FOLDERS: {
 		EN: 'There was an error getting what folders are on %NAME%',
-		IT: 'Si è verificato un errore durante il recupero delle cartelle su %NAME%'
+		IT: 'Si ÔøΩ verificato un errore durante il recupero delle cartelle su %NAME%'
 	},
 	
 	ERROR_UPLOADING_FILE: {
 		EN: 'There was an error uploading the file',
-		IT: 'Si è verificato un errore durante il caricamento del file'
+		IT: 'Si ÔøΩ verificato un errore durante il caricamento del file'
 	},
 	
 	ERROR_SAVE_SCRIPT: {
 		EN: 'Your script could not be saved because an error occurred',
-		IT: 'Impossibile salvare lo script perché si è verificato un errore'
+		IT: 'Impossibile salvare lo script perchÔøΩ si ÔøΩ verificato un errore'
 	},
 	
 	ERROR_RUN_SCRIPT: {
 		EN: 'An error occurred trying to run your script',
-		IT: 'Si è verificato un errore durante il tentativo di eseguire lo script'
+		IT: 'Si ÔøΩ verificato un errore durante il tentativo di eseguire lo script'
 	},
 	
 	ERROR_GET_ORIGINAL_SCRIPT: {
 		EN: 'There was an error getting the original script',
-		IT: 'Si è verificato un errore durante il recupero dello script originale'
+		IT: 'Si ÔøΩ verificato un errore durante il recupero dello script originale'
 	},
 	
 	ERROR_SAVE_DUPLICATE_SCRIPT: {
 		EN: 'There was an error saving the duplicate script',
-		IT: 'Si è verificato un errore durante il salvataggio dello script duplicato'
+		IT: 'Si ÔøΩ verificato un errore durante il salvataggio dello script duplicato'
 	},
 	
 	ERROR_GET_ORIGINAL_SCRIPT: {
 		EN: 'There was an error getting the original script',
-		IT: 'Si è verificato un errore durante il recupero dello script originale'
+		IT: 'Si ÔøΩ verificato un errore durante il recupero dello script originale'
 	},
 	
 	ERROR_EXPORT_SCRIPT: {
@@ -188,67 +188,67 @@ var nao_i18n = {
 	
 	ERROR_CHANGE_PASSWORD: {
 		EN: 'Your password could not be changed because an error occurred',
-		IT: 'Impossibile modificare la password perché si è verificato un errore'
+		IT: 'Impossibile modificare la password perchÔøΩ si ÔøΩ verificato un errore'
 	},
 	
 	ERROR_CHANGE_PASSWORD_INCORRECT: {		// Use %ACCOUNT% to insert reference account name
 		EN: 'The current password you entered was incorrect. The password for the %ACCOUNT% account has not been changed',
-		IT: 'La password corrente inserita non è corretta. La password per l\'account %ACCOUNT% non è stata modificata'
+		IT: 'La password corrente inserita non ÔøΩ corretta. La password per l\'account %ACCOUNT% non ÔøΩ stata modificata'
 	},
 	
 	ERROR_SAVE_PROFILE: {
 		EN: 'Your profile could not be saved because an error occurred. Your password has not been changed',
-		IT: 'Impossibile salvare il profilo a causa di un errore. La tua password non è stata cambiata'
+		IT: 'Impossibile salvare il profilo a causa di un errore. La tua password non ÔøΩ stata cambiata'
 	},
 	
 	ERROR_GET_FILE_LIST: {
 		EN: 'There was a error getting the list of files on the NAO',
-		IT: 'Si è verificato un errore durante il recupero dell\'elenco dei file sul NAO'
+		IT: 'Si ÔøΩ verificato un errore durante il recupero dell\'elenco dei file sul NAO'
 	},
 	
 	ERROR_RECORDING: {
 		EN: 'The NAO could not record audio because an error occurred',
-		IT: 'Il NAO non è riuscito a registrare l\'audio a causa di un errore'
+		IT: 'Il NAO non ÔøΩ riuscito a registrare l\'audio a causa di un errore'
 	},
 	
 	ERROR_SOUND_PLAYBACK: {
 		EN: 'There was an error playing sound',
-		IT: 'Si è verificato un errore durante la riproduzione del suono'
+		IT: 'Si ÔøΩ verificato un errore durante la riproduzione del suono'
 	},
 	
 	ERROR_DELETE_SOUND: {
 		EN: 'There was an error deleting the sound',
-		IT: 'Si è verificato un errore durante l\'eliminazione del suono'
+		IT: 'Si ÔøΩ verificato un errore durante l\'eliminazione del suono'
 	},
 	
 	ERROR_DELETE_FILE: {
 		EN: 'There was an error deleting the file',
-		IT: 'Si è verificato un errore durante l\'eliminazione del file'
+		IT: 'Si ÔøΩ verificato un errore durante l\'eliminazione del file'
 	},
 	
 	ERROR_CLEAR_TEMP_FILES: {
 		EN: 'There was an error clearing the temporary files from NAO Cadet',
-		IT: 'Si è verificato un errore durante la cancellazione dei file temporanei dal cadetto NAO'
+		IT: 'Si ÔøΩ verificato un errore durante la cancellazione dei file temporanei dal cadetto NAO'
 	},
 	
 	ERROR_RESTORE_FILE: {
 		EN: 'A problem occurred trying to restore the file',
-		IT: 'Si è verificato un problema durante il tentativo di ripristinare il file'
+		IT: 'Si ÔøΩ verificato un problema durante il tentativo di ripristinare il file'
 	},
 
 	ERROR_RESTORE_SCRIPT: {
 		EN: 'There was an error restoring the script',
-		IT: 'Si è verificato un errore durante il ripristino dello script'
+		IT: 'Si ÔøΩ verificato un errore durante il ripristino dello script'
 	},
 	
 	ERROR_RESTORE: {
 		EN: 'An error occurred restoring NAO Cadet',
-		IT: 'Si è verificato un errore durante il ripristino del cadetto NAO'
+		IT: 'Si ÔøΩ verificato un errore durante il ripristino del cadetto NAO'
 	},
 	
 	ERROR_BACKUP: {
 		EN: 'An error occurred backing up NAO Cadet',
-		IT: 'Si è verificato un errore durante il backup del cadetto NAO'
+		IT: 'Si ÔøΩ verificato un errore durante il backup del cadetto NAO'
 	},
 	
 	ERROR_GETTING_LOCATIONS: {
@@ -258,12 +258,12 @@ var nao_i18n = {
 	
 	ERROR_CREATE_LOCATION: {
 		EN: 'There was an error creating the location',
-		IT: 'Si è verificato un errore durante la creazione della posizione'
+		IT: 'Si ÔøΩ verificato un errore durante la creazione della posizione'
 	},
 	
 	ERROR_RENAME_LOCATION: {
 		EN: 'Could not rename the location because an error occurred',
-		IT: 'Impossibile rinominare la posizione perché si è verificato un errore'
+		IT: 'Impossibile rinominare la posizione perchÔøΩ si ÔøΩ verificato un errore'
 	},
 	
 	ERROR_GET_LOCATION: {
@@ -273,7 +273,7 @@ var nao_i18n = {
 	
 	ERROR_DELETE_LOCATION: {
 		EN: 'An problem occurred trying to delete the location',
-		IT: 'Si è verificato un problema durante il tentativo di eliminare la posizione'
+		IT: 'Si ÔøΩ verificato un problema durante il tentativo di eliminare la posizione'
 	},
 	
 	ERROR_CREATE_LOCATION: {
@@ -288,27 +288,27 @@ var nao_i18n = {
 	
 	ERROR_RESTORE_LOCATION: {
 		EN: 'An problem occurred trying to restore the location',
-		IT: 'Si è verificato un problema durante il tentativo di ripristinare la posizione'
+		IT: 'Si ÔøΩ verificato un problema durante il tentativo di ripristinare la posizione'
 	},
 	
 	ERROR_RENAME_USER: {
 		EN: 'An error occurred renaming the user',
-		IT: 'Si è verificato un errore durante la ridenominazione dell\'utente'
+		IT: 'Si ÔøΩ verificato un errore durante la ridenominazione dell\'utente'
 	},
 	
 	ERROR_DELETE_USER: {
 		EN: 'An problem occurred trying to delete the user',
-		IT: 'Si è verificato un problema durante il tentativo di eliminare l\'utente'
+		IT: 'Si ÔøΩ verificato un problema durante il tentativo di eliminare l\'utente'
 	},
 	
 	ERROR_RESTORE_USER: {
 		EN: 'An problem occurred trying to restore the user',
-		IT: 'Si è verificato un problema durante il tentativo di ripristinare l\'utente'
+		IT: 'Si ÔøΩ verificato un problema durante il tentativo di ripristinare l\'utente'
 	},
 	
 	ERROR_QUITTING_CADET: {
 		EN: 'An problem occurred trying to quit NAO Cadet',
-		IT: 'Si è verificato un problema durante il tentativo di uscire da Cadetto NAO'
+		IT: 'Si ÔøΩ verificato un problema durante il tentativo di uscire da Cadetto NAO'
 	},
 	
 	TITLE_RESTORE_SCRIPT_ERROR: {
@@ -388,7 +388,7 @@ var nao_i18n = {
 	
 	TITLE_MOTION_EXISTS: {
 		EN: 'Motion already exists',
-		IT: 'La moto esiste già'
+		IT: 'La moto esiste giÔøΩ'
 	},
 	
 	TITLE_UPLOAD_MOTION_ERROR: {
@@ -768,17 +768,17 @@ var nao_i18n = {
 	
 	MSG_PASSWORD_CHANGED: {		// Use %ACCOUNT% to insert reference account name
 		EN: 'The password for the %ACCOUNT% account has been changed',
-		IT: 'La password per l\'account %ACCOUNT% è stata modificata'
+		IT: 'La password per l\'account %ACCOUNT% ÔøΩ stata modificata'
 	},
 	
 	MSG_SCRIPT_LOCKED: {
 		EN: 'This script is locked because it was created by someone else or is currently being edited.<br><br>You are able to view this script however you will need to save it as a copy',
-		IT: 'Questo script è bloccato perché è stato creato da qualcun altro o è attualmente in fase di modifica. <br> <br> Puoi visualizzare questo script, tuttavia dovrai salvarlo come copia'
+		IT: 'Questo script ÔøΩ bloccato perchÔøΩ ÔøΩ stato creato da qualcun altro o ÔøΩ attualmente in fase di modifica. <br> <br> Puoi visualizzare questo script, tuttavia dovrai salvarlo come copia'
 	},
 
 	MSG_RESTART_REQUIRED: {
 		EN: 'There has been a system change with %NAME% and a restart of NAO Cadet is required',
-		IT: 'Si è verificato un cambiamento di sistema con %NAME% ed è necessario il riavvio di Cadet NAO'
+		IT: 'Si ÔøΩ verificato un cambiamento di sistema con %NAME% ed ÔøΩ necessario il riavvio di Cadet NAO'
 	},
 	
 	MSG_NAO_CADET_SHUTDOWN: {
@@ -797,8 +797,8 @@ var nao_i18n = {
 	},
 	
 	MSG_WELCOME_NAO_CADET: {
-		EN: '%TIME_GREETING%, It\'s great to be in %LOCATION%<br><br>Before we start, what is your name?',
-		IT: '%TIME_GREETING%, è bello essere in %LOCATION% <br> <br> Prima di iniziare, come ti chiami?'
+		EN: '%TIME_GREETING%, It\'s great to be at %LOCATION%<br><br>Before we start, what is your name?',
+		IT: '%TIME_GREETING%, ÔøΩ bello essere a %LOCATION% <br> <br> Prima di iniziare, come ti chiami?'
 	},
 	
 	MSG_CLEAR_TEMP_FILES_SUCCESS: {
@@ -808,7 +808,7 @@ var nao_i18n = {
 	
 	MSG_UNEXPECTED_DISCONNECT: {
 		EN: '%NAME% has unexpectedly disconnected from us. There maybe a network issue or the NAO may need to be restarted.',
-		IT: '%NAME% si è inaspettatamente disconnesso da noi. Potrebbe esserci un problema di rete o potrebbe essere necessario riavviare il NAO.'
+		IT: '%NAME% si ÔøΩ inaspettatamente disconnesso da noi. Potrebbe esserci un problema di rete o potrebbe essere necessario riavviare il NAO.'
 	},
 	
 	MSG_PAGE_NOT_FOUND: {
@@ -868,12 +868,12 @@ var nao_i18n = {
 	
 	MSG_FIRST_TIME: {
 		EN: 'We\'ve noticed that this is the first time NAO Cadet has been run on %NAME%, and we need the following information before we continue:',
-		IT: 'Abbiamo notato che questa è la prima volta che cado NAO è stato eseguito su %NAME% e abbiamo bisogno delle seguenti informazioni prima di continuare:'
+		IT: 'Abbiamo notato che questa ÔøΩ la prima volta che cado NAO ÔøΩ stato eseguito su %NAME% e abbiamo bisogno delle seguenti informazioni prima di continuare:'
 	},
 	
 	MSG_FIRST_TIME_LOCATION_INFO: {
 		EN: 'NAO Cadet identifies users and scripts per location. If %NAME% moves to a different location, it will not affect the users and scripts at this location.<br><br>Users will be able to view scripts at other locations, but not modify them',
-		IT: 'NAO Cadet identifica gli utenti e gli script per posizione. Se %NAME% si sposta in una posizione diversa, ciò non influirà sugli utenti e sugli script in questa posizione. <br> <br> Gli utenti potranno visualizzare gli script in altre posizioni, ma non modificarli'
+		IT: 'NAO Cadet identifica gli utenti e gli script per posizione. Se %NAME% si sposta in una posizione diversa, ciÔøΩ non influirÔøΩ sugli utenti e sugli script in questa posizione. <br> <br> Gli utenti potranno visualizzare gli script in altre posizioni, ma non modificarli'
 	},
 	
 	MSG_SAVE_SCRIPT_CONFIRM: {
@@ -898,7 +898,7 @@ var nao_i18n = {
 	
 	MSG_ADMIN_PASSWORD_INFO: {
 		EN: 'The admin account is used to modify NAO Cadet settings and perform bulk activities',
-		IT: 'L\'account amministratore viene utilizzato per modificare le impostazioni del cadetto NAO ed eseguire attività in blocco'
+		IT: 'L\'account amministratore viene utilizzato per modificare le impostazioni del cadetto NAO ed eseguire attivitÔøΩ in blocco'
 	},
 	
 	MSG_ROOT_PASSWORD: {
@@ -908,7 +908,7 @@ var nao_i18n = {
 	
 	MSG_ROOT_PASSWORD_INFO: {
 		EN: 'The <strong>root</strong> account is used as an emergency account and can permanently delete data',
-		IT: 'L\'account <strong> root </strong> viene utilizzato come account di emergenza e può eliminare definitivamente i dati'
+		IT: 'L\'account <strong> root </strong> viene utilizzato come account di emergenza e puÔøΩ eliminare definitivamente i dati'
 	},
 	
 	MSG_ENTER_PASSWORD: {
@@ -933,7 +933,7 @@ var nao_i18n = {
 	
 	MSG_LOCATION_SETTING: {
 		EN: 'This NAO is currently set for the location %LOCATION% and will default to the scripts and users at %LOCATION%.<br><br>If this is not correct and you would like to change this, login using the <i>admin</i> account and select <i>Change Location</i>',
-		IT: 'Questo NAO è attualmente impostato per la posizione %LOCATION% e imposterà automaticamente gli script e gli utenti su %LOCATION%. <br> <br> Se questo non è corretto e si desidera modificarlo, accedere utilizzando < i> admin </i> e selezionare <i> Cambia posizione </i>'
+		IT: 'Questo NAO ÔøΩ attualmente impostato per la posizione %LOCATION% e imposterÔøΩ automaticamente gli script e gli utenti su %LOCATION%. <br> <br> Se questo non ÔøΩ corretto e si desidera modificarlo, accedere utilizzando < i> admin </i> e selezionare <i> Cambia posizione </i>'
 	},
 	
 	MSG_CONFIRM_QUIT_CADET: {
@@ -1063,7 +1063,7 @@ var nao_i18n = {
 	
 	MSG_NO_PASSWORD_SET: {
 		EN: 'No password has been set',
-		IT: 'Nessuna password è stata impostata'
+		IT: 'Nessuna password ÔøΩ stata impostata'
 	},
 	
 	MSG_SCRIPT_SAVED: {
@@ -1108,7 +1108,7 @@ var nao_i18n = {
 	
 	MSG_CHANGE_DISCONNECT_USERS: {
 		EN: 'Changing this setting will force all connected users to be disconnected',
-		IT: 'La modifica di questa impostazione forzerà la disconnessione di tutti gli utenti connessi'
+		IT: 'La modifica di questa impostazione forzerÔøΩ la disconnessione di tutti gli utenti connessi'
 	},
 	
 	MSG_LOCATION_SET_TO: {
@@ -1318,7 +1318,7 @@ var nao_i18n = {
 	
 	BTN_YES: {
 		EN: 'Yes',
-		IT: 'Sì'
+		IT: 'SÔøΩ'
 	},
 	
 	BTN_NO: {
@@ -1683,12 +1683,12 @@ var nao_i18n = {
 	
 	BLOCK_NAO_EVENT_BUMPER_LEFT: {
 		EN: 'when left foot pressed',
-		IT: 'quando il piede sinistro è premuto'
+		IT: 'quando il piede sinistro ÔøΩ premuto'
 	},
 	
 	BLOCK_NAO_EVENT_BUMPER_RIGHT: {
 		EN: 'when right foot pressed',
-		IT: 'quando il piede destro è premuto'
+		IT: 'quando il piede destro ÔøΩ premuto'
 	},
 	
 	BLOCK_NAO_EVENT_HAND_LEFT: {
@@ -1793,7 +1793,7 @@ var nao_i18n = {
 	
 	BLOCK_MOTION_SETJOINTALL: {
 		EN: 'set joints %1 to angles %2 speed %3',
-		IT: 'imposta i giunti %1 sugli angoli %2 velocità %3'
+		IT: 'imposta i giunti %1 sugli angoli %2 velocitÔøΩ %3'
 	},
 	
 	BLOCK_MOTION_RUN_DROPDOWN: {
