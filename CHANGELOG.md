@@ -1,6 +1,6 @@
 # Change Log:
 
-**1.0.3**
+**1.1.0-beta.1**
 - Added support for Choregraphe 2.8 and NAO v6
 - Removed references to State Library QLD as support has been transferred to STEMMechanics
 - Fixed inconsistant version numbers in various places

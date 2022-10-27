@@ -40,7 +40,7 @@
         app = {}
 
         #---- EDIT THESE IF NEEDED ----
-        app["app_version"] = "1.0.3"
+        app["app_version"] = "1.1.0-beta.1"
         app["http_port"] = 3000
         app["websocket_port"] = 4000
 
