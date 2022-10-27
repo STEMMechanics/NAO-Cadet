@@ -36,24 +36,33 @@
         import socket
         #import fcntl
         import struct
+        import xml.etree.ElementTree as xml
 
         app = {}
 
         #---- EDIT THESE IF NEEDED ----
-        app["app_version"] = "1.1.0-beta.1"
+        app["beta"] = 2
         app["http_port"] = 3000
         app["websocket_port"] = 4000
 
 
-
-
         #---- THATS IT, CODE BEGINS HERE ----
-
+        app["app_version"] = "0.0.0" # this will be filled from behavior properties
         app["nao_virtual"] = True
         app["nao_name"] = "NAO"
         app["nao_eth_ip"] = ""
         app["nao_wlan_ip"] = ""
+
+        self.frameMgr = ALProxy("ALFrameManager")
+        app["app_path"] = self.frameMgr.getBehaviorPath(self.behaviorId)
+
         try:
+            tree = xml.parse(app["app_path"] + "/../.xml")
+            root = tree.getroot()
+            app["app_version"] = root.attrib.get("version")
+            if app["beta"] is not None:
+                app["app_version"] = app["app_version"] + "-beta." + app["beta"]
+
             ALMemory.getData("DCM/Time")
             if ALMemory.getData("DCM/Simulation") != 1:
                 app["nao_virtual"] = False
@@ -93,9 +102,6 @@
 
         if app["nao_eth_ip"] == app["nao_wlan_ip"]:
                 app["nao_eth_ip"] = ""
-
-        self.frameMgr = ALProxy("ALFrameManager")
-        app["app_path"] = self.frameMgr.getBehaviorPath(self.behaviorId)
 
         self.onStopped(app)]]>
                 </content>
