@@ -1,0 +1,37 @@
+name: 🐛 Bug Report
+description: Something doesn't work
+labels: [bug]
+body:
+- type: markdown
+  attributes:
+    value: '## Before you start...'
+- type: markdown
+  attributes:
+    value: |
+        The issue list is reserved exclusively for bug reports and feature requests. That means we do not accept usage 
+        questions. If you open an issue that does not conform to the requirements, **it will be closed immediately.**
+- type: markdown
+  attributes:
+    value: |
+        Maintaining open source projects is [hard work](https://nolanlawson.com/2017/03/05/what-it-feels-like-to-be-an-open-source-maintainer/).
+        As a free and open source project, STEMMechanics also has limited maintainer bandwidth and we need to prioritise that.
+- type: markdown
+  attributes:
+    value: |
+        For questions, please use the following resources:
+        * Read the [NAO Cadet Wiki](https://github.com/STEMMechanics/NAO-Cadet/wiki)
+        * Email the developer at james@stemmechanics.com.au
+- type: textarea
+  attributes:
+    label: Describe the bug
+    description: A clear and concise description of what the bug is, what is expected and what is actually happening
+    validations:
+        required: true
+- type: textarea
+  attributes:
+    label: Steps to reproduce
+    description: What do we need to do in order to make the bug happen?
+- type: textarea
+  attributes:
+    label: Screenshots / Videos
+    description: If applicable, add screenshots to help explain your problem.

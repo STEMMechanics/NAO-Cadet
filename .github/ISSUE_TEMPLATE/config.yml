@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+    - name: Directly contact STEMMechanics
+      url: mailto:james@stemmechanics.com.au
+      about: If you would like to report a security issue or have a private request, send me an email

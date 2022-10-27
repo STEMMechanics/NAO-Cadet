@@ -1,0 +1,31 @@
+name: 🚀 Feature Request
+description: I have an idea for the Drustcraft Engine
+labels: [feature request]
+body:
+- type: markdown
+  attributes:
+    value: '## Before you start...'
+- type: markdown
+  attributes:
+    value: |
+        The issue list is reserved exclusively for bug reports and feature requests. That means we do not accept usage 
+        questions. If you open an issue that does not conform to the requirements, **it will be closed immediately.**
+- type: markdown
+  attributes:
+    value: |
+        Maintaining open source projects is [hard work](https://nolanlawson.com/2017/03/05/what-it-feels-like-to-be-an-open-source-maintainer/).
+        As a free and open source project, STEMMechanics also has limited maintainer bandwidth and we need to prioritise that.
+- type: markdown
+  attributes:
+    value: |
+        Thanks for taking the time to fill out this feature request for the **Drustcraft Engine**!
+        If you would like to discuss a possible feature before opening an issue, jump over to [our Discord server](https://drustcraft.com.au/discord).
+            
+        - Please only describe one feature request in one single issue
+        - Make sure you search through existing issues
+- type: textarea
+  attributes:
+    label: What feature do you want to see added?
+    description: Please be as clear as possible, and include as must detail as you can. Include some mockup images if it helps!
+    validations:
+        required: true
