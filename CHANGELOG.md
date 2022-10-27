@@ -1,5 +1,8 @@
 # Change Log:
 
+**1.1.0-beta.2**
+- Version now pulled from behavior properties. (Beta number still set within behavior)
+
 **1.1.0-beta.1**
 - Added support for Choregraphe 2.8 and NAO v6
 - Removed references to State Library QLD as support has been transferred to STEMMechanics
