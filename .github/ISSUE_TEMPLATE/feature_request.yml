@@ -27,5 +27,5 @@ body:
   attributes:
     label: What feature do you want to see added?
     description: Please be as clear as possible, and include as must detail as you can. Include some mockup images if it helps!
-    validations:
-        required: true
+  validations:
+    required: true
