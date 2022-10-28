@@ -52,17 +52,21 @@
         app["nao_name"] = "NAO"
         app["nao_eth_ip"] = ""
         app["nao_wlan_ip"] = ""
+        app["nao_wlan_name"] = ""
 
         self.frameMgr = ALProxy("ALFrameManager")
         app["app_path"] = self.frameMgr.getBehaviorPath(self.behaviorId)
 
         try:
-            tree = xml.parse(app["app_path"] + "/../.xml")
+            tree = xml.parse(app["app_path"] + "/manifest.xml")
             root = tree.getroot()
             app["app_version"] = root.attrib.get("version")
-            if app["beta"] is not None:
-                app["app_version"] = app["app_version"] + "-beta." + app["beta"]
+            if app["beta"] != "":
+                app["app_version"] = app["app_version"] + "-beta." + str(app["beta"])
+        except:
+            pass
 
+        try:
             ALMemory.getData("DCM/Time")
             if ALMemory.getData("DCM/Simulation") != 1:
                 app["nao_virtual"] = False
@@ -71,37 +75,29 @@
 
         if app["nao_virtual"] == True:
             app["nao_name"] = "virtual-nao"
-            app["nao_eth_ip"] = "127.0.0.1"
-            app["nao_wlan_ip"] = "127.0.0.1"
         else:
-            app["nao_name"] = socket.gethostname()
+            alconnman = ALProxy("ALConnectionManager")
 
-            try:
-                #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                #strInterfaceName = "eth0"
-                #strInterfaceName = strInterfaceName[:15]
-                #packedInterfaceName = struct.pack('256s', strInterfaceName)
-                #ret = fcntl.ioctl(sock.fileno(), 0x8915, packedInterfaceName)
-                #ret = ret[20:24]
-                #app["nao_eth_ip"] = socket.inet_ntoa(ret)
-                app["nao_eth_ip"] = os.popen('ip addr show eth0 | grep "\<inet\>" | awk \'{ print $2 }\' | awk -F "/" \'{ print $1 }\'').read().strip()
-            except:
-                app["nao_eth_ip"] = ""
+            #Scanning is required to update the services list
+            alconnman.scan()
+            services = alconnman.services()
 
-            try:
-                #sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                #strInterfaceName = "wlan0"
-                #strInterfaceName = strInterfaceName[:15]
-                #packedInterfaceName = struct.pack('256s', strInterfaceName)
-                #ret = fcntl.ioctl(sock.fileno(), 0x8915, packedInterfaceName)
-                #ret = ret[20:24]
-                #app["nao_wlan_ip"] = socket.inet_ntoa(ret)
-                app["nao_wlan_ip"] = os.popen('ip addr show wlan0 | grep "\<inet\>" | awk \'{ print $2 }\' | awk -F "/" \'{ print $1 }\'').read().strip()
-            except:
-                app["nao_wlan_ip"] = ""
+            for service in services:
+                network = dict(service)
+                ipv4 = network.get("IPv4")
+                if len(ipv4) > 1:
+                    type = network.get("Type", "")
+                    name = network.get("Name", "")
+                    address = ""
 
-        if app["nao_eth_ip"] == app["nao_wlan_ip"]:
-                app["nao_eth_ip"] = ""
+                    for ipv4_data in ipv4:
+                        if len(ipv4_data) == 2:
+                            if ipv4_data[0] == "Address":
+                                if type == "ethernet":
+                                    app["nao_eth_ip"] = ipv4_data[1]
+                                elif type == "wifi":
+                                    app["nao_wlan_ip"] = ipv4_data[1]
+                                    app["nao_wlan_name"] = name
 
         self.onStopped(app)]]>
                 </content>
@@ -362,7 +358,7 @@ class MyClass(GeneratedClass):
             self.proxy["autonomousMoves"].setBackgroundStrategy("none")
 
         configuration = {"bodyLanguageMode":"contextual"}
-        if self.app["nao_eth_ip"] == "" and self.app["nao_wlan_ip"] == "":
+        if self.app["nao_virtual"] == False and self.app["nao_eth_ip"] == "" and self.app["nao_wlan_ip"] == "":
             self.proxy["animatedSpeech"].say("I cannot play NAO Cadet because I am not connected to a network", configuration)
             time.sleep(1.0)
             self.proxy["posture"].goToPosture("Stand", 3.0)
@@ -371,16 +367,19 @@ class MyClass(GeneratedClass):
         else:
             s = "Hey, I'm " + robotName + ". and lets play NAO Cadet. Open the app on your tablet or ipad., Or connect your browser to "
 
-            if self.app["nao_eth_ip"] != "":
-                ipaddr = self.app["nao_eth_ip"].split(".")
-                s = s + ", if you are using ethernet, " + ipaddr[0] + ". " + ipaddr[1] + ". " + ipaddr[2] + ". " + ipaddr[3] + ". colon 3000"
+            if self.app["nao_virtual"] == True:
+                s = s + "the address of the computer running the virtual nao"
+            else:
+                if self.app["nao_eth_ip"] != "":
+                    ipaddr = self.app["nao_eth_ip"].split(".")
+                    s = s + ", if you are using a blue cable, " + ipaddr[0] + ". " + ipaddr[1] + ". " + ipaddr[2] + ". " + ipaddr[3] + ". colon 3000"
+
+                    if self.app["nao_wlan_ip"] != "":
+                        s = s + ", or "
 
                 if self.app["nao_wlan_ip"] != "":
-                    s = s + ", or "
-
-            if self.app["nao_wlan_ip"] != "":
-                ipaddr = self.app["nao_wlan_ip"].split(".")
-                s = s + ", if you are using wifi, " + ipaddr[0] + ". " + ipaddr[1] + ". " + ipaddr[2] + ". " + ipaddr[3] + ". colon 3000"
+                    ipaddr = self.app["nao_wlan_ip"].split(".")
+                    s = s + ", if you are connected to the wifi, " + self.app["nao_wlan_name"] + ", " + ipaddr[0] + ". " + ipaddr[1] + ". " + ipaddr[2] + ". " + ipaddr[3] + ". colon 3000"
 
             self.proxy["animatedSpeech"].say(s, configuration)
             time.sleep(1.0)
