@@ -106,7 +106,7 @@
               <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
               <Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" />
             </Box>
-            <Box name="WebSocket Server" id="4" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="412" y="253">
+            <Box name="WebSocket Server" id="4" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="277" y="241">
               <bitmap>media/images/box/box-python-script.png</bitmap>
               <script language="4">
                 <content>
@@ -385,7 +385,8 @@ class MyClass(GeneratedClass):
             time.sleep(1.0)
             self.proxy["posture"].goToPosture("Stand", 3.0)
 
-            self.websocketServer.run_forever()#ping_interval=30, ping_timeout=10)
+            #self.websocketServer.run_forever(ping_interval=30, ping_timeout=10)
+            self.websocketServer.run_forever()
 
     def onInput_onStop(self):
         self.cadet_quit(None)
@@ -1975,7 +1976,7 @@ class MyClass(GeneratedClass):
               <Input name="onTextToSpeechDone" type="1" type_size="1" nature="1" inner="0" tooltip="" id="9" />
               <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="10" />
             </Box>
-            <Box name="BasicHTTPServer" id="2" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="395" y="28">
+            <Box name="BasicHTTPServer" id="2" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="498" y="13">
               <bitmap>media/images/box/box-python-script.png</bitmap>
               <script language="4">
                 <content>
@@ -2076,14 +2077,19 @@ class MyClass(GeneratedClass):
 
         self.httpServer = Server(('', self.app["http_port"]), Handler)
         self.httpServer.allow_reuse_address = True
-        self.httpServer.serve_forever(self.app, self.log, self.htdocsPath)]]>
+        self.httpServer.serve_forever(self.app, self.log, self.htdocsPath)
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]>
                 </content>
               </script>
               <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
               <Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
-              <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" />
+              <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+              <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
             </Box>
-            <Box name="UDP" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="401" y="139">
+            <Box name="UDP" id="1" localization="8" tooltip="This box contains a basic python script and can be used to create any python script box you would like.&#x0A;&#x0A;To edit its script, double-click on it." x="533" y="253">
               <bitmap>media/images/box/box-python-script.png</bitmap>
               <script language="4">
                 <content>
@@ -2185,9 +2191,11 @@ class MyClass(GeneratedClass):
             <Link inputowner="4" indexofinput="3" outputowner="0" indexofoutput="4" />
             <Link inputowner="4" indexofinput="4" outputowner="0" indexofoutput="5" />
             <Link inputowner="2" indexofinput="2" outputowner="3" indexofoutput="3" />
-            <Link inputowner="0" indexofinput="6" outputowner="2" indexofoutput="3" />
+            <Link inputowner="0" indexofinput="6" outputowner="2" indexofoutput="4" />
             <Link inputowner="1" indexofinput="2" outputowner="3" indexofoutput="3" />
             <Link inputowner="0" indexofinput="6" outputowner="1" indexofoutput="4" />
+            <Link inputowner="1" indexofinput="3" outputowner="4" indexofoutput="10" />
+            <Link inputowner="2" indexofinput="3" outputowner="4" indexofoutput="10" />
           </Diagram>
         </BehaviorKeyframe>
       </BehaviorLayer>
