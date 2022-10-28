@@ -1,6 +1,8 @@
 # Change Log:
 
 **1.1.0-beta.2**
+- Added onStop inputs and paths to UDP and HTTPServer boxes
+- Better resolving and annoucement of network details
 - Version now pulled from behavior properties. (Beta number still set within behavior)
 
 **1.1.0-beta.1**
