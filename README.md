@@ -26,7 +26,7 @@ Over time, it has grown to support:
 
 ## 🖥️ Installation
 
-To use NAO Cadet, you first need to install the `naocadet.crg` file onto your robot using the Choregraphe program. Then once installed. it can be launched by speaking the word  *Cadet*.
+To use NAO Cadet, you first need to install the `naocadet.crg` file onto your robot using the Choregraphe 2.8 program. Then once installed. it can be launched by speaking the word  *Cadet*.
 
 Connect your browser to the web address announced by the NAO.
 
