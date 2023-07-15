@@ -1,13 +1,6 @@
 # Welcome
 ![NAO Cadet Banner](https://raw.githubusercontent.com/STEMMechanics/NAO-Cadet/main/.github/img/banner.png)
 
-[![Pull Requests Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](http://makeapullrequest.com)
-[![first-timers-only Friendly](https://img.shields.io/badge/first--timers--only-friendly-blue.svg)](http://www.firsttimersonly.com/)
-[![Issues Open](https://img.shields.io/github/issues/STEMMechanics/NAO-Cadet?color=008080)](https://github.com/STEMMechanics/NAO-Cadet/issues)
-[![GitHub Good First Issues](https://img.shields.io/github/issues/STEMMechanics/NAO-Cadet/good%20first%20issue?label=Good%20First%20issues)](https://github.com/STEMMechanics/NAO-Cadet/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
-[![GitHub Help Wanted issues](https://img.shields.io/github/issues/STEMMechanics/NAO-Cadet/help%20wanted?label=%22Help%20Wanted%22%20issues)](https://github.com/STEMMechanics/NAO-Cadet/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22)
-
-
 NAO Cadet was created back in 2018 for the purpose of:
 
 - Teaching young kids how to code a NAO robot using a familar block based system
@@ -24,6 +17,10 @@ Over time, it has grown to support:
 
 > **NOTE:** Only the virtual robot in Choregraphe 2.8 is supported due to dependencies not present in version 2.1
 
+## 🛟 Limited Support
+
+Support and updates to this software is now limited due to time commitments and no longer having access to the NAO ecosystem.
+
 ## 🖥️ Installation
 
 To use NAO Cadet, you first need to install the `naocadet.crg` file onto your robot using the Choregraphe 2.8 program. Then once installed. it can be launched by speaking the word  *Cadet*.
@@ -31,10 +28,6 @@ To use NAO Cadet, you first need to install the `naocadet.crg` file onto your ro
 Connect your browser to the web address announced by the NAO.
 
 > The default **admin** password is **admin**. It is recommended that you first login as admin and change this password.
-
-## 👩‍💻 Wiki
-
-NAO Cadet has a [wiki](/STEMMechanics/NAO-Cadet/wiki) for more information about installing and using the software on your NAO robot.
 
 If you have any questions, please email james@stemmechanics.com.au. Any issues or feature requests, please use the [issue tracker](/STEMMechanics/NAO-Cadet/issues).
 
